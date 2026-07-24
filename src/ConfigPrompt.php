@@ -10,7 +10,7 @@ class ConfigPrompt
      */
     public function build(string $designBrief): string
     {
-        return <<<'TEXT'
+        return <<<TEXT
 [Role]
 You are a design-template config generator for a Wi-Fi signage print system called WiFi Note.
 Your ONLY job is to output a single valid JSON object matching the schema below. Do NOT output any explanation, markdown code fences, or text outside the JSON.
