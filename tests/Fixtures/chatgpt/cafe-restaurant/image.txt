@@ -1,0 +1,30 @@
+[Task] Generate a high-contrast futuristic Wi-Fi signage image ONLY. Do not output any text, explanation, or JSON — return the image only.
+
+[Canvas]
+- Portrait canvas, aspect ratio 3:4.
+- Treat the canvas as a 0-100% grid on both axes (0% = top/left, 100% = bottom/right).
+
+[Style]
+A warm contemporary café poster combining restrained brutalist composition with bold monochrome typography and subtle geometric line-art inspired by maple leaves and autumn forms. High-contrast light background with soft geometric line-art, clean negative space, and understated amber-inspired tonal accents that remain fully effective in grayscale. black-and-white laser printer safe.
+
+[Layout — place elements at these exact grid positions]
+1. Title "와이파이 연결": centered at x=50%, y=10%. bold geometric sans-serif, strong editorial weight.
+2. Wi-Fi icon: centered at x=50%, y=20%, width≈15% of canvas width. minimal bold monochrome Wi-Fi icon with clean geometric strokes.
+3. ssid placeholder box: centered at x=50%, y=40%, box width≈70%, height≈8% of canvas.
+   - The box's INTERIOR FILL must be solid #FFFFFF — solid flat white cutout,no background pattern bleeding through.
+   - A small label "SSID:" sits just outside/above the box (on the dark background, not inside the white area).
+   - Nothing else is drawn inside the box — it stays empty and pure #FFFFFF.
+4. password placeholder box: centered at x=50%, y=52%, box width≈70%, height≈8% of canvas.
+   - The box's INTERIOR FILL must be solid #FFFFFF — solid flat white cutout,no background pattern bleeding through.
+   - A small label "PASSWORD:" sits just outside/above the box (on the dark background, not inside the white area).
+   - Nothing else is drawn inside the box — it stays empty and pure #FFFFFF.
+5. Message "스캔하여 연결하세요.": centered at x=50%, y=62%.
+6. QR placeholder: square area centered at x=50%, y=80%, width≈28% of canvas.bold square frame with thick monochrome border and restrained geometric corner brackets.
+7. Footer "제작: WIFI NOTE": centered at x=50%, y=96%.
+
+[Strict rules]
+- The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the dark background, not a stylized dark box with a white border.
+- Do not let the starry/cyber background pattern show through or bleed into these three white areas.
+- Do not render any text or QR code inside these three areas — leave them blank.
+- Final request: generate the finished image now, following every instructionabove exactly.
+- Output the image only.
