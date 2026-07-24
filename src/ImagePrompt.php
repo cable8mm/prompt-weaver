@@ -24,7 +24,11 @@ class ImagePrompt
         $lines[] = '- Treat the canvas as a 0-100% grid on both axes (0% = top/left, 100% = bottom/right).';
         $lines[] = '';
         $lines[] = '[Style]';
-        $lines[] = "{$style['theme']}. {$style['background']}. {$style['print_target']}.";
+        $lines[] = $this->joinSentences([
+            $style['theme'],
+            $style['background'],
+            $style['print_target'],
+        ]);
         $lines[] = '';
         $lines[] = '[Layout — place elements at these exact grid positions]';
 
@@ -72,6 +76,7 @@ class ImagePrompt
         $lines[] = '- The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the dark background, not a stylized dark box with a white border.';
         $lines[] = '- Do not let the starry/cyber background pattern show through or bleed into these three white areas.';
         $lines[] = '- Do not render any text or QR code inside these three areas — leave them blank.';
+        $lines[] = '- Final request: generate the finished image now, following every instruction above exactly.';
         $lines[] = '- Output the image only.';
 
         return implode("\n", $lines);
@@ -85,5 +90,18 @@ class ImagePrompt
             'inside_top' => 'inside the box, aligned to the top edge',
             default => $position,
         };
+    }
+
+    /**
+     * Join sentence fragments with a single trailing period each.
+     *
+     * @param  array<int, string>  $parts
+     */
+    private function joinSentences(array $parts): string
+    {
+        return implode(' ', array_map(
+            fn (string $part): string => rtrim(trim($part), '.').'.',
+            $parts,
+        ));
     }
 }

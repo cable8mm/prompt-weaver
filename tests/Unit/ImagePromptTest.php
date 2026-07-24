@@ -3,7 +3,7 @@
 use Cable8mm\PromptWeaver\ImagePrompt;
 
 it('builds a detailed image prompt from the structured config', function () {
-    $prompt = (new ImagePrompt())->build([
+    $prompt = (new ImagePrompt)->build([
         'canvas' => [
             'aspect_ratio' => '3:4',
         ],
@@ -82,5 +82,6 @@ it('builds a detailed image prompt from the structured config', function () {
         ->toContain('6. QR placeholder: square area centered at x=50%, y=80%, width≈28% of canvas. QR frame with clean edges.')
         ->toContain('7. Footer "제작: WIFI NOTE": centered at x=50%, y=96%.')
         ->toContain('[Strict rules]')
+        ->toContain('Final request: generate the finished image now, following every instruction above exactly.')
         ->toContain('Output the image only.');
 });
