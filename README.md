@@ -177,7 +177,7 @@ $promptText = $imagePrompt->build($config);
 If you want to manually test prompts and copy the output into `tests/Fixtures/*`, use the CLI:
 
 ```bash
-php bin/prompt-weaver init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
 ```
 
 This creates:
@@ -189,9 +189,9 @@ tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json
 Then generate the prompts:
 
 ```bash
-php bin/prompt-weaver brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
-php bin/prompt-weaver config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
-php bin/prompt-weaver image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
 ```
 
 What each command outputs:
@@ -227,7 +227,7 @@ The easiest way to test this package is to run the CLI, copy the output into `te
 ### 1) Create a fixture folder
 
 ```bash
-php bin/prompt-weaver init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
 ```
 
 This creates a new `manifest.json` with default values.
@@ -235,7 +235,7 @@ This creates a new `manifest.json` with default values.
 ### 2) Generate the design-brief prompt
 
 ```bash
-php bin/prompt-weaver brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
 ```
 
 Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json` if you want to compare model responses later.
@@ -243,7 +243,7 @@ Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-ca
 ### 3) Generate the config prompt
 
 ```bash
-php bin/prompt-weaver config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
 ```
 
 This is the prompt you paste into a model to get the JSON config response.
@@ -251,7 +251,7 @@ This is the prompt you paste into a model to get the JSON config response.
 ### 4) Generate the final image prompt
 
 ```bash
-php bin/prompt-weaver image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
 ```
 
 Copy the output into `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt` if you want to preserve the exact prompt for that model run.
