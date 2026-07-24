@@ -11,6 +11,14 @@ use Cable8mm\PromptWeaver\ImagePrompt;
 
 final class PromptWeaverCli
 {
+    private const DEFAULT_FIXTURES_ROOT = 'tests/Fixtures';
+
+    private const DEFAULT_PRODUCT = 'a Wi-Fi signage template';
+
+    private const DEFAULT_CATEGORY = 'Cafe/Restaurant';
+
+    private const DEFAULT_FORMAT = 'A4/A5 Poster';
+
     public function run(array $argv): int
     {
         array_shift($argv);
@@ -19,6 +27,7 @@ final class PromptWeaverCli
 
         try {
             return match ($command) {
+                'init' => $this->init($argv),
                 'brief' => $this->brief($argv),
                 'config' => $this->config($argv),
                 'image' => $this->image($argv),
@@ -46,6 +55,51 @@ final class PromptWeaverCli
         $prompt = new DesignBriefPrompt($product);
 
         echo $prompt->build($category, $format).PHP_EOL;
+
+        return 0;
+    }
+
+    private function init(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $model = $options['model'] ?? null;
+        $scenario = $options['scenario'] ?? null;
+        $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
+
+        $this->requireValues($model, $scenario);
+
+        $model = $this->validatePathSegment($model, 'model');
+        $scenario = $this->validatePathSegment($scenario, 'scenario');
+        $fixturesRoot = rtrim($fixturesRoot, '/');
+
+        $manifestPath = "{$fixturesRoot}/{$model}/{$scenario}/manifest.json";
+
+        if (is_file($manifestPath)) {
+            throw new RuntimeException("Fixture already exists: {$manifestPath}");
+        }
+
+        $directory = dirname($manifestPath);
+
+        if (! is_dir($directory) && ! mkdir($directory, 0777, true) && ! is_dir($directory)) {
+            throw new RuntimeException("Unable to create directory: {$directory}");
+        }
+
+        $manifest = [
+            'model' => $model,
+            'scenario' => $scenario,
+            'product' => self::DEFAULT_PRODUCT,
+            'category' => self::DEFAULT_CATEGORY,
+            'format' => self::DEFAULT_FORMAT,
+        ];
+
+        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
+
+        if (file_put_contents($manifestPath, $json) === false) {
+            throw new RuntimeException("Unable to write manifest: {$manifestPath}");
+        }
+
+        echo "Created {$manifestPath}".PHP_EOL;
 
         return 0;
     }
@@ -120,6 +174,7 @@ final class PromptWeaverCli
 Prompt Weaver CLI
 
 Usage:
+  bin/prompt-weaver init --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver brief --product="..." --category="..." --format="..."
   bin/prompt-weaver config --brief="..."
   bin/prompt-weaver image --config-file=path/to/config.json
@@ -171,6 +226,15 @@ TEXT;
                 throw new InvalidArgumentException('Missing required argument.');
             }
         }
+    }
+
+    private function validatePathSegment(string $value, string $name): string
+    {
+        if (! preg_match('/^[A-Za-z0-9._-]+$/', $value)) {
+            throw new InvalidArgumentException("Invalid {$name}: {$value}");
+        }
+
+        return $value;
     }
 }
 
