@@ -194,12 +194,6 @@ composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and cof
 composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
 ```
 
-If you only want to mirror fixture outputs into `dist`, run:
-
-```bash
-composer pw dist
-```
-
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
@@ -207,7 +201,6 @@ What each command outputs:
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `chain` prints all three prompts in one run for quick inspection.
 5. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
-6. `dist` copies every `config.json` and `image.txt` under `tests/Fixtures/*/*/` into the matching `dist/*/*/` path.
 
 ## Output Flow
 
@@ -277,8 +270,6 @@ The integration test reads those files and checks that:
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
 3. The image prompt matches the saved `image.txt` fixture.
-4. `composer pw dist` mirrors every `config.json` and `image.txt` fixture into `dist` with the same folder structure.
-
 ### 6) Run the tests
 
 ```bash
