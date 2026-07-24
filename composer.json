@@ -31,6 +31,7 @@
   "minimum-stability": "stable",
   "prefer-stable": true,
   "scripts": {
+    "pw": "php ./bin/prompt-weaver",
     "test": "./vendor/bin/pest",
     "lint": "./vendor/bin/pint",
     "inspect": "./vendor/bin/pint --test"

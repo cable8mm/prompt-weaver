@@ -177,9 +177,27 @@ $promptText = $imagePrompt->build($config);
 If you want to manually test prompts and copy the output into `tests/Fixtures/*`, use the CLI:
 
 ```bash
-php bin/prompt-weaver brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
-php bin/prompt-weaver config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
-php bin/prompt-weaver image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+```
+
+This creates:
+
+```text
+tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json
+```
+
+Then generate the prompts:
+
+```bash
+composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+```
+
+If you only want to mirror fixture outputs into `dist`, run:
+
+```bash
+composer pw dist
 ```
 
 What each command outputs:
@@ -188,6 +206,8 @@ What each command outputs:
 2. `config` prints the JSON-generation prompt you send after you have a design brief result.
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `chain` prints all three prompts in one run for quick inspection.
+5. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
+6. `dist` copies every `config.json` and `image.txt` under `tests/Fixtures/*/*/` into the matching `dist/*/*/` path.
 
 ## Output Flow
 
@@ -211,31 +231,39 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 The easiest way to test this package is to run the CLI, copy the output into `tests/Fixtures/*`, and then run Pest.
 
-### 1) Generate the design-brief prompt
+### 1) Create a fixture folder
 
 ```bash
-php bin/prompt-weaver brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
 ```
 
-Copy the output into your own fixture file if you want to compare model responses later.
+This creates a new `manifest.json` with default values.
 
-### 2) Generate the config prompt
+### 2) Generate the design-brief prompt
 
 ```bash
-php bin/prompt-weaver config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+```
+
+Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json` if you want to compare model responses later.
+
+### 3) Generate the config prompt
+
+```bash
+composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
 ```
 
 This is the prompt you paste into a model to get the JSON config response.
 
-### 3) Generate the final image prompt
+### 4) Generate the final image prompt
 
 ```bash
-php bin/prompt-weaver image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
 ```
 
 Copy the output into `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt` if you want to preserve the exact prompt for that model run.
 
-### 4) Compare against fixtures
+### 5) Compare against fixtures
 
 The repo already includes one complete example:
 
@@ -249,8 +277,9 @@ The integration test reads those files and checks that:
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
 3. The image prompt matches the saved `image.txt` fixture.
+4. `composer pw dist` mirrors every `config.json` and `image.txt` fixture into `dist` with the same folder structure.
 
-### 5) Run the tests
+### 6) Run the tests
 
 ```bash
 composer test
