@@ -61,6 +61,7 @@ it('copies every config json from fixtures into dist preserving the folder struc
 
         file_put_contents($fixturesRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/config.json', '{"model":"gemini-54-flash"}');
         file_put_contents($fixturesRoot.'/gpt-54-mini/wifi-note-cafe/config.json', '{"model":"gpt-54-mini"}');
+        file_put_contents($fixturesRoot.'/gpt-54-mini/wifi-note-cafe/image.txt', 'image prompt');
         file_put_contents($fixturesRoot.'/gpt-54-mini/wifi-note-cafe/design-brief.json', '{"ignored":true}');
 
         $result = run_pw_command([
@@ -71,14 +72,18 @@ it('copies every config json from fixtures into dist preserving the folder struc
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->toContain('Copied 2 config.json file(s)');
+        expect($result['stdout'])->toContain('Copied 3 fixture file(s)');
 
         expect(is_file($distRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/config.json'))->toBeTrue();
+        expect(is_file($distRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/image.txt'))->toBeFalse();
         expect(is_file($distRoot.'/gpt-54-mini/wifi-note-cafe/config.json'))->toBeTrue();
+        expect(is_file($distRoot.'/gpt-54-mini/wifi-note-cafe/image.txt'))->toBeTrue();
         expect(is_file($distRoot.'/gpt-54-mini/wifi-note-cafe/design-brief.json'))->toBeFalse();
 
         expect(trim((string) file_get_contents($distRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/config.json')))
             ->toBe('{"model":"gemini-54-flash"}');
+        expect(trim((string) file_get_contents($distRoot.'/gpt-54-mini/wifi-note-cafe/image.txt')))
+            ->toBe('image prompt');
         expect(trim((string) file_get_contents($distRoot.'/gpt-54-mini/wifi-note-cafe/config.json')))
             ->toBe('{"model":"gpt-54-mini"}');
     } finally {

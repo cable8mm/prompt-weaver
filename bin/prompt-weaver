@@ -128,7 +128,7 @@ final class PromptWeaverCli
         );
 
         foreach ($iterator as $path => $info) {
-            if (! $info->isFile() || $info->getFilename() !== 'config.json') {
+            if (! $info->isFile() || ! in_array($info->getFilename(), ['config.json', 'image.txt'], true)) {
                 continue;
             }
 
@@ -147,7 +147,7 @@ final class PromptWeaverCli
             $copied++;
         }
 
-        echo "Copied {$copied} config.json file(s) from {$fixturesRoot} to {$distRoot}".PHP_EOL;
+        echo "Copied {$copied} fixture file(s) from {$fixturesRoot} to {$distRoot}".PHP_EOL;
 
         return 0;
     }
