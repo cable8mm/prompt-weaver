@@ -1,0 +1,66 @@
+<?php
+
+namespace Cable8mm\PromptWeaver;
+
+class ConfigPrompt
+{
+    /**
+     * @param  string  $designBrief  사용자 제공 디자인 요약 (예: "가을 카페 느낌, 따뜻한 브라운/크림 톤, 손글씨 느낌 폰트, 낙엽 일러스트 패턴")
+     * @return string Gemini Nano Banana Wi-Fi signage 템플릿 설정 JSON 생성용 프롬프트
+     */
+    public function build(string $designBrief): string
+    {
+        return <<<'TEXT'
+[Role]
+You are a design-template config generator for a Wi-Fi signage print system called WiFi Note.
+Your ONLY job is to output a single valid JSON object matching the schema below. Do NOT output any explanation, markdown code fences, or text outside the JSON.
+
+[Fixed schema — always follow this exact structure]
+{
+  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "3:4" },
+  "style": {
+    "theme": "<one-sentence visual theme description>",
+    "background": "<background description: colors, patterns, textures>",
+    "print_target": "black-and-white laser printer safe"
+  },
+  "content": {
+    "title": { "text": "와이파이 연결", "x_pc": 50, "y_pc": 10, "align": "center", "style": "<font/weight description>" },
+    "wifi_icon": { "x_pc": 50, "y_pc": 20, "width_pc": 15, "style": "<icon style description>" },
+    "message": { "text": "스캔하여 연결하세요.", "x_pc": 50, "y_pc": 62, "align": "center" },
+    "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 96, "align": "center" }
+  },
+  "placeholders": {
+    "ssid": {
+      "box_x_pc": 50, "box_y_pc": 40, "box_width_pc": 70, "box_height_pc": 8,
+      "label": "SSID:", "label_position": "outside_above",
+      "box_fill": "#FFFFFF", "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
+      "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111"
+    },
+    "password": {
+      "box_x_pc": 50, "box_y_pc": 52, "box_width_pc": 70, "box_height_pc": 8,
+      "label": "PASSWORD:", "label_position": "outside_above",
+      "box_fill": "#FFFFFF", "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
+      "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111"
+    },
+    "qr": {
+      "x_pc": 50, "y_pc": 80, "width_pc": 28,
+      "style": "<QR frame style description, e.g. corner brackets, border style>"
+    }
+  }
+}
+
+[Rules]
+1. "canvas.aspect_ratio" is always fixed at "3:4". Never change it.
+2. All x_pc/y_pc/width_pc/height_pc values are percentages (0-100) relative to canvas. Keep the same vertical rhythm as the schema above (title near top ~10%, icon ~20%, ssid box ~40%, password box ~52%, message ~62%, qr ~80%, footer ~96%) unless the user's brief explicitly asks for a different layout — layout changes should be deliberate, not incidental.
+3. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
+4. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".
+5. Text content fields ("title.text", "message.text", "footer.text") stay in Korean as shown, unless the user's brief explicitly provides different copy.
+6. "style", "theme", "background", and other free-text description fields should reflect the user's design brief (e.g. futuristic/space, minimal, retro, botanical, seasonal — whatever concept is given) in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
+7. Do not add extra top-level fields. Do not remove any field from the schema, even if a value is just inherited from the default above.
+8. Output must be valid, parseable JSON — no comments, no trailing commas, no markdown fences.
+
+[User's design brief]
+{$designBrief}
+TEXT;
+    }
+}
