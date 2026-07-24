@@ -13,6 +13,8 @@ final class PromptWeaverCli
 {
     private const DEFAULT_FIXTURES_ROOT = 'tests/Fixtures';
 
+    private const DEFAULT_DIST_ROOT = 'dist';
+
     private const DEFAULT_PRODUCT = 'a Wi-Fi signage template';
 
     private const DEFAULT_CATEGORY = 'Cafe/Restaurant';
@@ -27,6 +29,7 @@ final class PromptWeaverCli
 
         try {
             return match ($command) {
+                'dist' => $this->dist($argv),
                 'init' => $this->init($argv),
                 'brief' => $this->brief($argv),
                 'config' => $this->config($argv),
@@ -104,6 +107,51 @@ final class PromptWeaverCli
         return 0;
     }
 
+    private function dist(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
+        $distRoot = $options['dist-root'] ?? self::DEFAULT_DIST_ROOT;
+
+        if (! is_dir($fixturesRoot)) {
+            throw new RuntimeException("Fixtures root not found: {$fixturesRoot}");
+        }
+
+        $copied = 0;
+        $fixturesRoot = rtrim($fixturesRoot, '/');
+        $distRoot = rtrim($distRoot, '/');
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($fixturesRoot, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $path => $info) {
+            if (! $info->isFile() || $info->getFilename() !== 'config.json') {
+                continue;
+            }
+
+            $relativePath = substr($path, strlen($fixturesRoot) + 1);
+            $targetPath = $distRoot.'/'.$relativePath;
+            $targetDirectory = dirname($targetPath);
+
+            if (! is_dir($targetDirectory) && ! mkdir($targetDirectory, 0777, true) && ! is_dir($targetDirectory)) {
+                throw new RuntimeException("Unable to create directory: {$targetDirectory}");
+            }
+
+            if (! copy($path, $targetPath)) {
+                throw new RuntimeException("Unable to copy {$path} to {$targetPath}");
+            }
+
+            $copied++;
+        }
+
+        echo "Copied {$copied} config.json file(s) from {$fixturesRoot} to {$distRoot}".PHP_EOL;
+
+        return 0;
+    }
+
     private function config(array $argv): int
     {
         $options = $this->parseOptions($argv);
@@ -174,6 +222,7 @@ final class PromptWeaverCli
 Prompt Weaver CLI
 
 Usage:
+  bin/prompt-weaver dist [--fixtures-root=tests/Fixtures] [--dist-root=dist]
   bin/prompt-weaver init --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver brief --product="..." --category="..." --format="..."
   bin/prompt-weaver config --brief="..."
