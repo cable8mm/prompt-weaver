@@ -42,6 +42,7 @@ function remove_directory(string $directory): void
     ) as $path) {
         if ($path->isDir()) {
             rmdir($path->getPathname());
+
             continue;
         }
 
