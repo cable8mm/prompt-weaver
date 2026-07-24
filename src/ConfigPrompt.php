@@ -5,12 +5,12 @@ namespace Cable8mm\PromptWeaver;
 class ConfigPrompt
 {
     /**
-     * @param  string  $designBrief  사용자 제공 디자인 요약 (예: "가을 카페 느낌, 따뜻한 브라운/크림 톤, 손글씨 느낌 폰트, 낙엽 일러스트 패턴")
-     * @return string Gemini Nano Banana Wi-Fi signage 템플릿 설정 JSON 생성용 프롬프트
+     * @param  string  $designBrief  User-provided design brief (e.g., "Autumn cafe vibe, warm brown/cream tones, handwritten-style font, fallen-leaf illustration pattern")
+     * @return string Prompt for generating Gemini Nano Banana Wi-Fi signage template config JSON
      */
     public function build(string $designBrief): string
     {
-        return <<<'TEXT'
+        return <<<TEXT
 [Role]
 You are a design-template config generator for a Wi-Fi signage print system called WiFi Note.
 Your ONLY job is to output a single valid JSON object matching the schema below. Do NOT output any explanation, markdown code fences, or text outside the JSON.

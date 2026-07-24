@@ -1,0 +1,177 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require dirname(__DIR__).'/vendor/autoload.php';
+
+use Cable8mm\PromptWeaver\ConfigPrompt;
+use Cable8mm\PromptWeaver\DesignBriefPrompt;
+use Cable8mm\PromptWeaver\ImagePrompt;
+
+final class PromptWeaverCli
+{
+    public function run(array $argv): int
+    {
+        array_shift($argv);
+
+        $command = array_shift($argv) ?? 'help';
+
+        try {
+            return match ($command) {
+                'brief' => $this->brief($argv),
+                'config' => $this->config($argv),
+                'image' => $this->image($argv),
+                'chain' => $this->chain($argv),
+                'help', '--help', '-h' => $this->help(),
+                default => $this->error("Unknown command: {$command}"),
+            };
+        } catch (Throwable $throwable) {
+            fwrite(STDERR, $throwable->getMessage().PHP_EOL);
+
+            return 1;
+        }
+    }
+
+    private function brief(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $product = $options['product'] ?? null;
+        $category = $options['category'] ?? null;
+        $format = $options['format'] ?? null;
+
+        $this->requireValues($product, $category, $format);
+
+        $prompt = new DesignBriefPrompt($product);
+
+        echo $prompt->build($category, $format).PHP_EOL;
+
+        return 0;
+    }
+
+    private function config(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+        $designBrief = $options['brief'] ?? null;
+
+        $this->requireValues($designBrief);
+
+        echo (new ConfigPrompt())->build($designBrief).PHP_EOL;
+
+        return 0;
+    }
+
+    private function image(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+        $configPath = $options['config-file'] ?? null;
+
+        $this->requireValues($configPath);
+
+        if (! is_string($configPath) || ! is_file($configPath)) {
+            throw new RuntimeException("Config file not found: {$configPath}");
+        }
+
+        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+
+        echo (new ImagePrompt())->build($config).PHP_EOL;
+
+        return 0;
+    }
+
+    private function chain(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $product = $options['product'] ?? null;
+        $category = $options['category'] ?? null;
+        $format = $options['format'] ?? null;
+        $brief = $options['brief'] ?? null;
+        $configFile = $options['config-file'] ?? null;
+
+        $this->requireValues($product, $category, $format, $brief, $configFile);
+
+        if (! is_string($configFile) || ! is_file($configFile)) {
+            throw new RuntimeException("Config file not found: {$configFile}");
+        }
+
+        $config = json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR);
+
+        $briefPrompt = (new DesignBriefPrompt($product))->build($category, $format);
+        $configPrompt = (new ConfigPrompt())->build($brief);
+        $imagePrompt = (new ImagePrompt())->build($config);
+
+        echo "=== design-brief prompt ===".PHP_EOL;
+        echo $briefPrompt.PHP_EOL;
+        echo PHP_EOL;
+        echo "=== config prompt ===".PHP_EOL;
+        echo $configPrompt.PHP_EOL;
+        echo PHP_EOL;
+        echo "=== image prompt ===".PHP_EOL;
+        echo $imagePrompt.PHP_EOL;
+
+        return 0;
+    }
+
+    private function help(): int
+    {
+        echo <<<TEXT
+Prompt Weaver CLI
+
+Usage:
+  bin/prompt-weaver brief --product="..." --category="..." --format="..."
+  bin/prompt-weaver config --brief="..."
+  bin/prompt-weaver image --config-file=path/to/config.json
+  bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --config-file=path/to/config.json
+
+TEXT;
+
+        return 0;
+    }
+
+    private function error(string $message): int
+    {
+        fwrite(STDERR, $message.PHP_EOL);
+        fwrite(STDERR, "Try: bin/prompt-weaver --help".PHP_EOL);
+
+        return 1;
+    }
+
+    /**
+     * @param  array<int, string>  $argv
+     * @return array<string, string>
+     */
+    private function parseOptions(array $argv): array
+    {
+        $options = [];
+
+        foreach ($argv as $argument) {
+            if (! str_starts_with($argument, '--')) {
+                continue;
+            }
+
+            $argument = substr($argument, 2);
+            [$key, $value] = array_pad(explode('=', $argument, 2), 2, null);
+
+            if ($key === '') {
+                continue;
+            }
+
+            $options[$key] = $value ?? '1';
+        }
+
+        return $options;
+    }
+
+    private function requireValues(string ...$values): void
+    {
+        foreach ($values as $value) {
+            if (! is_string($value) || $value === '') {
+                throw new InvalidArgumentException('Missing required argument.');
+            }
+        }
+    }
+}
+
+exit((new PromptWeaverCli())->run($argv));

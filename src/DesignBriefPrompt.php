@@ -5,8 +5,8 @@ namespace Cable8mm\PromptWeaver;
 class DesignBriefPrompt
 {
     /**
-     * 카테고리와 무관하게 섞어 쓸 수 있는 랜덤 창의성 시드 풀.
-     * 필요하면 카테고리별 전용 풀로 세분화해도 됨.
+     * Random creativity seed pool that can be mixed regardless of category.
+     * Can be subdivided into category-specific pools if needed.
      */
     private array $moodSeeds = [
         'futuristic and space-themed',
