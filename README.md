@@ -172,6 +172,23 @@ $config = [
 $promptText = $imagePrompt->build($config);
 ```
 
+## CLI Workflow
+
+If you want to manually test prompts and copy the output into `tests/Fixtures/*`, use the CLI:
+
+```bash
+php bin/prompt-weaver brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+php bin/prompt-weaver config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+php bin/prompt-weaver image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+```
+
+What each command outputs:
+
+1. `brief` prints the design-brief prompt you send to a model.
+2. `config` prints the JSON-generation prompt you send after you have a design brief result.
+3. `image` prints the final image-generation prompt you can paste into your image model.
+4. `chain` prints all three prompts in one run for quick inspection.
+
 ## Output Flow
 
 This package is intended to be used as part of a multi-step generation pipeline:
@@ -189,6 +206,57 @@ This package is intended to be used as part of a multi-step generation pipeline:
 - `ConfigPrompt` is strict about JSON structure so the next step can parse the output reliably.
 - `ImagePrompt` focuses on layout, contrast, and print-safe composition.
 - The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final `image.txt` prompt.
+
+## Testing
+
+The easiest way to test this package is to run the CLI, copy the output into `tests/Fixtures/*`, and then run Pest.
+
+### 1) Generate the design-brief prompt
+
+```bash
+php bin/prompt-weaver brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+```
+
+Copy the output into your own fixture file if you want to compare model responses later.
+
+### 2) Generate the config prompt
+
+```bash
+php bin/prompt-weaver config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+```
+
+This is the prompt you paste into a model to get the JSON config response.
+
+### 3) Generate the final image prompt
+
+```bash
+php bin/prompt-weaver image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+```
+
+Copy the output into `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt` if you want to preserve the exact prompt for that model run.
+
+### 4) Compare against fixtures
+
+The repo already includes one complete example:
+
+- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/manifest.json`
+- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/design-brief.json`
+- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json`
+- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`
+
+The integration test reads those files and checks that:
+
+1. The design-brief prompt is generated correctly.
+2. The config prompt includes the generated brief.
+3. The image prompt matches the saved `image.txt` fixture.
+
+### 5) Run the tests
+
+```bash
+composer test
+```
+
+If you change prompt wording, update the fixture files first, then run the tests again.
 
 ## Development
 
