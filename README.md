@@ -37,40 +37,66 @@ The library contains three prompt builders:
 
 They work together like this:
 
-1. `DesignBriefPrompt` creates a short design brief from a category and format.
-2. `ConfigPrompt` turns that brief into a strict JSON-generation prompt.
-3. `ImagePrompt` turns the resulting config into a detailed image prompt.
+1. `DesignBriefPrompt` takes a product, category, and format, then returns a prompt for generating a short design brief.
+2. `ConfigPrompt` takes that design brief text, then returns a prompt for generating strict JSON.
+3. `ImagePrompt` takes the parsed JSON config, then returns the final image-generation prompt you can paste into a model.
+
+The final prompt text is also stored in the fixture example at
+[`tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`](/Users/cable8mm/Herd/prompt-weaver/tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt).
 
 ## Usage
 
-### 1) Build a design brief prompt
+### Step 1: Build a design brief prompt
+
+Input:
 
 ```php
-use Cable8mm\PromptWeaver\DesignBriefPrompt;
-
-$briefPrompt = new DesignBriefPrompt(
-    product: 'a Wi-Fi signage template'
-);
-
+$briefPrompt = new DesignBriefPrompt(product: 'a Wi-Fi signage template');
 $promptText = $briefPrompt->build(
     category: 'Cafe/Restaurant',
     format: 'A4/A5 Poster'
 );
 ```
 
-### 2) Build a config prompt
+Output:
+
+```text
+[Role]
+You are a creative director for a Wi-Fi signage template. Your job is to write ONE short design brief...
+...
+[Inputs]
+- Category: Cafe/Restaurant
+- Format: A4/A5 Poster
+...
+```
+
+That returned text is not the final design brief yet. It is the prompt you send to a model.
+
+### Step 2: Turn the design brief into a config prompt
 
 ```php
 use Cable8mm\PromptWeaver\ConfigPrompt;
 
 $configPrompt = new ConfigPrompt();
 
+// This would usually be the model's response to Step 1.
+$designBrief = 'A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones.';
+
 $promptText = $configPrompt->build(
-    designBrief: 'A warm cafe-style Wi-Fi sign with soft brown tones and a handwritten feel.'
+    designBrief: $designBrief
 );
 ```
 
-### 3) Build an image prompt
+Output:
+
+```text
+[Role]
+You are a design-template config generator for a Wi-Fi signage print system called WiFi Note.
+Your ONLY job is to output a single valid JSON object matching the schema below.
+...
+```
+
+### Step 3: Turn the config JSON into the final image prompt
 
 `ImagePrompt` expects a structured config array shaped like the JSON schema produced by `ConfigPrompt`.
 
@@ -79,7 +105,8 @@ use Cable8mm\PromptWeaver\ImagePrompt;
 
 $imagePrompt = new ImagePrompt();
 
-$promptText = $imagePrompt->build([
+// This would usually be the parsed JSON response from Step 2.
+$config = [
     'canvas' => [
         'aspect_ratio' => '3:4',
     ],
@@ -140,23 +167,28 @@ $promptText = $imagePrompt->build([
             'style' => 'QR frame style with clean edges',
         ],
     ],
-]);
+];
+
+$promptText = $imagePrompt->build($config);
 ```
 
 ## Output Flow
 
 This package is intended to be used as part of a multi-step generation pipeline:
 
-1. Generate a design brief
-2. Convert it into a config JSON prompt
-3. Convert the config into a final image prompt
-4. Send the prompt to your model or image generator
+1. Call `DesignBriefPrompt::build()` to create the prompt for the brief-generation model.
+2. Send that prompt to a model and capture the brief text.
+3. Pass the brief text into `ConfigPrompt::build()` to create the JSON-generation prompt.
+4. Send that prompt to a model and parse the returned JSON.
+5. Pass the parsed JSON into `ImagePrompt::build()` to create the final image prompt.
+6. Send the final text to your image model or image generator.
 
 ## Notes
 
 - `DesignBriefPrompt` intentionally adds a small amount of randomness so the generated briefs feel less repetitive.
 - `ConfigPrompt` is strict about JSON structure so the next step can parse the output reliably.
 - `ImagePrompt` focuses on layout, contrast, and print-safe composition.
+- The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final `image.txt` prompt.
 
 ## Development
 
