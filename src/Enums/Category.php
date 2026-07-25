@@ -4,7 +4,7 @@ namespace Cable8mm\PromptWeaver\Enums;
 
 use Cable8mm\EnumGetter\EnumGetter;
 
-enum WifiNoteCategory: string
+enum Category: string
 {
     use EnumGetter;
 

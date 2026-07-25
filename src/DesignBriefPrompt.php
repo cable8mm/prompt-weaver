@@ -2,8 +2,8 @@
 
 namespace Cable8mm\PromptWeaver;
 
-use Cable8mm\PromptWeaver\Enums\WifiNoteCategory;
-use Cable8mm\PromptWeaver\Enums\WifiNoteFormat;
+use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\Format;
 
 class DesignBriefPrompt
 {
@@ -58,10 +58,10 @@ class DesignBriefPrompt
     /**
      * Builds a design brief based on the provided category and format.
      *
-     * @param  WifiNoteCategory  $category  design brief category
-     * @param  WifiNoteFormat  $format  design brief format
+     * @param  Category  $category  design brief category
+     * @param  Format  $format  design brief format
      */
-    public function build(WifiNoteCategory $category, WifiNoteFormat $format): string
+    public function build(Category $category, Format $format): string
     {
         $randomSeeds = implode(', ', [
             $this->pickRandom($this->moodSeeds, $this->lastMoodSeed),

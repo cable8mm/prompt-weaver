@@ -7,8 +7,8 @@ require dirname(__DIR__).'/vendor/autoload.php';
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
-use Cable8mm\PromptWeaver\Enums\WifiNoteCategory;
-use Cable8mm\PromptWeaver\Enums\WifiNoteFormat;
+use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\ImagePrompt;
 use Cable8mm\PromptWeaver\PreviewImage;
 
@@ -250,25 +250,25 @@ final class PromptWeaverCli
         return 0;
     }
 
-    private function categoryFromInput(string $category): WifiNoteCategory
+    private function categoryFromInput(string $category): Category
     {
         return match ($category) {
-            'Cafe/Restaurant', 'Cafe / Restaurant' => WifiNoteCategory::CAFE_RESTAURANT,
-            'Office/Coworking', 'Office / Coworking Space' => WifiNoteCategory::OFFICE_COWORKING,
-            'Stay/Hotel', 'Stay / Hotel Type' => WifiNoteCategory::STAY_HOTEL,
-            'Event/Exhibition', 'Event / Exhibition Type' => WifiNoteCategory::EVENT_EXHIBITION,
-            'Other' => WifiNoteCategory::OTHER,
+            'Cafe/Restaurant', 'Cafe / Restaurant' => Category::CAFE_RESTAURANT,
+            'Office/Coworking', 'Office / Coworking Space' => Category::OFFICE_COWORKING,
+            'Stay/Hotel', 'Stay / Hotel Type' => Category::STAY_HOTEL,
+            'Event/Exhibition', 'Event / Exhibition Type' => Category::EVENT_EXHIBITION,
+            'Other' => Category::OTHER,
             default => throw new InvalidArgumentException("Unknown category: {$category}"),
         };
     }
 
-    private function formatFromInput(string $format): WifiNoteFormat
+    private function formatFromInput(string $format): Format
     {
         return match ($format) {
-            'A4/A5 Poster', 'A4/A5 Poster Type' => WifiNoteFormat::A45_POSTER,
-            'L-Stand/Table Tent', 'L-Shape Stand / Table Tent Type' => WifiNoteFormat::L_STAND,
-            'Sticker', 'Sticker Type (Round/Square)' => WifiNoteFormat::STICKER,
-            'Business Card', 'Business Card Type' => WifiNoteFormat::CARD,
+            'A4/A5 Poster', 'A4/A5 Poster Type' => Format::A45_POSTER,
+            'L-Stand/Table Tent', 'L-Shape Stand / Table Tent Type' => Format::L_STAND,
+            'Sticker', 'Sticker Type (Round/Square)' => Format::STICKER,
+            'Business Card', 'Business Card Type' => Format::CARD,
             default => throw new InvalidArgumentException("Unknown format: {$format}"),
         };
     }

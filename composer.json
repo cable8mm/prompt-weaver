@@ -24,9 +24,6 @@
     "psr-4": {
       "Cable8mm\\PromptWeaver\\": "src/"
     },
-    "classmap": [
-      "src/Enums"
-    ],
     "files": [
       "src/helpers.php"
     ]
