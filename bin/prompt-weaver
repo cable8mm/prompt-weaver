@@ -119,7 +119,7 @@ final class PromptWeaverCli
             'format' => self::DEFAULT_FORMAT,
         ];
 
-        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
+        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
 
         if (file_put_contents($manifestPath, $json) === false) {
             throw new RuntimeException("Unable to write manifest: {$manifestPath}");
@@ -151,7 +151,7 @@ final class PromptWeaverCli
 
         (new PreviewImage)->calibrate($fixtureDirectory);
 
-        echo 'Updated '.rtrim($fixtureDirectory, '/').'/config.json'.PHP_EOL;
+        echo 'Updated '.rtrim($fixtureDirectory, '/').'/calibrate.config.json'.PHP_EOL;
 
         return 0;
     }
