@@ -284,7 +284,7 @@ This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.png` using `calibra
 ./weaver preview chatgpt/cafe-restaurant --output=html
 ```
 
-This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.html` using `image.png` and `calibrate.config.json` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required.
+This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.html` using `image.png`, `calibrate.config.json`, and `fonts/AtkinsonHyperlegible-Regular.woff2` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required. Keep the generated HTML in its fixture directory so its relative asset paths remain valid.
 
 Because browsers commonly block `fetch()` from local `file://` pages, serve the fixture directory through a local web server before opening the HTML:
 

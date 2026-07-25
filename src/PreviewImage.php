@@ -219,12 +219,15 @@ final class PreviewImage
 
         $qrX = (float) ($qrPlaceholder['box_x_pc'] ?? $qrPlaceholder['x_pc'] ?? 0);
         $qrY = (float) ($qrPlaceholder['box_y_pc'] ?? $qrPlaceholder['y_pc'] ?? 0);
-        $qrWidth = (float) ($qrPlaceholder['box_width_pc'] ?? $qrPlaceholder['width_pc'] ?? 0);
-        $fontData = base64_encode((string) file_get_contents($this->fontPath()));
+        $qrBox = $this->qrPlaceholderBoxFromDimensions($qrPlaceholder, $width, $height);
+        $qrBoxSize = min($qrBox['width'], $qrBox['height']);
+        $qrPadding = max(10, (int) round($qrBoxSize * 0.1));
+        $qrWidth = (($qrBoxSize - ($qrPadding * 2)) / $width) * 100;
+        $fontUrl = htmlspecialchars($this->relativePath(dirname($outputPath), $this->webFontPath()), ENT_QUOTES, 'UTF-8');
         $html = '<!doctype html>'.PHP_EOL
             .'<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'.PHP_EOL
             .'<title>Prompt Weaver Preview</title><style>'.PHP_EOL
-            .'*{box-sizing:border-box}@font-face{font-family:PreviewFont;src:url("data:font/ttf;base64,'.$fontData.'") format("truetype");font-weight:400;font-style:normal;font-display:block}body{margin:0;background:#ddd;display:grid;place-items:center;min-height:100vh}.preview{position:relative;width:min(100vw,'.$width.'px);aspect-ratio:'.$width.'/'.$height.';container-type:inline-size}.preview>img.background{position:absolute;inset:0;width:100%;height:100%;display:block}.text-placeholder{position:absolute;transform:translate(-50%,-50%);width:70%;text-align:center;font-family:PreviewFont,sans-serif;font-weight:400;line-height:1;white-space:nowrap;font-size:calc(var(--font-size) * 100cqw / '.$width.')} .qr{position:absolute;transform:translate(-50%,-50%);width:'.$qrWidth.'%;height:auto;image-rendering:auto}</style></head><body>'.PHP_EOL
+            .'*{box-sizing:border-box}@font-face{font-family:PreviewFont;src:url("'.$fontUrl.'") format("woff2");font-weight:400;font-style:normal;font-display:block}body{margin:0;background:#ddd;display:grid;place-items:center;min-height:100vh}.preview{position:relative;width:min(100vw,'.$width.'px);aspect-ratio:'.$width.'/'.$height.';container-type:inline-size}.preview>img.background{position:absolute;inset:0;width:100%;height:100%;display:block}.text-placeholder{position:absolute;transform:translate(-50%,-50%);width:70%;text-align:center;font-family:PreviewFont,sans-serif;font-weight:400;line-height:1;white-space:nowrap;font-size:calc(var(--font-size) * 100cqw / '.$width.')} .qr{position:absolute;transform:translate(-50%,-50%);width:'.$qrWidth.'%;height:auto;image-rendering:auto}</style></head><body>'.PHP_EOL
             .'<main class="preview"><img class="background" src="image.png" alt="">'
             .$textElement('ssid', $ssidPlaceholder).$textElement('password', $passwordPlaceholder)
             .'<img class="qr" src="'.$qrDataUri.'" alt="Wi-Fi QR code" style="left: '.$qrX.'%; top: '.$qrY.'%;"></main>'.PHP_EOL
@@ -638,6 +641,37 @@ final class PreviewImage
         }
 
         throw new RuntimeException("Preview font file not found: {$fontPath}");
+    }
+
+    private function webFontPath(): string
+    {
+        $fontPath = dirname(__DIR__).'/fonts/AtkinsonHyperlegible-Regular.woff2';
+
+        if (is_file($fontPath)) {
+            return $fontPath;
+        }
+
+        throw new RuntimeException("Webfont file not found: {$fontPath}");
+    }
+
+    private function relativePath(string $fromDirectory, string $targetPath): string
+    {
+        $from = realpath($fromDirectory);
+        $target = realpath($targetPath);
+
+        if ($from === false || $target === false) {
+            throw new RuntimeException('Unable to resolve preview font path.');
+        }
+
+        $fromParts = explode('/', trim($from, '/'));
+        $targetParts = explode('/', trim($target, '/'));
+        $commonLength = 0;
+
+        while (isset($fromParts[$commonLength], $targetParts[$commonLength]) && $fromParts[$commonLength] === $targetParts[$commonLength]) {
+            $commonLength++;
+        }
+
+        return str_repeat('../', count($fromParts) - $commonLength).implode('/', array_slice($targetParts, $commonLength));
     }
 
     private function buildWifiPayload(string $ssid, string $password): string
