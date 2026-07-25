@@ -457,6 +457,7 @@ final class PreviewImage
                         // background runs before scoring the remaining candidates.
                         if ($height < $minimumWidth * 0.5 || $aspectRatio < 0.6 || $aspectRatio > 1.6) {
                             $runStart = null;
+
                             continue;
                         }
 
