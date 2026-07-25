@@ -14,33 +14,44 @@ final class PreviewImage
 
     private const CALIBRATED_CONFIG_FILENAME = 'calibrate.config.json';
 
+    private string $fixtureDirectory;
+
+    private string $configPath;
+
+    private string $calibratedConfigPath;
+
+    private string $backgroundPath;
+
+    public function __construct(string $fixtureDirectory)
+    {
+        $this->fixtureDirectory = rtrim($fixtureDirectory, '/');
+        $this->configPath = $this->fixtureDirectory.'/'.self::CONFIG_FILENAME;
+        $this->calibratedConfigPath = $this->fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME;
+        $this->backgroundPath = $this->fixtureDirectory.'/image.png';
+    }
+
     /**
      * Detect the actual white placeholder boxes in image.png and write the
      * corresponding coordinates to calibrate.config.json.
      *
      * @return array<string, float> Updated coordinates keyed by placeholder.
      */
-    public function calibrate(string $fixtureDirectory): array
+    public function calibrate(): array
     {
-        $fixtureDirectory = rtrim($fixtureDirectory, '/');
-        $configPath = $fixtureDirectory.'/'.self::CONFIG_FILENAME;
-        $calibratedConfigPath = $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME;
-        $backgroundPath = $fixtureDirectory.'/image.png';
-
-        if (! is_file($configPath)) {
-            throw new RuntimeException("Config file not found: {$configPath}");
+        if (! is_file($this->configPath)) {
+            throw new RuntimeException("Config file not found: {$this->configPath}");
         }
 
-        if (! is_file($backgroundPath)) {
-            throw new RuntimeException("Background image not found: {$backgroundPath}");
+        if (! is_file($this->backgroundPath)) {
+            throw new RuntimeException("Background image not found: {$this->backgroundPath}");
         }
 
         /** @var array<string, mixed> $config */
-        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
-        $image = imagecreatefromstring((string) file_get_contents($backgroundPath));
+        $config = json_decode((string) file_get_contents($this->configPath), true, 512, JSON_THROW_ON_ERROR);
+        $image = imagecreatefromstring((string) file_get_contents($this->backgroundPath));
 
         if (! $image instanceof GdImage) {
-            throw new RuntimeException("Unable to load background image: {$backgroundPath}");
+            throw new RuntimeException("Unable to load background image: {$this->backgroundPath}");
         }
 
         $calibrator = new Calibrator;
@@ -62,8 +73,8 @@ final class PreviewImage
 
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
 
-        if (file_put_contents($calibratedConfigPath, $json) === false) {
-            throw new RuntimeException("Unable to write calibrated config: {$calibratedConfigPath}");
+        if (file_put_contents($this->calibratedConfigPath, $json) === false) {
+            throw new RuntimeException("Unable to write calibrated config: {$this->calibratedConfigPath}");
         }
 
         return $updated;
@@ -72,13 +83,11 @@ final class PreviewImage
     /**
      * @param  array<string, string>  $options
      */
-    public function render(string $fixtureDirectory, string $outputPath, array $options = []): string
+    public function render(string $outputPath, array $options = []): string
     {
-        $fixtureDirectory = rtrim($fixtureDirectory, '/');
-        $configPath = is_file($fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME)
-            ? $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME
-            : $fixtureDirectory.'/'.self::CONFIG_FILENAME;
-        $backgroundPath = $fixtureDirectory.'/image.png';
+        $configPath = is_file($this->calibratedConfigPath)
+            ? $this->calibratedConfigPath
+            : $this->configPath;
 
         if (! is_file($configPath)) {
             throw new RuntimeException("Config file not found: {$configPath}");
@@ -87,19 +96,17 @@ final class PreviewImage
         /** @var array<string, mixed> $config */
         $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
 
-        return (new RenderPng)->render($config, $backgroundPath, $outputPath, $options);
+        return (new RenderPng)->render($config, $this->backgroundPath, $outputPath, $options);
     }
 
     /**
      * @param  array<string, string>  $options
      */
-    public function renderHtml(string $fixtureDirectory, string $outputPath, array $options = []): string
+    public function renderHtml(string $outputPath, array $options = []): string
     {
-        $fixtureDirectory = rtrim($fixtureDirectory, '/');
-        $configPath = is_file($fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME)
-            ? $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME
-            : $fixtureDirectory.'/'.self::CONFIG_FILENAME;
-        $backgroundPath = $fixtureDirectory.'/image.png';
+        $configPath = is_file($this->calibratedConfigPath)
+            ? $this->calibratedConfigPath
+            : $this->configPath;
 
         if (! is_file($configPath)) {
             throw new RuntimeException("Config file not found: {$configPath}");
@@ -108,6 +115,6 @@ final class PreviewImage
         /** @var array<string, mixed> $config */
         $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
 
-        return (new RenderHtml)->render($config, $backgroundPath, $configPath, $outputPath, $options);
+        return (new RenderHtml)->render($config, $this->backgroundPath, $configPath, $outputPath, $options);
     }
 }
