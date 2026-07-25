@@ -174,10 +174,10 @@ $promptText = $imagePrompt->build($config);
 
 ## CLI Workflow
 
-If you want to manually test prompts and copy the output into `tests/Fixtures/*`, use the CLI:
+The CLI uses one fixture reference in the form `model/scenario`. All commands below operate on the same fixture folder:
 
 ```bash
-./pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+./weaver init gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
 This creates:
@@ -186,16 +186,16 @@ This creates:
 tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json
 ```
 
-Then generate the prompts:
+The commands use the files created or saved in that folder:
 
 ```bash
-./pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
-./pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
-./pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
-./pw preview --fixture=tests/Fixtures/gpt-54-mini/wifi-note-cafe
+./weaver brief gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver config gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver image gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-`preview` writes a `preview.png` file in the same fixture folder by overlaying the SSID, password, and QR code on top of `image.png`.
+`brief` reads `manifest.json`, `config` reads `design-brief.json`, `image` reads `config.json`, and `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
 
 What each command outputs:
 
@@ -226,47 +226,47 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 ## Testing
 
-The easiest way to test this package is to run the CLI, copy the output into `tests/Fixtures/*`, and then run Pest.
+The easiest way to test this package is to create one fixture and keep all generated files in its folder, then run Pest.
 
 ### 1) Create a fixture folder
 
 ```bash
-./pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+./weaver init gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-This creates a new `manifest.json` with default values.
+This creates `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json` with default values for `product`, `category`, and `format`.
 
 ### 2) Generate the design-brief prompt
 
 ```bash
-./pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+./weaver brief gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json` if you want to compare model responses later.
+Send the printed prompt to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json`.
 
 ### 3) Generate the config prompt
 
 ```bash
-./pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+./weaver config gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-This is the prompt you paste into a model to get the JSON config response.
+The command reads `design-brief.json`, takes its `design_brief` value, and prints the JSON-generation prompt. Send that prompt to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/config.json`.
 
 ### 4) Generate the final image prompt
 
 ```bash
-./pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+./weaver image gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-Copy the output into `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt` if you want to preserve the exact prompt for that model run.
+The command reads `config.json` and prints the final image-generation prompt. Save the prompt as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/image.txt` if you want to preserve it.
 
 ### 5) Generate a preview image
 
 ```bash
-./pw preview --fixture=tests/Fixtures/gpt-54-mini/wifi-note-cafe
+./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-This creates `tests/Fixtures/gpt-54-mini/wifi-note-cafe/preview.png` so you can inspect the SSID, password, and QR placement by eye.
+This creates `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/preview.png` so you can inspect the SSID, password, and QR placement by eye.
 
 ### 6) Compare against fixtures
 
