@@ -90,8 +90,6 @@ final class PreviewImage
             throw new RuntimeException("Unable to write calibrated config: {$calibratedConfigPath}");
         }
 
-        imagedestroy($image);
-
         return $updated;
     }
 
@@ -163,8 +161,6 @@ final class PreviewImage
         if (! imagepng($baseImage, $outputPath)) {
             throw new RuntimeException("Unable to write preview image: {$outputPath}");
         }
-
-        imagedestroy($baseImage);
 
         return $outputPath;
     }
@@ -370,7 +366,6 @@ final class PreviewImage
         $qrTop = (int) round($box['center_y'] - ($qrSize / 2));
 
         imagecopy($image, $qrImage, $qrLeft, $qrTop, 0, 0, $qrSize, $qrSize);
-        imagedestroy($qrImage);
     }
 
     /**
@@ -415,6 +410,7 @@ final class PreviewImage
         $endY = min($imageHeight - 1, $expected['center_y'] + $searchRadius);
         $minimumWidth = max(40, (int) round($expected['width'] * 0.5));
         $best = null;
+        $bestScore = PHP_FLOAT_MAX;
 
         for ($y = $startY; $y <= $endY; $y++) {
             $runStart = null;
@@ -430,13 +426,58 @@ final class PreviewImage
                     $runEnd = $x - 1;
                     $width = $runEnd - $runStart + 1;
 
-                    if ($width >= $minimumWidth && ($best === null || $width > $best['width'])) {
-                        $best = [
-                            'left' => $runStart,
-                            'right' => $runEnd,
-                            'width' => $width,
-                            'y' => $y,
-                        ];
+                    if ($width >= $minimumWidth) {
+                        // A single long white scanline is not enough to identify
+                        // the QR frame: the generated artwork also contains wide
+                        // white/ivory background areas. Measure how far this same
+                        // run continues vertically and prefer square candidates.
+                        $top = $y;
+                        $bottom = $y;
+
+                        for ($candidateY = $y - 1; $candidateY >= $startY; $candidateY--) {
+                            if ($this->whitePixelRatio($image, $runStart, $runEnd, $candidateY) < 0.8) {
+                                break;
+                            }
+
+                            $top = $candidateY;
+                        }
+
+                        for ($candidateY = $y + 1; $candidateY <= $endY; $candidateY++) {
+                            if ($this->whitePixelRatio($image, $runStart, $runEnd, $candidateY) < 0.8) {
+                                break;
+                            }
+
+                            $bottom = $candidateY;
+                        }
+
+                        $height = $bottom - $top + 1;
+                        $aspectRatio = $width / max(1, $height);
+
+                        // The QR placeholder is square. Reject broad horizontal
+                        // background runs before scoring the remaining candidates.
+                        if ($height < $minimumWidth * 0.5 || $aspectRatio < 0.6 || $aspectRatio > 1.6) {
+                            $runStart = null;
+                            continue;
+                        }
+
+                        $centerX = ($runStart + $runEnd) / 2;
+                        $centerY = ($top + $bottom) / 2;
+                        $score = abs(log($aspectRatio))
+                            + (abs($centerY - $expected['center_y']) / $imageHeight) * 2
+                            + (abs($width - $expected['width']) / $imageWidth) * 0.25;
+
+                        if ($score < $bestScore) {
+                            $bestScore = $score;
+                            $best = [
+                                'left' => $runStart,
+                                'right' => $runEnd,
+                                'width' => $width,
+                                'top' => $top,
+                                'bottom' => $bottom,
+                                'center_x' => (int) round($centerX),
+                                'center_y' => (int) round($centerY),
+                            ];
+                        }
                     }
 
                     $runStart = null;
@@ -448,33 +489,13 @@ final class PreviewImage
             return null;
         }
 
-        $centerX = (int) round(($best['left'] + $best['right']) / 2);
-        $top = $best['y'];
-        $bottom = $best['y'];
-
-        for ($y = $best['y'] - 1; $y >= $startY; $y--) {
-            if ($this->whitePixelRatio($image, $best['left'], $best['right'], $y) < 0.8) {
-                break;
-            }
-
-            $top = $y;
-        }
-
-        for ($y = $best['y'] + 1; $y <= $endY; $y++) {
-            if ($this->whitePixelRatio($image, $best['left'], $best['right'], $y) < 0.8) {
-                break;
-            }
-
-            $bottom = $y;
-        }
-
         return [
             'left' => $best['left'],
-            'top' => $top,
+            'top' => $best['top'],
             'width' => $best['width'],
-            'height' => $bottom - $top + 1,
-            'center_x' => $centerX,
-            'center_y' => (int) round(($top + $bottom) / 2),
+            'height' => $best['bottom'] - $best['top'] + 1,
+            'center_x' => $best['center_x'],
+            'center_y' => $best['center_y'],
         ];
     }
 
