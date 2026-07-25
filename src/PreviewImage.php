@@ -240,18 +240,13 @@ final class PreviewImage
 
     private function fontPath(): string
     {
-        foreach ([
-            '/System/Library/Fonts/AppleSDGothicNeo.ttc',
-            '/System/Library/Fonts/AppleGothic.ttf',
-            '/System/Library/Fonts/Supplemental/Arial Unicode.ttf',
-            '/Library/Fonts/Arial Unicode.ttf',
-        ] as $fontPath) {
-            if (is_file($fontPath)) {
-                return $fontPath;
-            }
+        $fontPath = dirname(__DIR__).'/fonts/AtkinsonHyperlegible-Regular.ttf';
+
+        if (is_file($fontPath)) {
+            return $fontPath;
         }
 
-        throw new RuntimeException('No suitable font file found for preview rendering.');
+        throw new RuntimeException("Preview font file not found: {$fontPath}");
     }
 
     private function buildWifiPayload(string $ssid, string $password): string
