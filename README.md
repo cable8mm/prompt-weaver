@@ -195,7 +195,7 @@ The commands use the files created or saved in that folder:
 ./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, `image` reads `config.json`, and `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
 
 What each command outputs:
 
@@ -222,7 +222,7 @@ This package is intended to be used as part of a multi-step generation pipeline:
 - `DesignBriefPrompt` intentionally adds a small amount of randomness so the generated briefs feel less repetitive.
 - `ConfigPrompt` is strict about JSON structure so the next step can parse the output reliably.
 - `ImagePrompt` focuses on layout, contrast, and print-safe composition.
-- The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final `image.txt` prompt.
+- The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final image prompt.
 
 ## Testing
 
@@ -250,7 +250,7 @@ The prompt is also saved automatically as `tests/Fixtures/gemini-54-flash/wifi-w
 ./weaver config gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-The command reads `design-brief.json`, takes its `design_brief` value, and prints the JSON-generation prompt. Send that prompt to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/config.json`.
+The command reads `design-brief.json`, takes its `design_brief` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/config.json`.
 
 ### 4) Generate the final image prompt
 
@@ -258,7 +258,7 @@ The command reads `design-brief.json`, takes its `design_brief` value, and print
 ./weaver image gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-The command reads `config.json` and prints the final image-generation prompt. Save the prompt as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/image.txt` if you want to preserve it.
+The command reads `config.json`, prints the final image-generation prompt, and saves it as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/image.prompt`.
 
 ### 5) Generate a preview image
 
@@ -275,13 +275,13 @@ The repo already includes one complete example:
 - `tests/Fixtures/gpt-54-mini/wifi-note-cafe/manifest.json`
 - `tests/Fixtures/gpt-54-mini/wifi-note-cafe/design-brief.json`
 - `tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json`
-- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`
+- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.prompt`
 
 The integration test reads those files and checks that:
 
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
-3. The image prompt matches the saved `image.txt` fixture.
+3. The image prompt matches the saved `image.prompt` fixture.
 4. The preview image can be generated from the fixture background without errors.
 
 ### 7) Run the tests

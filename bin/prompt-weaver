@@ -170,7 +170,18 @@ final class PromptWeaverCli
 
         $this->requireValues($designBrief);
 
-        echo (new ConfigPrompt)->build($designBrief).PHP_EOL;
+        $promptText = (new ConfigPrompt)->build($designBrief);
+
+        if ($fixtureReference !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+            $promptPath = $fixtureDirectory.'/config.prompt';
+
+            if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
+                throw new RuntimeException("Unable to write prompt: {$promptPath}");
+            }
+        }
+
+        echo $promptText.PHP_EOL;
 
         return 0;
     }
@@ -190,8 +201,18 @@ final class PromptWeaverCli
         }
 
         $config = $this->readJsonFile($configPath);
+        $promptText = (new ImagePrompt)->build($config);
 
-        echo (new ImagePrompt)->build($config).PHP_EOL;
+        if ($fixtureReference !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+            $promptPath = $fixtureDirectory.'/image.prompt';
+
+            if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
+                throw new RuntimeException("Unable to write prompt: {$promptPath}");
+            }
+        }
+
+        echo $promptText.PHP_EOL;
 
         return 0;
     }
