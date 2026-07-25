@@ -13,7 +13,7 @@ final class PreviewImage
 {
     private const DEFAULT_SSID = 'WIFI-NOTE';
 
-    private const DEFAULT_PASSWORD = '12345678';
+    private const DEFAULT_PASSWORD = 'WIFI-PASSWORD';
 
     /**
      * @param  array<string, string>  $options
@@ -54,12 +54,14 @@ final class PreviewImage
             $baseImage,
             $this->configPlaceholder($config, 'ssid'),
             $ssid,
+            1,
         );
 
         $this->drawPlaceholderText(
             $baseImage,
             $this->configPlaceholder($config, 'password'),
             $password,
+            2,
         );
 
         $this->drawQr(
@@ -132,15 +134,90 @@ final class PreviewImage
     /**
      * @param  array<string, mixed>  $placeholder
      */
-    private function drawPlaceholderText(GdImage $image, array $placeholder, string $text): void
+    private function drawPlaceholderText(GdImage $image, array $placeholder, string $text, int $verticalAdjustment = 0): void
     {
         $box = $this->placeholderBox($image, $placeholder);
+        $box = $this->alignTextBoxToWhiteArea($image, $box);
         $font = $this->fontPath();
         $fontSize = (int) ($placeholder['font_size_px'] ?? 36);
         $colorHex = (string) ($placeholder['color'] ?? '#111111');
         $color = $this->allocateColor($image, $colorHex);
 
-        $this->drawTextCenteredInBox($image, $font, $fontSize, $text, $box, $color);
+        $this->drawTextCenteredInBox($image, $font, $fontSize, $text, $box, $color, $verticalAdjustment);
+    }
+
+    /**
+     * Generated images can place the white placeholder slightly away from the
+     * percentage coordinates in the config. Use the actual white area for the
+     * text's vertical center when it can be detected.
+     *
+     * @param  array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}  $box
+     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}
+     */
+    private function alignTextBoxToWhiteArea(GdImage $image, array $box): array
+    {
+        $left = max(0, $box['left'] + 4);
+        $right = min(imagesx($image) - 1, $box['left'] + $box['width'] - 5);
+
+        if ($right <= $left) {
+            return $box;
+        }
+
+        $searchRadius = max($box['height'] * 2, (int) round(imagesy($image) * 0.08));
+        $startY = max(0, $box['center_y'] - $searchRadius);
+        $endY = min(imagesy($image) - 1, $box['center_y'] + $searchRadius);
+        $runs = [];
+        $runStart = null;
+
+        for ($y = $startY; $y <= $endY; $y++) {
+            $whiteRatio = $this->whitePixelRatio($image, $left, $right, $y);
+            $isWhiteRow = $whiteRatio >= 0.8;
+
+            if ($isWhiteRow && $runStart === null) {
+                $runStart = $y;
+            }
+
+            if ((! $isWhiteRow || $y === $endY) && $runStart !== null) {
+                $runEnd = $isWhiteRow && $y === $endY ? $y : $y - 1;
+
+                if ($runEnd - $runStart + 1 >= max(12, (int) round($box['height'] * 0.5))) {
+                    $runs[] = [$runStart, $runEnd];
+                }
+
+                $runStart = null;
+            }
+        }
+
+        if ($runs === []) {
+            return $box;
+        }
+
+        usort($runs, fn (array $first, array $second): int => abs((($first[0] + $first[1]) / 2) - $box['center_y']) <=>
+            abs((($second[0] + $second[1]) / 2) - $box['center_y'])
+        );
+
+        $centerY = (int) round(($runs[0][0] + $runs[0][1]) / 2);
+
+        return [...$box, 'center_y' => $centerY, 'top' => $centerY - (int) round($box['height'] / 2)];
+    }
+
+    private function whitePixelRatio(GdImage $image, int $left, int $right, int $y): float
+    {
+        $whitePixels = 0;
+        $pixelCount = $right - $left + 1;
+
+        for ($x = $left; $x <= $right; $x++) {
+            $color = imagecolorat($image, $x, $y);
+            $red = ($color >> 16) & 255;
+            $green = ($color >> 8) & 255;
+            $blue = $color & 255;
+
+            if ($red >= 248 && $green >= 248 && $blue >= 248) {
+                $whitePixels++;
+            }
+        }
+
+        return $pixelCount > 0 ? $whitePixels / $pixelCount : 0.0;
     }
 
     /**
@@ -170,7 +247,7 @@ final class PreviewImage
     /**
      * @param  array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}  $box
      */
-    private function drawTextCenteredInBox(GdImage $image, string $font, int $fontSize, string $text, array $box, int $color): void
+    private function drawTextCenteredInBox(GdImage $image, string $font, int $fontSize, string $text, array $box, int $color, int $verticalAdjustment = 0): void
     {
         $bbox = imagettfbbox($fontSize, 0, $font, $text);
 
@@ -188,7 +265,7 @@ final class PreviewImage
 
         $x = (int) round($box['left'] + (($box['width'] - $textWidth) / 2) - $left);
         $y = (int) round($box['top'] + (($box['height'] - $textHeight) / 2) - $top);
-        $y += max(4, (int) round($fontSize * 0.1));
+        $y += max(0, (int) round($fontSize * 0.05) - $verticalAdjustment);
 
         imagettftext($image, $fontSize, 0, $x, $y, $color, $font, $text);
     }
