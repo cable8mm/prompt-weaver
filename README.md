@@ -196,7 +196,7 @@ The commands use the files created or saved in that folder:
 ./weaver preview chatgpt/cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then updates the text `box_y_pc` values and the QR `x_pc`, `y_pc`, and `width_pc` values in `config.json`. `preview` runs the same calibration before rendering and writes `preview.png` in the same fixture folder.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then updates the text `box_y_pc` values and the QR `x_pc`, `y_pc`, and `width_pc` values in `config.json`. `preview` renders `preview.png` in the same fixture folder using the coordinates already stored in `config.json`.
 
 What each command outputs:
 
@@ -204,7 +204,7 @@ What each command outputs:
 2. `config` prints the JSON-generation prompt you send after you have a design brief result.
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `calibrate` updates `config.json` to match the actual text-box and QR-frame positions in `image.png`.
-5. `preview` renders a human-checkable `preview.png` on top of the fixture background after calibration.
+5. `preview` renders a human-checkable `preview.png` on top of the fixture background using the current `config.json` coordinates.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
 
