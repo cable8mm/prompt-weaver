@@ -212,7 +212,7 @@ final class PreviewImage
             $y = (float) ($placeholder['box_y_pc'] ?? 0);
             $fontSize = (int) ($placeholder['font_size_px'] ?? 36);
             $color = htmlspecialchars((string) ($placeholder['color'] ?? '#111111'), ENT_QUOTES, 'UTF-8');
-            $style = "left: {$x}%; top: {$y}%; --font-size: {$fontSize}px; color: {$color};";
+            $style = "left: {$x}%; top: {$y}%; --font-size: {$fontSize}; color: {$color};";
 
             return '<div id="'.$class.'" class="text-placeholder" style="'.$style.'"></div>';
         };
@@ -220,10 +220,11 @@ final class PreviewImage
         $qrX = (float) ($qrPlaceholder['box_x_pc'] ?? $qrPlaceholder['x_pc'] ?? 0);
         $qrY = (float) ($qrPlaceholder['box_y_pc'] ?? $qrPlaceholder['y_pc'] ?? 0);
         $qrWidth = (float) ($qrPlaceholder['box_width_pc'] ?? $qrPlaceholder['width_pc'] ?? 0);
+        $fontData = base64_encode((string) file_get_contents($this->fontPath()));
         $html = '<!doctype html>'.PHP_EOL
             .'<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'.PHP_EOL
             .'<title>Prompt Weaver Preview</title><style>'.PHP_EOL
-            .'*{box-sizing:border-box}body{margin:0;background:#ddd;display:grid;place-items:center;min-height:100vh}.preview{position:relative;width:min(100vw,'.$width.'px);aspect-ratio:'.$width.'/'.$height.';container-type:inline-size}.preview>img.background{position:absolute;inset:0;width:100%;height:100%;display:block}.text-placeholder{position:absolute;transform:translate(-50%,-50%);width:70%;text-align:center;font-family:Arial,sans-serif;font-weight:bold;line-height:1;white-space:nowrap;font-size:calc(var(--font-size) * 100cqw / '.$width.')} .qr{position:absolute;transform:translate(-50%,-50%);width:'.$qrWidth.'%;height:auto;image-rendering:auto}</style></head><body>'.PHP_EOL
+            .'*{box-sizing:border-box}@font-face{font-family:PreviewFont;src:url("data:font/ttf;base64,'.$fontData.'") format("truetype");font-weight:400;font-style:normal;font-display:block}body{margin:0;background:#ddd;display:grid;place-items:center;min-height:100vh}.preview{position:relative;width:min(100vw,'.$width.'px);aspect-ratio:'.$width.'/'.$height.';container-type:inline-size}.preview>img.background{position:absolute;inset:0;width:100%;height:100%;display:block}.text-placeholder{position:absolute;transform:translate(-50%,-50%);width:70%;text-align:center;font-family:PreviewFont,sans-serif;font-weight:400;line-height:1;white-space:nowrap;font-size:calc(var(--font-size) * 100cqw / '.$width.')} .qr{position:absolute;transform:translate(-50%,-50%);width:'.$qrWidth.'%;height:auto;image-rendering:auto}</style></head><body>'.PHP_EOL
             .'<main class="preview"><img class="background" src="image.png" alt="">'
             .$textElement('ssid', $ssidPlaceholder).$textElement('password', $passwordPlaceholder)
             .'<img class="qr" src="'.$qrDataUri.'" alt="Wi-Fi QR code" style="left: '.$qrX.'%; top: '.$qrY.'%;"></main>'.PHP_EOL
