@@ -29,6 +29,7 @@ final class PromptWeaverCli
         try {
             return match ($command) {
                 'init' => $this->init($argv),
+                'calibrate' => $this->calibrate($argv),
                 'preview' => $this->preview($argv),
                 'brief' => $this->brief($argv),
                 'config' => $this->config($argv),
@@ -130,32 +131,26 @@ final class PromptWeaverCli
     private function preview(array $argv): int
     {
         $options = $this->parseOptions($argv);
-
-        $fixtureDirectory = isset($options['fixture']) ? $options['fixture'] : null;
-        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
-            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
-        }
-
-        if (! is_string($fixtureDirectory) || $fixtureDirectory === '') {
-            $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
-            $model = $options['model'] ?? null;
-            $scenario = $options['scenario'] ?? null;
-
-            $this->requireValues($model, $scenario);
-
-            $fixtureDirectory = rtrim($fixturesRoot, '/').'/'.$this->validatePathSegment($model, 'model').'/'.$this->validatePathSegment($scenario, 'scenario');
-        }
-
-        if (! is_dir($fixtureDirectory)) {
-            throw new RuntimeException("Fixture directory not found: {$fixtureDirectory}");
-        }
+        $fixtureDirectory = $this->resolveFixtureDirectory($argv);
 
         $outputPath = $options['output'] ?? rtrim($fixtureDirectory, '/').'/preview.png';
 
         $preview = new PreviewImage;
+        $preview->calibrate($fixtureDirectory);
         $preview->render($fixtureDirectory, $outputPath, $options);
 
         echo "Created {$outputPath}".PHP_EOL;
+
+        return 0;
+    }
+
+    private function calibrate(array $argv): int
+    {
+        $fixtureDirectory = $this->resolveFixtureDirectory($argv);
+
+        (new PreviewImage)->calibrate($fixtureDirectory);
+
+        echo 'Updated '.rtrim($fixtureDirectory, '/').'/config.json'.PHP_EOL;
 
         return 0;
     }
@@ -258,6 +253,7 @@ Prompt Weaver CLI
 
 Usage:
   bin/prompt-weaver init model/scenario [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver calibrate model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver preview --fixture="path/to/fixture"
   bin/prompt-weaver preview --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver brief model/scenario [--fixtures-root=tests/Fixtures]
@@ -314,6 +310,32 @@ TEXT;
         }
 
         return null;
+    }
+
+    private function resolveFixtureDirectory(array $argv): string
+    {
+        $options = $this->parseOptions($argv);
+        $fixtureDirectory = isset($options['fixture']) ? $options['fixture'] : null;
+
+        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+        }
+
+        if (! is_string($fixtureDirectory) || $fixtureDirectory === '') {
+            $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
+            $model = $options['model'] ?? null;
+            $scenario = $options['scenario'] ?? null;
+
+            $this->requireValues($model, $scenario);
+
+            $fixtureDirectory = rtrim($fixturesRoot, '/').'/'.$this->validatePathSegment($model, 'model').'/'.$this->validatePathSegment($scenario, 'scenario');
+        }
+
+        if (! is_dir($fixtureDirectory)) {
+            throw new RuntimeException("Fixture directory not found: {$fixtureDirectory}");
+        }
+
+        return $fixtureDirectory;
     }
 
     /** @return array{0: string, 1: string} */

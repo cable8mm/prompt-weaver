@@ -192,19 +192,21 @@ The commands use the files created or saved in that folder:
 ./weaver brief gemini-54-flash/wifi-warm-cafe-in-summer
 ./weaver config gemini-54-flash/wifi-warm-cafe-in-summer
 ./weaver image gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver calibrate gemini-54-flash/wifi-warm-cafe-in-summer
 ./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white placeholder boxes in `image.png` and updates their `box_y_pc` values in `config.json`. `preview` runs the same calibration before rendering and writes `preview.png` in the same fixture folder.
 
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
 2. `config` prints the JSON-generation prompt you send after you have a design brief result.
 3. `image` prints the final image-generation prompt you can paste into your image model.
-4. `preview` renders a human-checkable `preview.png` on top of the fixture background.
-5. `chain` prints all three prompts in one run for quick inspection.
-6. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
+4. `calibrate` updates `config.json` to match the actual placeholder positions in `image.png`.
+5. `preview` renders a human-checkable `preview.png` on top of the fixture background after calibration.
+6. `chain` prints all three prompts in one run for quick inspection.
+7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
 
 ## Output Flow
 
@@ -260,7 +262,15 @@ The command reads `design-brief.json`, takes its `design_brief` value, prints th
 
 The command reads `config.json`, prints the final image-generation prompt, and saves it as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/image.prompt`.
 
-### 5) Generate a preview image
+### 5) Calibrate the config to the generated image
+
+```bash
+./weaver calibrate gemini-54-flash/wifi-warm-cafe-in-summer
+```
+
+This detects the actual white placeholder boxes in `image.png` and updates the `box_y_pc` values in `config.json`.
+
+### 6) Generate a preview image
 
 ```bash
 ./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
@@ -268,7 +278,7 @@ The command reads `config.json`, prints the final image-generation prompt, and s
 
 This creates `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/preview.png` so you can inspect the SSID, password, and QR placement by eye.
 
-### 6) Compare against fixtures
+### 7) Compare against fixtures
 
 The repo already includes one complete example:
 
@@ -284,7 +294,7 @@ The integration test reads those files and checks that:
 3. The image prompt matches the saved `image.txt` fixture.
 4. The preview image can be generated from the fixture background without errors.
 
-### 7) Run the tests
+### 8) Run the tests
 
 ```bash
 composer test

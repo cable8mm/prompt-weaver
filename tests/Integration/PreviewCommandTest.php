@@ -111,3 +111,28 @@ it('creates a preview image by overlaying qr and credential text on the backgrou
         remove_directory_preview($workingFixture);
     }
 });
+
+it('calibrates placeholder coordinates in config from the generated image', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $workingFixture = sys_get_temp_dir().'/prompt-weaver-calibrate-'.bin2hex(random_bytes(4));
+
+    try {
+        copy_directory_preview($sourceFixture, $workingFixture);
+
+        $result = run_prompt_weaver_preview([
+            'calibrate',
+            '--fixture='.$workingFixture,
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        expect($result['stderr'])->toBe('');
+        expect($result['stdout'])->toContain('Updated '.$workingFixture.'/config.json');
+
+        $config = json_decode((string) file_get_contents($workingFixture.'/config.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        expect($config['placeholders']['ssid']['box_y_pc'])->toBeGreaterThan(40.0);
+        expect($config['placeholders']['password']['box_y_pc'])->toBeGreaterThan(52.0);
+    } finally {
+        remove_directory_preview($workingFixture);
+    }
+});

@@ -16,6 +16,66 @@ final class PreviewImage
     private const DEFAULT_PASSWORD = 'WIFI-PASSWORD';
 
     /**
+     * Detect the actual white placeholder boxes in image.png and update the
+     * corresponding vertical coordinates in config.json.
+     *
+     * @return array<string, float> Updated coordinates keyed by placeholder.
+     */
+    public function calibrate(string $fixtureDirectory): array
+    {
+        $fixtureDirectory = rtrim($fixtureDirectory, '/');
+        $configPath = $fixtureDirectory.'/config.json';
+        $backgroundPath = $fixtureDirectory.'/image.png';
+
+        if (! is_file($configPath)) {
+            throw new RuntimeException("Config file not found: {$configPath}");
+        }
+
+        if (! is_file($backgroundPath)) {
+            throw new RuntimeException("Background image not found: {$backgroundPath}");
+        }
+
+        /** @var array<string, mixed> $config */
+        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+        $image = imagecreatefromstring((string) file_get_contents($backgroundPath));
+
+        if (! $image instanceof GdImage) {
+            throw new RuntimeException("Unable to load background image: {$backgroundPath}");
+        }
+
+        $updated = [];
+
+        foreach (['ssid', 'password'] as $key) {
+            $placeholder = $config['placeholders'][$key] ?? null;
+
+            if (! is_array($placeholder)) {
+                continue;
+            }
+
+            $box = $this->placeholderBox($image, $placeholder);
+            $centerY = $this->findWhiteAreaCenterY($image, $box);
+
+            if ($centerY === null) {
+                continue;
+            }
+
+            $coordinate = round(($centerY / imagesy($image)) * 100, 2);
+            $config['placeholders'][$key]['box_y_pc'] = $coordinate;
+            $updated[$key] = $coordinate;
+        }
+
+        $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
+
+        if (file_put_contents($configPath, $json) === false) {
+            throw new RuntimeException("Unable to write config: {$configPath}");
+        }
+
+        imagedestroy($image);
+
+        return $updated;
+    }
+
+    /**
      * @param  array<string, string>  $options
      */
     public function render(string $fixtureDirectory, string $outputPath, array $options = []): string
@@ -137,7 +197,6 @@ final class PreviewImage
     private function drawPlaceholderText(GdImage $image, array $placeholder, string $text, int $verticalAdjustment = 0): void
     {
         $box = $this->placeholderBox($image, $placeholder);
-        $box = $this->alignTextBoxToWhiteArea($image, $box);
         $font = $this->fontPath();
         $fontSize = (int) ($placeholder['font_size_px'] ?? 36);
         $colorHex = (string) ($placeholder['color'] ?? '#111111');
@@ -147,20 +206,15 @@ final class PreviewImage
     }
 
     /**
-     * Generated images can place the white placeholder slightly away from the
-     * percentage coordinates in the config. Use the actual white area for the
-     * text's vertical center when it can be detected.
-     *
      * @param  array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}  $box
-     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}
      */
-    private function alignTextBoxToWhiteArea(GdImage $image, array $box): array
+    private function findWhiteAreaCenterY(GdImage $image, array $box): ?int
     {
         $left = max(0, $box['left'] + 4);
         $right = min(imagesx($image) - 1, $box['left'] + $box['width'] - 5);
 
         if ($right <= $left) {
-            return $box;
+            return null;
         }
 
         $searchRadius = max($box['height'] * 2, (int) round(imagesy($image) * 0.08));
@@ -189,16 +243,14 @@ final class PreviewImage
         }
 
         if ($runs === []) {
-            return $box;
+            return null;
         }
 
         usort($runs, fn (array $first, array $second): int => abs((($first[0] + $first[1]) / 2) - $box['center_y']) <=>
             abs((($second[0] + $second[1]) / 2) - $box['center_y'])
         );
 
-        $centerY = (int) round(($runs[0][0] + $runs[0][1]) / 2);
-
-        return [...$box, 'center_y' => $centerY, 'top' => $centerY - (int) round($box['height'] / 2)];
+        return (int) round(($runs[0][0] + $runs[0][1]) / 2);
     }
 
     private function whitePixelRatio(GdImage $image, int $left, int $right, int $y): float

@@ -1,5 +1,9 @@
 {
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "3:4" },
+  "canvas": {
+    "width_pc": 100,
+    "height_pc": 100,
+    "aspect_ratio": "3:4"
+  },
   "style": {
     "theme": "A warm cafe poster with elegant Art Deco geometric framing, subtle maple-inspired line-art, and a cozy autumn atmosphere while preserving generous negative space for Wi-Fi information.",
     "background": "Soft cream paper texture with high-contrast charcoal Art Deco linework, restrained geometric border accents, and delicate maple leaf line-art integrated into the corners for a crisp, print-friendly composition.",
@@ -35,7 +39,7 @@
   "placeholders": {
     "ssid": {
       "box_x_pc": 50,
-      "box_y_pc": 40,
+      "box_y_pc": 41.99,
       "box_width_pc": 70,
       "box_height_pc": 8,
       "label": "SSID:",
@@ -50,7 +54,7 @@
     },
     "password": {
       "box_x_pc": 50,
-      "box_y_pc": 52,
+      "box_y_pc": 55.66,
       "box_width_pc": 70,
       "box_height_pc": 8,
       "label": "PASSWORD:",
