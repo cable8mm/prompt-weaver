@@ -1,8 +1,8 @@
 {
   "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "3:4" },
   "style": {
-    "theme": "A warm contemporary café poster combining restrained brutalist composition with bold monochrome typography and subtle geometric line-art inspired by maple leaves and autumn forms.",
-    "background": "High-contrast light background with soft geometric line-art, clean negative space, and understated amber-inspired tonal accents that remain fully effective in grayscale.",
+    "theme": "A warm cafe poster with elegant Art Deco geometric framing, subtle maple-inspired line-art, and a cozy autumn atmosphere while preserving generous negative space for Wi-Fi information.",
+    "background": "Soft cream paper texture with high-contrast charcoal Art Deco linework, restrained geometric border accents, and delicate maple leaf line-art integrated into the corners for a crisp, print-friendly composition.",
     "print_target": "black-and-white laser printer safe"
   },
   "content": {
@@ -11,13 +11,13 @@
       "x_pc": 50,
       "y_pc": 10,
       "align": "center",
-      "style": "bold geometric sans-serif, strong editorial weight"
+      "style": "bold geometric Art Deco-inspired sans-serif with refined proportions"
     },
     "wifi_icon": {
       "x_pc": 50,
       "y_pc": 20,
       "width_pc": 15,
-      "style": "minimal bold monochrome Wi-Fi icon with clean geometric strokes"
+      "style": "minimal high-contrast geometric Wi-Fi icon enclosed in a thin Art Deco circular frame"
     },
     "message": {
       "text": "스캔하여 연결하세요.",
@@ -67,7 +67,7 @@
       "x_pc": 50,
       "y_pc": 80,
       "width_pc": 28,
-      "style": "bold square frame with thick monochrome border and restrained geometric corner brackets"
+      "style": "clean white square with a thin double-line Art Deco border and subtle corner brackets for a refined, high-contrast frame"
     }
   }
 }

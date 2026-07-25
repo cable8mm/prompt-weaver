@@ -174,10 +174,10 @@ $promptText = $imagePrompt->build($config);
 
 ## CLI Workflow
 
-If you want to manually test prompts and copy the output into `tests/Fixtures/*`, use the CLI:
+The CLI uses one fixture reference in the form `model/scenario`. All commands below operate on the same fixture folder:
 
 ```bash
-composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+./weaver init gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
 This creates:
@@ -186,21 +186,25 @@ This creates:
 tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json
 ```
 
-Then generate the prompts:
+The commands use the files created or saved in that folder:
 
 ```bash
-composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
-composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
-composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+./weaver brief gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver config gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver image gemini-54-flash/wifi-warm-cafe-in-summer
+./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
 ```
+
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
 
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
 2. `config` prints the JSON-generation prompt you send after you have a design brief result.
 3. `image` prints the final image-generation prompt you can paste into your image model.
-4. `chain` prints all three prompts in one run for quick inspection.
-5. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
+4. `preview` renders a human-checkable `preview.png` on top of the fixture background.
+5. `chain` prints all three prompts in one run for quick inspection.
+6. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
 
 ## Output Flow
 
@@ -218,45 +222,53 @@ This package is intended to be used as part of a multi-step generation pipeline:
 - `DesignBriefPrompt` intentionally adds a small amount of randomness so the generated briefs feel less repetitive.
 - `ConfigPrompt` is strict about JSON structure so the next step can parse the output reliably.
 - `ImagePrompt` focuses on layout, contrast, and print-safe composition.
-- The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final `image.txt` prompt.
+- The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final image prompt.
 
 ## Testing
 
-The easiest way to test this package is to run the CLI, copy the output into `tests/Fixtures/*`, and then run Pest.
+The easiest way to test this package is to create one fixture and keep all generated files in its folder, then run Pest.
 
 ### 1) Create a fixture folder
 
 ```bash
-composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+./weaver init gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-This creates a new `manifest.json` with default values.
+This creates `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json` with default values for `product`, `category`, and `format`.
 
 ### 2) Generate the design-brief prompt
 
 ```bash
-composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+./weaver brief gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json` if you want to compare model responses later.
+The prompt is also saved automatically as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/brief.prompt`. Send it to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json`.
 
 ### 3) Generate the config prompt
 
 ```bash
-composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+./weaver config gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-This is the prompt you paste into a model to get the JSON config response.
+The command reads `design-brief.json`, takes its `design_brief` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/config.json`.
 
 ### 4) Generate the final image prompt
 
 ```bash
-composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+./weaver image gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-Copy the output into `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt` if you want to preserve the exact prompt for that model run.
+The command reads `config.json`, prints the final image-generation prompt, and saves it as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/image.prompt`.
 
-### 5) Compare against fixtures
+### 5) Generate a preview image
+
+```bash
+./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
+```
+
+This creates `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/preview.png` so you can inspect the SSID, password, and QR placement by eye.
+
+### 6) Compare against fixtures
 
 The repo already includes one complete example:
 
@@ -270,7 +282,9 @@ The integration test reads those files and checks that:
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
 3. The image prompt matches the saved `image.txt` fixture.
-### 6) Run the tests
+4. The preview image can be generated from the fixture background without errors.
+
+### 7) Run the tests
 
 ```bash
 composer test

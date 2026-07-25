@@ -8,6 +8,7 @@ require dirname(__DIR__).'/vendor/autoload.php';
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\ImagePrompt;
+use Cable8mm\PromptWeaver\PreviewImage;
 
 final class PromptWeaverCli
 {
@@ -28,6 +29,7 @@ final class PromptWeaverCli
         try {
             return match ($command) {
                 'init' => $this->init($argv),
+                'preview' => $this->preview($argv),
                 'brief' => $this->brief($argv),
                 'config' => $this->config($argv),
                 'image' => $this->image($argv),
@@ -46,15 +48,32 @@ final class PromptWeaverCli
     {
         $options = $this->parseOptions($argv);
 
-        $product = $options['product'] ?? null;
-        $category = $options['category'] ?? null;
-        $format = $options['format'] ?? null;
+        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
+            $manifest = $this->readJsonFile($this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT).'/manifest.json');
+            $product = $manifest['product'] ?? null;
+            $category = $manifest['category'] ?? null;
+            $format = $manifest['format'] ?? null;
+        } else {
+            $product = $options['product'] ?? null;
+            $category = $options['category'] ?? null;
+            $format = $options['format'] ?? null;
+        }
 
         $this->requireValues($product, $category, $format);
 
         $prompt = new DesignBriefPrompt($product);
+        $promptText = $prompt->build($category, $format);
 
-        echo $prompt->build($category, $format).PHP_EOL;
+        if ($fixtureReference !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+            $promptPath = $fixtureDirectory.'/brief.prompt';
+
+            if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
+                throw new RuntimeException("Unable to write prompt: {$promptPath}");
+            }
+        }
+
+        echo $promptText.PHP_EOL;
 
         return 0;
     }
@@ -63,11 +82,15 @@ final class PromptWeaverCli
     {
         $options = $this->parseOptions($argv);
 
-        $model = $options['model'] ?? null;
-        $scenario = $options['scenario'] ?? null;
         $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
 
-        $this->requireValues($model, $scenario);
+        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
+            [$model, $scenario] = $this->parseFixtureReference($fixtureReference);
+        } else {
+            $model = $options['model'] ?? null;
+            $scenario = $options['scenario'] ?? null;
+            $this->requireValues($model, $scenario);
+        }
 
         $model = $this->validatePathSegment($model, 'model');
         $scenario = $this->validatePathSegment($scenario, 'scenario');
@@ -104,14 +127,61 @@ final class PromptWeaverCli
         return 0;
     }
 
+    private function preview(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $fixtureDirectory = isset($options['fixture']) ? $options['fixture'] : null;
+        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+        }
+
+        if (! is_string($fixtureDirectory) || $fixtureDirectory === '') {
+            $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
+            $model = $options['model'] ?? null;
+            $scenario = $options['scenario'] ?? null;
+
+            $this->requireValues($model, $scenario);
+
+            $fixtureDirectory = rtrim($fixturesRoot, '/').'/'.$this->validatePathSegment($model, 'model').'/'.$this->validatePathSegment($scenario, 'scenario');
+        }
+
+        if (! is_dir($fixtureDirectory)) {
+            throw new RuntimeException("Fixture directory not found: {$fixtureDirectory}");
+        }
+
+        $outputPath = $options['output'] ?? rtrim($fixtureDirectory, '/').'/preview.png';
+
+        $preview = new PreviewImage;
+        $preview->render($fixtureDirectory, $outputPath, $options);
+
+        echo "Created {$outputPath}".PHP_EOL;
+
+        return 0;
+    }
+
     private function config(array $argv): int
     {
         $options = $this->parseOptions($argv);
-        $designBrief = $options['brief'] ?? null;
+        $fixtureReference = $this->firstPositional($argv);
+        $designBrief = $fixtureReference === null
+            ? ($options['brief'] ?? null)
+            : ($this->readJsonFile($this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT).'/design-brief.json')['design_brief'] ?? null);
 
         $this->requireValues($designBrief);
 
-        echo (new ConfigPrompt())->build($designBrief).PHP_EOL;
+        $promptText = (new ConfigPrompt)->build($designBrief);
+
+        if ($fixtureReference !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+            $promptPath = $fixtureDirectory.'/config.prompt';
+
+            if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
+                throw new RuntimeException("Unable to write prompt: {$promptPath}");
+            }
+        }
+
+        echo $promptText.PHP_EOL;
 
         return 0;
     }
@@ -119,7 +189,10 @@ final class PromptWeaverCli
     private function image(array $argv): int
     {
         $options = $this->parseOptions($argv);
-        $configPath = $options['config-file'] ?? null;
+        $fixtureReference = $this->firstPositional($argv);
+        $configPath = $fixtureReference === null
+            ? ($options['config-file'] ?? null)
+            : $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT).'/config.json';
 
         $this->requireValues($configPath);
 
@@ -127,9 +200,19 @@ final class PromptWeaverCli
             throw new RuntimeException("Config file not found: {$configPath}");
         }
 
-        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+        $config = $this->readJsonFile($configPath);
+        $promptText = (new ImagePrompt)->build($config);
 
-        echo (new ImagePrompt())->build($config).PHP_EOL;
+        if ($fixtureReference !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+            $promptPath = $fixtureDirectory.'/image.prompt';
+
+            if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
+                throw new RuntimeException("Unable to write prompt: {$promptPath}");
+            }
+        }
+
+        echo $promptText.PHP_EOL;
 
         return 0;
     }
@@ -153,16 +236,16 @@ final class PromptWeaverCli
         $config = json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR);
 
         $briefPrompt = (new DesignBriefPrompt($product))->build($category, $format);
-        $configPrompt = (new ConfigPrompt())->build($brief);
-        $imagePrompt = (new ImagePrompt())->build($config);
+        $configPrompt = (new ConfigPrompt)->build($brief);
+        $imagePrompt = (new ImagePrompt)->build($config);
 
-        echo "=== design-brief prompt ===".PHP_EOL;
+        echo '=== design-brief prompt ==='.PHP_EOL;
         echo $briefPrompt.PHP_EOL;
         echo PHP_EOL;
-        echo "=== config prompt ===".PHP_EOL;
+        echo '=== config prompt ==='.PHP_EOL;
         echo $configPrompt.PHP_EOL;
         echo PHP_EOL;
-        echo "=== image prompt ===".PHP_EOL;
+        echo '=== image prompt ==='.PHP_EOL;
         echo $imagePrompt.PHP_EOL;
 
         return 0;
@@ -170,14 +253,16 @@ final class PromptWeaverCli
 
     private function help(): int
     {
-        echo <<<TEXT
+        echo <<<'TEXT'
 Prompt Weaver CLI
 
 Usage:
-  bin/prompt-weaver init --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
-  bin/prompt-weaver brief --product="..." --category="..." --format="..."
-  bin/prompt-weaver config --brief="..."
-  bin/prompt-weaver image --config-file=path/to/config.json
+  bin/prompt-weaver init model/scenario [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver preview --fixture="path/to/fixture"
+  bin/prompt-weaver preview --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver brief model/scenario [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver config model/scenario [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver image model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --config-file=path/to/config.json
 
 TEXT;
@@ -188,7 +273,7 @@ TEXT;
     private function error(string $message): int
     {
         fwrite(STDERR, $message.PHP_EOL);
-        fwrite(STDERR, "Try: bin/prompt-weaver --help".PHP_EOL);
+        fwrite(STDERR, 'Try: bin/prompt-weaver --help'.PHP_EOL);
 
         return 1;
     }
@@ -219,6 +304,56 @@ TEXT;
         return $options;
     }
 
+    /** @param array<int, string> $argv */
+    private function firstPositional(array $argv): ?string
+    {
+        foreach ($argv as $argument) {
+            if (! str_starts_with($argument, '--')) {
+                return $argument;
+            }
+        }
+
+        return null;
+    }
+
+    /** @return array{0: string, 1: string} */
+    private function parseFixtureReference(string $reference): array
+    {
+        $parts = explode('/', trim($reference, '/'));
+
+        if (count($parts) !== 2 || in_array('', $parts, true)) {
+            throw new InvalidArgumentException("Fixture must be in the form model/scenario: {$reference}");
+        }
+
+        return [
+            $this->validatePathSegment($parts[0], 'model'),
+            $this->validatePathSegment($parts[1], 'scenario'),
+        ];
+    }
+
+    private function fixtureDirectory(string $reference, string $fixturesRoot): string
+    {
+        [$model, $scenario] = $this->parseFixtureReference($reference);
+
+        return rtrim($fixturesRoot, '/').'/'.$model.'/'.$scenario;
+    }
+
+    /** @return array<string, mixed> */
+    private function readJsonFile(string $path): array
+    {
+        if (! is_file($path)) {
+            throw new RuntimeException("JSON file not found: {$path}");
+        }
+
+        $json = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+
+        if (! is_array($json)) {
+            throw new RuntimeException("JSON object expected: {$path}");
+        }
+
+        return $json;
+    }
+
     private function requireValues(string ...$values): void
     {
         foreach ($values as $value) {
@@ -238,4 +373,4 @@ TEXT;
     }
 }
 
-exit((new PromptWeaverCli())->run($argv));
+exit((new PromptWeaverCli)->run($argv));
