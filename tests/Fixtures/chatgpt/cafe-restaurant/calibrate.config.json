@@ -1,0 +1,77 @@
+{
+    "canvas": {
+        "width_pc": 100,
+        "height_pc": 100,
+        "aspect_ratio": "3:4"
+    },
+    "style": {
+        "theme": "A warm and inviting cafe poster blending elegant Art Deco geometry with subtle cherry blossom-inspired accents in a refined, timeless composition.",
+        "background": "High-contrast ivory background with charcoal Art Deco borders, delicate geometric line-art patterns, and sparse blossom-inspired motifs using clean monochrome shading and generous whitespace.",
+        "print_target": "black-and-white laser printer safe"
+    },
+    "content": {
+        "title": {
+            "text": "와이파이 연결",
+            "x_pc": 50,
+            "y_pc": 10,
+            "align": "center",
+            "style": "bold elegant Art Deco-inspired sans-serif with clean geometric proportions"
+        },
+        "wifi_icon": {
+            "x_pc": 50,
+            "y_pc": 20,
+            "width_pc": 15,
+            "style": "minimal geometric Wi-Fi icon enclosed within a refined Art Deco circular frame"
+        },
+        "message": {
+            "text": "스캔하여 연결하세요.",
+            "x_pc": 50,
+            "y_pc": 62,
+            "align": "center"
+        },
+        "footer": {
+            "text": "제작: WIFI NOTE",
+            "x_pc": 50,
+            "y_pc": 96,
+            "align": "center"
+        }
+    },
+    "placeholders": {
+        "ssid": {
+            "box_x_pc": 50,
+            "box_y_pc": 42.96,
+            "box_width_pc": 70,
+            "box_height_pc": 8,
+            "label": "SSID:",
+            "label_position": "outside_above",
+            "box_fill": "#FFFFFF",
+            "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
+            "align": "center",
+            "font_family": "Pretendard",
+            "font_size_px": 36,
+            "font_weight": "bold",
+            "color": "#111111"
+        },
+        "password": {
+            "box_x_pc": 50,
+            "box_y_pc": 55.46,
+            "box_width_pc": 70,
+            "box_height_pc": 8,
+            "label": "PASSWORD:",
+            "label_position": "outside_above",
+            "box_fill": "#FFFFFF",
+            "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
+            "align": "center",
+            "font_family": "Pretendard",
+            "font_size_px": 36,
+            "font_weight": "bold",
+            "color": "#111111"
+        },
+        "qr": {
+            "x_pc": 50.18,
+            "y_pc": 76.45,
+            "width_pc": 25.41,
+            "style": "clean white square with a thin double-line Art Deco border and subtle geometric corner accents"
+        }
+    }
+}

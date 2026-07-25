@@ -8,11 +8,14 @@
   "require": {
     "php": "^8.3",
     "bacon/bacon-qr-code": "^3.1",
+    "cable8mm/enum-getter": "^2.1",
     "ext-gd": "*"
   },
   "require-dev": {
     "pestphp/pest": "^4.0",
-    "laravel/pint": "^1.0"
+    "laravel/pint": "^1.0",
+    "laravel/framework": "^13.22",
+    "orchestra/testbench": "^11.1"
   },
   "suggest": {
     "ext-gd": "Required for generating QR codes."
@@ -20,7 +23,13 @@
   "autoload": {
     "psr-4": {
       "Cable8mm\\PromptWeaver\\": "src/"
-    }
+    },
+    "classmap": [
+      "src/Enums"
+    ],
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

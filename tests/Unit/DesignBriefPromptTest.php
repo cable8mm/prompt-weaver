@@ -1,6 +1,8 @@
 <?php
 
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
+use Cable8mm\PromptWeaver\Enums\WifiNoteCategory;
+use Cable8mm\PromptWeaver\Enums\WifiNoteFormat;
 
 function set_private_property(object $object, string $property, array $value): void
 {
@@ -16,13 +18,13 @@ it('builds a design brief prompt using the provided product, category, and forma
     set_private_property($promptBuilder, 'seasonSeeds', ['winter frost and pine mood']);
     set_private_property($promptBuilder, 'textureSeeds', ['subtle grid pattern']);
 
-    $prompt = $promptBuilder->build('Cafe/Restaurant', 'A4/A5 Poster');
+    $prompt = $promptBuilder->build(WifiNoteCategory::CAFE_RESTAURANT, WifiNoteFormat::A45_POSTER);
 
     expect($prompt)
         ->toContain('[Role]')
         ->toContain('You are a creative director for a Wi-Fi signage template.')
-        ->toContain('Category: Cafe/Restaurant')
-        ->toContain('Format: A4/A5 Poster')
+        ->toContain('Category: Cafe / Restaurant')
+        ->toContain('Format: A4/A5 Poster Type')
         ->toContain('minimal Scandinavian, winter frost and pine mood, subtle grid pattern')
         ->toContain('"concept_name": "<short catchy concept name, 2-6 words>"')
         ->toContain('"design_brief": "<1-3 concise sentences')
@@ -30,4 +32,34 @@ it('builds a design brief prompt using the provided product, category, and forma
         ->toContain('"font_mood": "<short description of what typography feel fits')
         ->toContain('"design_brief" must be written in English')
         ->toContain('Output ONLY a valid JSON object');
+});
+
+it('uses the configured color in rule one', function () {
+    $blackAndWhitePrompt = (new DesignBriefPrompt(product: 'a Wi-Fi signage template'))
+        ->build(WifiNoteCategory::OTHER, WifiNoteFormat::CARD);
+    $colorPrompt = (new DesignBriefPrompt(product: 'a Wi-Fi signage template', color: 'ocean blue and coral'))
+        ->build(WifiNoteCategory::OTHER, WifiNoteFormat::CARD);
+
+    expect($blackAndWhitePrompt)
+        ->toContain('assume high-contrast monochrome/greyscale-safe design')
+        ->not->toContain('use a color scheme based on ocean blue and coral');
+
+    expect($colorPrompt)
+        ->toContain('use a color scheme based on ocean blue and coral')
+        ->not->toContain('assume high-contrast monochrome/greyscale-safe design');
+});
+
+it('does not immediately repeat a random seed within a pool', function () {
+    $promptBuilder = new DesignBriefPrompt(product: 'a Wi-Fi signage template');
+
+    $previous = null;
+
+    foreach (range(1, 25) as $iteration) {
+        $prompt = $promptBuilder->build(WifiNoteCategory::OTHER, WifiNoteFormat::CARD);
+        preg_match('/Random creative seeds .*: (.+)/', $prompt, $matches);
+        $current = $matches[1];
+
+        expect($current)->not->toBe($previous);
+        $previous = $current;
+    }
 });

@@ -7,6 +7,8 @@ require dirname(__DIR__).'/vendor/autoload.php';
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
+use Cable8mm\PromptWeaver\Enums\WifiNoteCategory;
+use Cable8mm\PromptWeaver\Enums\WifiNoteFormat;
 use Cable8mm\PromptWeaver\ImagePrompt;
 use Cable8mm\PromptWeaver\PreviewImage;
 
@@ -63,7 +65,7 @@ final class PromptWeaverCli
         $this->requireValues($product, $category, $format);
 
         $prompt = new DesignBriefPrompt($product);
-        $promptText = $prompt->build($category, $format);
+        $promptText = $prompt->build($this->categoryFromInput($category), $this->formatFromInput($format));
 
         if ($fixtureReference !== null) {
             $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
@@ -117,7 +119,7 @@ final class PromptWeaverCli
             'format' => self::DEFAULT_FORMAT,
         ];
 
-        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
+        $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
 
         if (file_put_contents($manifestPath, $json) === false) {
             throw new RuntimeException("Unable to write manifest: {$manifestPath}");
@@ -136,7 +138,6 @@ final class PromptWeaverCli
         $outputPath = $options['output'] ?? rtrim($fixtureDirectory, '/').'/preview.png';
 
         $preview = new PreviewImage;
-        $preview->calibrate($fixtureDirectory);
         $preview->render($fixtureDirectory, $outputPath, $options);
 
         echo "Created {$outputPath}".PHP_EOL;
@@ -150,7 +151,7 @@ final class PromptWeaverCli
 
         (new PreviewImage)->calibrate($fixtureDirectory);
 
-        echo 'Updated '.rtrim($fixtureDirectory, '/').'/config.json'.PHP_EOL;
+        echo 'Updated '.rtrim($fixtureDirectory, '/').'/calibrate.config.json'.PHP_EOL;
 
         return 0;
     }
@@ -230,7 +231,10 @@ final class PromptWeaverCli
 
         $config = json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR);
 
-        $briefPrompt = (new DesignBriefPrompt($product))->build($category, $format);
+        $briefPrompt = (new DesignBriefPrompt($product))->build(
+            $this->categoryFromInput($category),
+            $this->formatFromInput($format),
+        );
         $configPrompt = (new ConfigPrompt)->build($brief);
         $imagePrompt = (new ImagePrompt)->build($config);
 
@@ -244,6 +248,29 @@ final class PromptWeaverCli
         echo $imagePrompt.PHP_EOL;
 
         return 0;
+    }
+
+    private function categoryFromInput(string $category): WifiNoteCategory
+    {
+        return match ($category) {
+            'Cafe/Restaurant', 'Cafe / Restaurant' => WifiNoteCategory::CAFE_RESTAURANT,
+            'Office/Coworking', 'Office / Coworking Space' => WifiNoteCategory::OFFICE_COWORKING,
+            'Stay/Hotel', 'Stay / Hotel Type' => WifiNoteCategory::STAY_HOTEL,
+            'Event/Exhibition', 'Event / Exhibition Type' => WifiNoteCategory::EVENT_EXHIBITION,
+            'Other' => WifiNoteCategory::OTHER,
+            default => throw new InvalidArgumentException("Unknown category: {$category}"),
+        };
+    }
+
+    private function formatFromInput(string $format): WifiNoteFormat
+    {
+        return match ($format) {
+            'A4/A5 Poster', 'A4/A5 Poster Type' => WifiNoteFormat::A45_POSTER,
+            'L-Stand/Table Tent', 'L-Shape Stand / Table Tent Type' => WifiNoteFormat::L_STAND,
+            'Sticker', 'Sticker Type (Round/Square)' => WifiNoteFormat::STICKER,
+            'Business Card', 'Business Card Type' => WifiNoteFormat::CARD,
+            default => throw new InvalidArgumentException("Unknown format: {$format}"),
+        };
     }
 
     private function help(): int

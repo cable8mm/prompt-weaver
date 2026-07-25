@@ -2,6 +2,9 @@
 
 namespace Cable8mm\PromptWeaver;
 
+use Cable8mm\PromptWeaver\Enums\WifiNoteCategory;
+use Cable8mm\PromptWeaver\Enums\WifiNoteFormat;
+
 class DesignBriefPrompt
 {
     /**
@@ -38,6 +41,12 @@ class DesignBriefPrompt
         'paper/craft texture',
     ];
 
+    private ?string $lastMoodSeed = null;
+
+    private ?string $lastSeasonSeed = null;
+
+    private ?string $lastTextureSeed = null;
+
     /**
      * @param  string  $product  example "a print-signage product", "a wifi signage template", "a business card design", etc.
      */
@@ -49,16 +58,20 @@ class DesignBriefPrompt
     /**
      * Builds a design brief based on the provided category and format.
      *
-     * @param  string  $category  examples: "Cafe/Restaurant", "Office/Coworking", "Stay/Hotel", "Event/Exhibition", "Other"
-     * @param  string  $format  examples: "A4/A5 Poster", "L-Stand/Table Tent", "Sticker", "Business Card"
+     * @param  WifiNoteCategory  $category  design brief category
+     * @param  WifiNoteFormat  $format  design brief format
      */
-    public function build(string $category, string $format): string
+    public function build(WifiNoteCategory $category, WifiNoteFormat $format): string
     {
         $randomSeeds = implode(', ', [
-            $this->pickRandom($this->moodSeeds),
-            $this->pickRandom($this->seasonSeeds),
-            $this->pickRandom($this->textureSeeds),
+            $this->pickRandom($this->moodSeeds, $this->lastMoodSeed),
+            $this->pickRandom($this->seasonSeeds, $this->lastSeasonSeed),
+            $this->pickRandom($this->textureSeeds, $this->lastTextureSeed),
         ]);
+
+        $printingInstruction = $this->color === 'black-and-white'
+            ? 'assume high-contrast monochrome/greyscale-safe design unless the random seeds clearly suggest a full-color context.'
+            : "use a color scheme based on {$this->color} unless the random seeds clearly suggest otherwise.";
 
         $template = <<<PROMPT
 [Role]
@@ -73,12 +86,12 @@ You are a creative director for {$this->product}. Your job is to write ONE short
 }
 
 [Inputs]
-- Category: {$category}
-- Format: {$format}
+- Category: {$category->value}
+- Format: {$format->value}
 - Random creative seeds to incorporate (use these as inspiration, blend them naturally — do not just list them back): {$randomSeeds}
 
 [Rules]
-1. The brief must stay realistic and printable — avoid overly complex illustrations that won't reproduce well on a black-and-white laser printer if requested; assume high-contrast monochrome/greyscale-safe design unless the random seeds clearly suggest a full-color context.
+1. The brief must stay realistic and printable — avoid overly complex illustrations that won't reproduce well on a black-and-white laser printer if requested; {$printingInstruction}
 2. Tailor the mood to the Category (e.g. Cafe/Restaurant → warm and inviting; Office/Coworking → clean and minimal; Stay/Hotel → calm and premium; Event/Exhibition → bold and energetic; Other → open interpretation).
 3. Tailor the composition sensibility to the Format (e.g. A4/A5 Poster → can carry more visual detail/background pattern; L-Stand/Table Tent → compact, readable from an angle, less background clutter; Sticker → very simple, bold, single focal motif since it's small; Business Card → extremely minimal, mostly typographic).
 4. Use the random creative seeds as flavor, not as a checklist — blend them into a coherent single concept rather than cramming all of them in.
@@ -89,8 +102,14 @@ PROMPT;
         return $template;
     }
 
-    private function pickRandom(array $pool): string
+    private function pickRandom(array $pool, ?string &$lastPicked): string
     {
-        return $pool[array_rand($pool)];
+        $available = count($pool) > 1 && $lastPicked !== null
+            ? array_values(array_diff($pool, [$lastPicked]))
+            : $pool;
+
+        $lastPicked = $available[array_rand($available)];
+
+        return $lastPicked;
     }
 }

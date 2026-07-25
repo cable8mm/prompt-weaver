@@ -71,6 +71,7 @@ it('creates a new fixture manifest with default values', function () {
         expect(is_file($manifestPath))->toBeTrue();
 
         $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+        $manifestJson = (string) file_get_contents($manifestPath);
 
         expect($manifest)->toMatchArray([
             'model' => 'gemini-54-flash',
@@ -79,6 +80,10 @@ it('creates a new fixture manifest with default values', function () {
             'category' => 'Cafe/Restaurant',
             'format' => 'A4/A5 Poster',
         ]);
+        expect($manifestJson)
+            ->toContain('"category": "Cafe/Restaurant"')
+            ->toContain('"format": "A4/A5 Poster"')
+            ->not->toContain('\\/');
     } finally {
         remove_directory($fixturesRoot);
     }
