@@ -195,7 +195,7 @@ The commands use the files created or saved in that folder:
 ./weaver preview gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-`brief` reads `manifest.json`, `config` reads `design-brief.json`, `image` reads `config.json`, and `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, `image` reads `config.json`, and `preview` reads `image.png` and writes `preview.png` in the same fixture folder.
 
 What each command outputs:
 
@@ -242,7 +242,7 @@ This creates `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.j
 ./weaver brief gemini-54-flash/wifi-warm-cafe-in-summer
 ```
 
-Send the printed prompt to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json`.
+The prompt is also saved automatically as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/brief.prompt`. Send it to a model and save its JSON response as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json`.
 
 ### 3) Generate the config prompt
 

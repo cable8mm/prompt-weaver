@@ -62,8 +62,18 @@ final class PromptWeaverCli
         $this->requireValues($product, $category, $format);
 
         $prompt = new DesignBriefPrompt($product);
+        $promptText = $prompt->build($category, $format);
 
-        echo $prompt->build($category, $format).PHP_EOL;
+        if ($fixtureReference !== null) {
+            $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
+            $promptPath = $fixtureDirectory.'/brief.prompt';
+
+            if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
+                throw new RuntimeException("Unable to write prompt: {$promptPath}");
+            }
+        }
+
+        echo $promptText.PHP_EOL;
 
         return 0;
     }
