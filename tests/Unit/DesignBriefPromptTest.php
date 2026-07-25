@@ -1,8 +1,8 @@
 <?php
 
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
-use Cable8mm\PromptWeaver\Enums\WifiNoteCategory;
-use Cable8mm\PromptWeaver\Enums\WifiNoteFormat;
+use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\Format;
 
 function set_private_property(object $object, string $property, array $value): void
 {
@@ -18,7 +18,7 @@ it('builds a design brief prompt using the provided product, category, and forma
     set_private_property($promptBuilder, 'seasonSeeds', ['winter frost and pine mood']);
     set_private_property($promptBuilder, 'textureSeeds', ['subtle grid pattern']);
 
-    $prompt = $promptBuilder->build(WifiNoteCategory::CAFE_RESTAURANT, WifiNoteFormat::A45_POSTER);
+    $prompt = $promptBuilder->build(Category::CAFE_RESTAURANT, Format::A45_POSTER);
 
     expect($prompt)
         ->toContain('[Role]')
@@ -36,9 +36,9 @@ it('builds a design brief prompt using the provided product, category, and forma
 
 it('uses the configured color in rule one', function () {
     $blackAndWhitePrompt = (new DesignBriefPrompt(product: 'a Wi-Fi signage template'))
-        ->build(WifiNoteCategory::OTHER, WifiNoteFormat::CARD);
+        ->build(Category::OTHER, Format::CARD);
     $colorPrompt = (new DesignBriefPrompt(product: 'a Wi-Fi signage template', color: 'ocean blue and coral'))
-        ->build(WifiNoteCategory::OTHER, WifiNoteFormat::CARD);
+        ->build(Category::OTHER, Format::CARD);
 
     expect($blackAndWhitePrompt)
         ->toContain('assume high-contrast monochrome/greyscale-safe design')
@@ -55,7 +55,7 @@ it('does not immediately repeat a random seed within a pool', function () {
     $previous = null;
 
     foreach (range(1, 25) as $iteration) {
-        $prompt = $promptBuilder->build(WifiNoteCategory::OTHER, WifiNoteFormat::CARD);
+        $prompt = $promptBuilder->build(Category::OTHER, Format::CARD);
         preg_match('/Random creative seeds .*: (.+)/', $prompt, $matches);
         $current = $matches[1];
 
