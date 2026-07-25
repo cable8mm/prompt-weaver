@@ -17,7 +17,7 @@ final class PreviewImage
 
     /**
      * Detect the actual white placeholder boxes in image.png and update the
-     * corresponding vertical coordinates in config.json.
+     * corresponding coordinates in config.json.
      *
      * @return array<string, float> Updated coordinates keyed by placeholder.
      */
@@ -62,6 +62,21 @@ final class PreviewImage
             $coordinate = round(($centerY / imagesy($image)) * 100, 2);
             $config['placeholders'][$key]['box_y_pc'] = $coordinate;
             $updated[$key] = $coordinate;
+        }
+
+        $qr = $config['placeholders']['qr'] ?? null;
+
+        if (is_array($qr)) {
+            $qrBox = $this->findQrBox($image, $qr);
+
+            if ($qrBox !== null) {
+                $config['placeholders']['qr']['x_pc'] = round(($qrBox['center_x'] / imagesx($image)) * 100, 2);
+                $config['placeholders']['qr']['y_pc'] = round(($qrBox['center_y'] / imagesy($image)) * 100, 2);
+                $config['placeholders']['qr']['width_pc'] = round(($qrBox['width'] / imagesx($image)) * 100, 2);
+                $updated['qr_x'] = $config['placeholders']['qr']['x_pc'];
+                $updated['qr_y'] = $config['placeholders']['qr']['y_pc'];
+                $updated['qr_width'] = $config['placeholders']['qr']['width_pc'];
+            }
         }
 
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
@@ -327,7 +342,7 @@ final class PreviewImage
      */
     private function drawQr(GdImage $image, array $placeholder, string $payload): void
     {
-        $box = $this->placeholderBox($image, $placeholder);
+        $box = $this->qrPlaceholderBox($image, $placeholder);
         $boxSize = min($box['width'], $box['height']);
         $padding = max(10, (int) round($boxSize * 0.1));
         $qrSize = max(64, $boxSize - ($padding * 2));
@@ -346,6 +361,120 @@ final class PreviewImage
 
         imagecopy($image, $qrImage, $qrLeft, $qrTop, 0, 0, $qrSize, $qrSize);
         imagedestroy($qrImage);
+    }
+
+    /**
+     * @param  array<string, mixed>  $placeholder
+     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}
+     */
+    private function qrPlaceholderBox(GdImage $image, array $placeholder): array
+    {
+        $widthPc = $placeholder['box_width_pc'] ?? $placeholder['width_pc'] ?? 0;
+        $heightPc = $placeholder['box_height_pc'] ?? $placeholder['height_pc'] ?? null;
+
+        // QR placeholders are square. Convert the width percentage to the
+        // equivalent height percentage when height_pc is omitted.
+        if ($heightPc === null && is_numeric($widthPc)) {
+            $heightPc = ((float) $widthPc * imagesx($image)) / imagesy($image);
+        }
+
+        return $this->placeholderBox($image, [
+            ...$placeholder,
+            'box_x_pc' => $placeholder['box_x_pc'] ?? $placeholder['x_pc'] ?? 0,
+            'box_y_pc' => $placeholder['box_y_pc'] ?? $placeholder['y_pc'] ?? 0,
+            'box_width_pc' => $widthPc,
+            'box_height_pc' => $heightPc ?? 0,
+        ]);
+    }
+
+    /**
+     * Find the large white QR frame in the configured vertical neighborhood.
+     *
+     * @param  array<string, mixed>  $placeholder
+     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}|null
+     */
+    private function findQrBox(GdImage $image, array $placeholder): ?array
+    {
+        $expected = $this->qrPlaceholderBox($image, $placeholder);
+        $imageWidth = imagesx($image);
+        $imageHeight = imagesy($image);
+        // Keep the search in the QR section so the larger credential boxes
+        // above it cannot be mistaken for the QR frame.
+        $searchRadius = (int) round($imageHeight * 0.2);
+        $startY = max(0, $expected['center_y'] - $searchRadius);
+        $endY = min($imageHeight - 1, $expected['center_y'] + $searchRadius);
+        $minimumWidth = max(40, (int) round($expected['width'] * 0.5));
+        $best = null;
+
+        for ($y = $startY; $y <= $endY; $y++) {
+            $runStart = null;
+
+            for ($x = 0; $x <= $imageWidth; $x++) {
+                $isWhite = $x < $imageWidth && $this->isWhitePixel($image, $x, $y);
+
+                if ($isWhite && $runStart === null) {
+                    $runStart = $x;
+                }
+
+                if ((! $isWhite || $x === $imageWidth) && $runStart !== null) {
+                    $runEnd = $x - 1;
+                    $width = $runEnd - $runStart + 1;
+
+                    if ($width >= $minimumWidth && ($best === null || $width > $best['width'])) {
+                        $best = [
+                            'left' => $runStart,
+                            'right' => $runEnd,
+                            'width' => $width,
+                            'y' => $y,
+                        ];
+                    }
+
+                    $runStart = null;
+                }
+            }
+        }
+
+        if ($best === null) {
+            return null;
+        }
+
+        $centerX = (int) round(($best['left'] + $best['right']) / 2);
+        $top = $best['y'];
+        $bottom = $best['y'];
+
+        for ($y = $best['y'] - 1; $y >= $startY; $y--) {
+            if ($this->whitePixelRatio($image, $best['left'], $best['right'], $y) < 0.8) {
+                break;
+            }
+
+            $top = $y;
+        }
+
+        for ($y = $best['y'] + 1; $y <= $endY; $y++) {
+            if ($this->whitePixelRatio($image, $best['left'], $best['right'], $y) < 0.8) {
+                break;
+            }
+
+            $bottom = $y;
+        }
+
+        return [
+            'left' => $best['left'],
+            'top' => $top,
+            'width' => $best['width'],
+            'height' => $bottom - $top + 1,
+            'center_x' => $centerX,
+            'center_y' => (int) round(($top + $bottom) / 2),
+        ];
+    }
+
+    private function isWhitePixel(GdImage $image, int $x, int $y): bool
+    {
+        $color = imagecolorat($image, $x, $y);
+
+        return (($color >> 16) & 255) >= 248
+            && (($color >> 8) & 255) >= 248
+            && ($color & 255) >= 248;
     }
 
     private function allocateColor(GdImage $image, string $hex): int

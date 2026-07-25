@@ -3,16 +3,20 @@
   "name": "cable8mm/prompt-weaver",
   "description": "Prompt Weaver is a simple library for creating and managing prompts in PHP.",
   "type": "library",
+  "license": "MIT",
   "homepage": "https://github.com/cable8mm/prompt-weaver",
   "require": {
-    "php": "^8.3"
+    "php": "^8.3",
+    "bacon/bacon-qr-code": "^3.1",
+    "ext-gd": "*"
   },
   "require-dev": {
     "pestphp/pest": "^4.0",
-    "laravel/pint": "^1.0",
-    "bacon/bacon-qr-code": "^3.1"
+    "laravel/pint": "^1.0"
   },
-  "license": "MIT",
+  "suggest": {
+    "ext-gd": "Required for generating QR codes."
+  },
   "autoload": {
     "psr-4": {
       "Cable8mm\\PromptWeaver\\": "src/"
