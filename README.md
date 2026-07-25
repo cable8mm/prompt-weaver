@@ -275,13 +275,13 @@ The repo already includes one complete example:
 - `tests/Fixtures/gpt-54-mini/wifi-note-cafe/manifest.json`
 - `tests/Fixtures/gpt-54-mini/wifi-note-cafe/design-brief.json`
 - `tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json`
-- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.prompt`
+- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`
 
 The integration test reads those files and checks that:
 
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
-3. The image prompt matches the saved `image.prompt` fixture.
+3. The image prompt matches the saved `image.txt` fixture.
 4. The preview image can be generated from the fixture background without errors.
 
 ### 7) Run the tests
