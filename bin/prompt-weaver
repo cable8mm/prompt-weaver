@@ -8,6 +8,7 @@ require dirname(__DIR__).'/vendor/autoload.php';
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\ImagePrompt;
+use Cable8mm\PromptWeaver\PreviewImage;
 
 final class PromptWeaverCli
 {
@@ -28,6 +29,7 @@ final class PromptWeaverCli
         try {
             return match ($command) {
                 'init' => $this->init($argv),
+                'preview' => $this->preview($argv),
                 'brief' => $this->brief($argv),
                 'config' => $this->config($argv),
                 'image' => $this->image($argv),
@@ -104,6 +106,36 @@ final class PromptWeaverCli
         return 0;
     }
 
+    private function preview(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $fixtureDirectory = $options['fixture'] ?? null;
+
+        if (! is_string($fixtureDirectory) || $fixtureDirectory === '') {
+            $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
+            $model = $options['model'] ?? null;
+            $scenario = $options['scenario'] ?? null;
+
+            $this->requireValues($model, $scenario);
+
+            $fixtureDirectory = rtrim($fixturesRoot, '/').'/'.$this->validatePathSegment($model, 'model').'/'.$this->validatePathSegment($scenario, 'scenario');
+        }
+
+        if (! is_dir($fixtureDirectory)) {
+            throw new RuntimeException("Fixture directory not found: {$fixtureDirectory}");
+        }
+
+        $outputPath = $options['output'] ?? rtrim($fixtureDirectory, '/').'/preview.png';
+
+        $preview = new PreviewImage();
+        $preview->render($fixtureDirectory, $outputPath, $options);
+
+        echo "Created {$outputPath}".PHP_EOL;
+
+        return 0;
+    }
+
     private function config(array $argv): int
     {
         $options = $this->parseOptions($argv);
@@ -175,6 +207,8 @@ Prompt Weaver CLI
 
 Usage:
   bin/prompt-weaver init --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver preview --fixture="path/to/fixture"
+  bin/prompt-weaver preview --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver brief --product="..." --category="..." --format="..."
   bin/prompt-weaver config --brief="..."
   bin/prompt-weaver image --config-file=path/to/config.json

@@ -177,7 +177,7 @@ $promptText = $imagePrompt->build($config);
 If you want to manually test prompts and copy the output into `tests/Fixtures/*`, use the CLI:
 
 ```bash
-composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+./pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
 ```
 
 This creates:
@@ -189,18 +189,22 @@ tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json
 Then generate the prompts:
 
 ```bash
-composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
-composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
-composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+./pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+./pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+./pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+./pw preview --fixture=tests/Fixtures/gpt-54-mini/wifi-note-cafe
 ```
+
+`preview` writes a `preview.png` file in the same fixture folder by overlaying the SSID, password, and QR code on top of `image.png`.
 
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
 2. `config` prints the JSON-generation prompt you send after you have a design brief result.
 3. `image` prints the final image-generation prompt you can paste into your image model.
-4. `chain` prints all three prompts in one run for quick inspection.
-5. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
+4. `preview` renders a human-checkable `preview.png` on top of the fixture background.
+5. `chain` prints all three prompts in one run for quick inspection.
+6. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
 
 ## Output Flow
 
@@ -227,7 +231,7 @@ The easiest way to test this package is to run the CLI, copy the output into `te
 ### 1) Create a fixture folder
 
 ```bash
-composer pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
+./pw init --model="gemini-54-flash" --scenario="wifi-warm-cafe-in-summer"
 ```
 
 This creates a new `manifest.json` with default values.
@@ -235,7 +239,7 @@ This creates a new `manifest.json` with default values.
 ### 2) Generate the design-brief prompt
 
 ```bash
-composer pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
+./pw brief --product="a Wi-Fi signage template" --category="Cafe/Restaurant" --format="A4/A5 Poster"
 ```
 
 Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-cafe-in-summer/design-brief.json` if you want to compare model responses later.
@@ -243,7 +247,7 @@ Copy the output into a file such as `tests/Fixtures/gemini-54-flash/wifi-warm-ca
 ### 3) Generate the config prompt
 
 ```bash
-composer pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
+./pw config --brief="A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones."
 ```
 
 This is the prompt you paste into a model to get the JSON config response.
@@ -251,12 +255,20 @@ This is the prompt you paste into a model to get the JSON config response.
 ### 4) Generate the final image prompt
 
 ```bash
-composer pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
+./pw image --config-file=tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json
 ```
 
 Copy the output into `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt` if you want to preserve the exact prompt for that model run.
 
-### 5) Compare against fixtures
+### 5) Generate a preview image
+
+```bash
+./pw preview --fixture=tests/Fixtures/gpt-54-mini/wifi-note-cafe
+```
+
+This creates `tests/Fixtures/gpt-54-mini/wifi-note-cafe/preview.png` so you can inspect the SSID, password, and QR placement by eye.
+
+### 6) Compare against fixtures
 
 The repo already includes one complete example:
 
@@ -270,7 +282,9 @@ The integration test reads those files and checks that:
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
 3. The image prompt matches the saved `image.txt` fixture.
-### 6) Run the tests
+4. The preview image can be generated from the fixture background without errors.
+
+### 7) Run the tests
 
 ```bash
 composer test
