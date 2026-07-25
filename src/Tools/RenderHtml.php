@@ -19,25 +19,15 @@ final class RenderHtml
      * Create a browser preview that keeps image.png and the calibrated config
      * as external files. The QR is embedded so the HTML has no QR dependency.
      *
+     * @param  array<string, mixed>  $config
      * @param  array<string, string>  $options
      */
-    public function render(string $fixtureDirectory, string $outputPath, array $options = []): string
+    public function render(array $config, string $backgroundPath, string $configPath, string $outputPath, array $options = []): string
     {
-        $fixtureDirectory = rtrim($fixtureDirectory, '/');
-        $configPath = is_file($fixtureDirectory.'/calibrate.config.json')
-            ? $fixtureDirectory.'/calibrate.config.json'
-            : $fixtureDirectory.'/config.json';
-        $backgroundPath = $fixtureDirectory.'/image.png';
-
-        if (! is_file($configPath)) {
-            throw new RuntimeException("Config file not found: {$configPath}");
-        }
         if (! is_file($backgroundPath)) {
             throw new RuntimeException("Background image not found: {$backgroundPath}");
         }
 
-        /** @var array<string, mixed> $config */
-        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
         $dimensions = getimagesize($backgroundPath);
         if ($dimensions === false) {
             throw new RuntimeException("Unable to read background image dimensions: {$backgroundPath}");

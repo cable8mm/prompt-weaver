@@ -74,7 +74,20 @@ final class PreviewImage
      */
     public function render(string $fixtureDirectory, string $outputPath, array $options = []): string
     {
-        return (new RenderPng)->render($fixtureDirectory, $outputPath, $options);
+        $fixtureDirectory = rtrim($fixtureDirectory, '/');
+        $configPath = is_file($fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME)
+            ? $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME
+            : $fixtureDirectory.'/'.self::CONFIG_FILENAME;
+        $backgroundPath = $fixtureDirectory.'/image.png';
+
+        if (! is_file($configPath)) {
+            throw new RuntimeException("Config file not found: {$configPath}");
+        }
+
+        /** @var array<string, mixed> $config */
+        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+
+        return (new RenderPng)->render($config, $backgroundPath, $outputPath, $options);
     }
 
     /**
@@ -82,6 +95,19 @@ final class PreviewImage
      */
     public function renderHtml(string $fixtureDirectory, string $outputPath, array $options = []): string
     {
-        return (new RenderHtml)->render($fixtureDirectory, $outputPath, $options);
+        $fixtureDirectory = rtrim($fixtureDirectory, '/');
+        $configPath = is_file($fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME)
+            ? $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME
+            : $fixtureDirectory.'/'.self::CONFIG_FILENAME;
+        $backgroundPath = $fixtureDirectory.'/image.png';
+
+        if (! is_file($configPath)) {
+            throw new RuntimeException("Config file not found: {$configPath}");
+        }
+
+        /** @var array<string, mixed> $config */
+        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+
+        return (new RenderHtml)->render($config, $backgroundPath, $configPath, $outputPath, $options);
     }
 }

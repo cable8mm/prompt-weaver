@@ -17,28 +17,14 @@ final class RenderPng
     private const DEFAULT_PASSWORD = 'WIFI-PASSWORD';
 
     /**
+     * @param  array<string, mixed>  $config
      * @param  array<string, string>  $options
      */
-    public function render(string $fixtureDirectory, string $outputPath, array $options = []): string
+    public function render(array $config, string $backgroundPath, string $outputPath, array $options = []): string
     {
-        $fixtureDirectory = rtrim($fixtureDirectory, '/');
-        $configPath = $fixtureDirectory.'/calibrate.config.json';
-        $backgroundPath = $fixtureDirectory.'/image.png';
-
-        if (! is_file($configPath)) {
-            $configPath = $fixtureDirectory.'/config.json';
-        }
-
-        if (! is_file($configPath)) {
-            throw new RuntimeException("Config file not found: {$configPath}");
-        }
-
         if (! is_file($backgroundPath)) {
             throw new RuntimeException("Background image not found: {$backgroundPath}");
         }
-
-        /** @var array<string, mixed> $config */
-        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
 
         $baseImage = imagecreatefromstring((string) file_get_contents($backgroundPath));
 

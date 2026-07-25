@@ -11,7 +11,14 @@ beforeEach(function () {
         throw new RuntimeException('Test fixture files not found.');
     }
 
-    test()->fixtureDir = $fixtureDir;
+    /** @var array<string, mixed> $config */
+    test()->config = json_decode(
+        (string) file_get_contents($configPath),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    test()->backgroundPath = $imagePath;
     test()->outputPath = sys_get_temp_dir().'/prompt-weaver-render-png-'.bin2hex(random_bytes(4)).'.png';
 });
 
@@ -24,12 +31,12 @@ afterEach(function () {
 it('renders a png with the same dimensions as the background image', function () {
     $renderer = new RenderPng;
 
-    $result = $renderer->render($this->fixtureDir, $this->outputPath);
+    $result = $renderer->render($this->config, $this->backgroundPath, $this->outputPath);
 
     expect($result)->toBe($this->outputPath);
     expect(is_file($this->outputPath))->toBeTrue();
 
-    [$baseWidth, $baseHeight] = getimagesize($this->fixtureDir.'/image.png');
+    [$baseWidth, $baseHeight] = getimagesize($this->backgroundPath);
     [$previewWidth, $previewHeight] = getimagesize($this->outputPath);
 
     expect([$previewWidth, $previewHeight])->toBe([$baseWidth, $baseHeight]);
@@ -38,15 +45,15 @@ it('renders a png with the same dimensions as the background image', function ()
 it('renders a png that differs from the original background image', function () {
     $renderer = new RenderPng;
 
-    $renderer->render($this->fixtureDir, $this->outputPath);
+    $renderer->render($this->config, $this->backgroundPath, $this->outputPath);
 
-    expect(md5_file($this->outputPath))->not->toBe(md5_file($this->fixtureDir.'/image.png'));
+    expect(md5_file($this->outputPath))->not->toBe(md5_file($this->backgroundPath));
 });
 
 it('renders a png with qr dark pixels in the configured area', function () {
     $renderer = new RenderPng;
 
-    $renderer->render($this->fixtureDir, $this->outputPath);
+    $renderer->render($this->config, $this->backgroundPath, $this->outputPath);
 
     $preview = imagecreatefrompng($this->outputPath);
     expect($preview)->toBeInstanceOf(GdImage::class);
@@ -70,37 +77,21 @@ it('renders a png with qr dark pixels in the configured area', function () {
 it('renders a png with custom ssid and password options', function () {
     $renderer = new RenderPng;
 
-    $renderer->render($this->fixtureDir, $this->outputPath, [
+    $renderer->render($this->config, $this->backgroundPath, $this->outputPath, [
         'ssid' => 'TEST-WIFI',
         'password' => 'TEST-PASS',
     ]);
 
     expect(is_file($this->outputPath))->toBeTrue();
 
-    [$baseWidth, $baseHeight] = getimagesize($this->fixtureDir.'/image.png');
+    [$baseWidth, $baseHeight] = getimagesize($this->backgroundPath);
     [$previewWidth, $previewHeight] = getimagesize($this->outputPath);
 
     expect([$previewWidth, $previewHeight])->toBe([$baseWidth, $baseHeight]);
 });
 
-it('throws an exception when config file is missing', function () {
-    $renderer = new RenderPng;
-
-    $renderer->render('/nonexistent/directory', $this->outputPath);
-})->throws(RuntimeException::class);
-
 it('throws an exception when background image is missing', function () {
     $renderer = new RenderPng;
 
-    $fixtureDir = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
-    $tempDir = sys_get_temp_dir().'/prompt-weaver-render-png-noimg-'.bin2hex(random_bytes(4));
-
-    if (! is_dir($tempDir) && ! mkdir($tempDir, 0777, true) && ! is_dir($tempDir)) {
-        throw new RuntimeException("Unable to create directory: {$tempDir}");
-    }
-
-    // Copy only config.json, not image.png
-    copy($fixtureDir.'/config.json', $tempDir.'/config.json');
-
-    $renderer->render($tempDir, $this->outputPath);
+    $renderer->render($this->config, '/nonexistent/image.png', $this->outputPath);
 })->throws(RuntimeException::class);

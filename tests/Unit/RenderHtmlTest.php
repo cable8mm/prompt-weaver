@@ -11,7 +11,15 @@ beforeEach(function () {
         throw new RuntimeException('Test fixture files not found.');
     }
 
-    test()->fixtureDir = $fixtureDir;
+    /** @var array<string, mixed> $config */
+    test()->config = json_decode(
+        (string) file_get_contents($configPath),
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+    test()->backgroundPath = $imagePath;
+    test()->configPath = $configPath;
     test()->outputPath = sys_get_temp_dir().'/prompt-weaver-render-html-'.bin2hex(random_bytes(4)).'.html';
 });
 
@@ -24,7 +32,7 @@ afterEach(function () {
 it('renders an html file with the expected structure', function () {
     $renderer = new RenderHtml;
 
-    $result = $renderer->render($this->fixtureDir, $this->outputPath);
+    $result = $renderer->render($this->config, $this->backgroundPath, $this->configPath, $this->outputPath);
 
     expect($result)->toBe($this->outputPath);
     expect(is_file($this->outputPath))->toBeTrue();
@@ -41,7 +49,7 @@ it('renders an html file with the expected structure', function () {
 it('renders html with ssid and password placeholder divs', function () {
     $renderer = new RenderHtml;
 
-    $renderer->render($this->fixtureDir, $this->outputPath);
+    $renderer->render($this->config, $this->backgroundPath, $this->configPath, $this->outputPath);
 
     $html = file_get_contents($this->outputPath);
     expect($html)->toContain('id="ssid"');
@@ -51,7 +59,7 @@ it('renders html with ssid and password placeholder divs', function () {
 it('renders html with embedded qr code as data uri', function () {
     $renderer = new RenderHtml;
 
-    $renderer->render($this->fixtureDir, $this->outputPath);
+    $renderer->render($this->config, $this->backgroundPath, $this->configPath, $this->outputPath);
 
     $html = file_get_contents($this->outputPath);
     expect($html)->toContain('data:image/png;base64,');
@@ -60,9 +68,9 @@ it('renders html with embedded qr code as data uri', function () {
 it('renders html with correct aspect ratio in css', function () {
     $renderer = new RenderHtml;
 
-    $renderer->render($this->fixtureDir, $this->outputPath);
+    $renderer->render($this->config, $this->backgroundPath, $this->configPath, $this->outputPath);
 
-    [$width, $height] = getimagesize($this->fixtureDir.'/image.png');
+    [$width, $height] = getimagesize($this->backgroundPath);
 
     $html = file_get_contents($this->outputPath);
     expect($html)->toContain('aspect-ratio:'.$width.'/'.$height.';');
@@ -71,7 +79,7 @@ it('renders html with correct aspect ratio in css', function () {
 it('renders html with custom ssid and password options', function () {
     $renderer = new RenderHtml;
 
-    $renderer->render($this->fixtureDir, $this->outputPath, [
+    $renderer->render($this->config, $this->backgroundPath, $this->configPath, $this->outputPath, [
         'ssid' => 'CUSTOM-SSID',
         'password' => 'CUSTOM-PASS',
     ]);
@@ -85,30 +93,15 @@ it('renders html with custom ssid and password options', function () {
 it('renders html with custom qr payload option', function () {
     $renderer = new RenderHtml;
 
-    $renderer->render($this->fixtureDir, $this->outputPath, [
+    $renderer->render($this->config, $this->backgroundPath, $this->configPath, $this->outputPath, [
         'qr-payload' => 'WIFI:T:WPA;S:TEST;P:TEST;;',
     ]);
 
     expect(is_file($this->outputPath))->toBeTrue();
 });
 
-it('throws an exception when config file is missing', function () {
-    $renderer = new RenderHtml;
-
-    $renderer->render('/nonexistent/directory', $this->outputPath);
-})->throws(RuntimeException::class);
-
 it('throws an exception when background image is missing', function () {
     $renderer = new RenderHtml;
 
-    $fixtureDir = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
-    $tempDir = sys_get_temp_dir().'/prompt-weaver-render-html-noimg-'.bin2hex(random_bytes(4));
-
-    if (! is_dir($tempDir) && ! mkdir($tempDir, 0777, true) && ! is_dir($tempDir)) {
-        throw new RuntimeException("Unable to create directory: {$tempDir}");
-    }
-
-    copy($fixtureDir.'/config.json', $tempDir.'/config.json');
-
-    $renderer->render($tempDir, $this->outputPath);
+    $renderer->render($this->config, '/nonexistent/image.png', $this->configPath, $this->outputPath);
 })->throws(RuntimeException::class);
