@@ -53,7 +53,7 @@ function copy_directory_preview(string $source, string $target): void
         }
 
         if (! is_dir(dirname($destination)) && ! mkdir(dirname($destination), 0777, true) && ! is_dir(dirname($destination))) {
-            throw new RuntimeException("Unable to create directory: ".dirname($destination));
+            throw new RuntimeException('Unable to create directory: '.dirname($destination));
         }
 
         copy($item->getPathname(), $destination);
@@ -72,6 +72,7 @@ function remove_directory_preview(string $directory): void
     ) as $path) {
         if ($path->isDir()) {
             rmdir($path->getPathname());
+
             continue;
         }
 
@@ -82,7 +83,7 @@ function remove_directory_preview(string $directory): void
 }
 
 it('creates a preview image by overlaying qr and credential text on the background', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/gpt-54-mini/wifi-note-cafe';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-preview-'.bin2hex(random_bytes(4));
 
     try {
