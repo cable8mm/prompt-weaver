@@ -140,11 +140,11 @@ final class PromptWeaverCli
             ? rtrim($fixtureDirectory, '/').'/preview.html'
             : ($outputOption ?? rtrim($fixtureDirectory, '/').'/preview.png');
 
-        $preview = new PreviewImage;
+        $preview = new PreviewImage($fixtureDirectory);
         if (strtolower(pathinfo($outputPath, PATHINFO_EXTENSION)) === 'html') {
-            $preview->renderHtml($fixtureDirectory, $outputPath, $options);
+            $preview->renderHtml($outputPath, $options);
         } else {
-            $preview->render($fixtureDirectory, $outputPath, $options);
+            $preview->render($outputPath, $options);
         }
 
         echo "Created {$outputPath}".PHP_EOL;
@@ -156,7 +156,7 @@ final class PromptWeaverCli
     {
         $fixtureDirectory = $this->resolveFixtureDirectory($argv);
 
-        (new PreviewImage)->calibrate($fixtureDirectory);
+        (new PreviewImage($fixtureDirectory))->calibrate();
 
         echo 'Updated '.rtrim($fixtureDirectory, '/').'/calibrate.config.json'.PHP_EOL;
 
