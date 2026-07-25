@@ -11,20 +11,25 @@ use RuntimeException;
 
 final class PreviewImage
 {
+    private const CONFIG_FILENAME = 'config.json';
+
+    private const CALIBRATED_CONFIG_FILENAME = 'calibrate.config.json';
+
     private const DEFAULT_SSID = 'WIFI-NOTE';
 
     private const DEFAULT_PASSWORD = 'WIFI-PASSWORD';
 
     /**
-     * Detect the actual white placeholder boxes in image.png and update the
-     * corresponding coordinates in config.json.
+     * Detect the actual white placeholder boxes in image.png and write the
+     * corresponding coordinates to calibrate.config.json.
      *
      * @return array<string, float> Updated coordinates keyed by placeholder.
      */
     public function calibrate(string $fixtureDirectory): array
     {
         $fixtureDirectory = rtrim($fixtureDirectory, '/');
-        $configPath = $fixtureDirectory.'/config.json';
+        $configPath = $fixtureDirectory.'/'.self::CONFIG_FILENAME;
+        $calibratedConfigPath = $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME;
         $backgroundPath = $fixtureDirectory.'/image.png';
 
         if (! is_file($configPath)) {
@@ -81,8 +86,8 @@ final class PreviewImage
 
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
 
-        if (file_put_contents($configPath, $json) === false) {
-            throw new RuntimeException("Unable to write config: {$configPath}");
+        if (file_put_contents($calibratedConfigPath, $json) === false) {
+            throw new RuntimeException("Unable to write calibrated config: {$calibratedConfigPath}");
         }
 
         imagedestroy($image);
@@ -95,8 +100,13 @@ final class PreviewImage
      */
     public function render(string $fixtureDirectory, string $outputPath, array $options = []): string
     {
-        $configPath = rtrim($fixtureDirectory, '/').'/config.json';
-        $backgroundPath = rtrim($fixtureDirectory, '/').'/image.png';
+        $fixtureDirectory = rtrim($fixtureDirectory, '/');
+        $configPath = $fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME;
+        $backgroundPath = $fixtureDirectory.'/image.png';
+
+        if (! is_file($configPath)) {
+            $configPath = $fixtureDirectory.'/'.self::CONFIG_FILENAME;
+        }
 
         if (! is_file($configPath)) {
             throw new RuntimeException("Config file not found: {$configPath}");

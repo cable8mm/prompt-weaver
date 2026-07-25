@@ -5,11 +5,11 @@
 - Treat the canvas as a 0-100% grid on both axes (0% = top/left, 100% = bottom/right).
 
 [Style]
-A warm cafe poster with elegant Art Deco geometric framing, subtle maple-inspired line-art, and a cozy autumn atmosphere while preserving generous negative space for Wi-Fi information. Soft cream paper texture with high-contrast charcoal Art Deco linework, restrained geometric border accents, and delicate maple leaf line-art integrated into the corners for a crisp, print-friendly composition. black-and-white laser printer safe.
+A warm and inviting cafe poster blending elegant Art Deco geometry with subtle cherry blossom-inspired accents in a refined, timeless composition. High-contrast ivory background with charcoal Art Deco borders, delicate geometric line-art patterns, and sparse blossom-inspired motifs using clean monochrome shading and generous whitespace. black-and-white laser printer safe.
 
 [Layout — place elements at these exact grid positions]
-1. Title "와이파이 연결": centered at x=50%, y=10%. bold geometric Art Deco-inspired sans-serif with refined proportions.
-2. Wi-Fi icon: centered at x=50%, y=20%, width≈15% of canvas width. minimal high-contrast geometric Wi-Fi icon enclosed in a thin Art Deco circular frame.
+1. Title "와이파이 연결": centered at x=50%, y=10%. bold elegant Art Deco-inspired sans-serif with clean geometric proportions.
+2. Wi-Fi icon: centered at x=50%, y=20%, width≈15% of canvas width. minimal geometric Wi-Fi icon enclosed within a refined Art Deco circular frame.
 3. ssid placeholder box: centered at x=50%, y=40%, box width≈70%, height≈8% of canvas.
    - The box's INTERIOR FILL must be solid #FFFFFF — solid flat white cutout, no background pattern bleeding through.
    - A small label "SSID:" sits just outside/above the box (against the surrounding background, not inside the white area).
@@ -19,7 +19,7 @@ A warm cafe poster with elegant Art Deco geometric framing, subtle maple-inspire
    - A small label "PASSWORD:" sits just outside/above the box (against the surrounding background, not inside the white area).
    - Nothing else is drawn inside the box — it stays empty and pure #FFFFFF.
 5. Message "스캔하여 연결하세요.": centered at x=50%, y=62%.
-6. QR placeholder: square area centered at x=50%, y=80%, width≈28% of canvas. clean white square with a thin double-line Art Deco border and subtle corner brackets for a refined, high-contrast frame.
+6. QR placeholder: square area centered at x=50%, y=80%, width≈28% of canvas. clean white square with a thin double-line Art Deco border and subtle geometric corner accents.
 7. Footer "제작: WIFI NOTE": centered at x=50%, y=96%.
 
 [Strict rules]
