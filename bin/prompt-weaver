@@ -135,10 +135,17 @@ final class PromptWeaverCli
         $options = $this->parseOptions($argv);
         $fixtureDirectory = $this->resolveFixtureDirectory($argv);
 
-        $outputPath = $options['output'] ?? rtrim($fixtureDirectory, '/').'/preview.png';
+        $outputOption = $options['output'] ?? null;
+        $outputPath = $outputOption === 'html'
+            ? rtrim($fixtureDirectory, '/').'/preview.html'
+            : ($outputOption ?? rtrim($fixtureDirectory, '/').'/preview.png');
 
         $preview = new PreviewImage;
-        $preview->render($fixtureDirectory, $outputPath, $options);
+        if (strtolower(pathinfo($outputPath, PATHINFO_EXTENSION)) === 'html') {
+            $preview->renderHtml($fixtureDirectory, $outputPath, $options);
+        } else {
+            $preview->render($fixtureDirectory, $outputPath, $options);
+        }
 
         echo "Created {$outputPath}".PHP_EOL;
 
@@ -282,6 +289,7 @@ Usage:
   bin/prompt-weaver init model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver calibrate model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver preview --fixture="path/to/fixture"
+  bin/prompt-weaver preview --fixture="path/to/fixture" --output="path/to/preview.html"
   bin/prompt-weaver preview --model="..." --scenario="..." [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver brief model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver config model/scenario [--fixtures-root=tests/Fixtures]
