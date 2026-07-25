@@ -17,7 +17,7 @@ class ImagePrompt
 
         $lines = [];
 
-        $lines[] = '[Task] Generate a high-contrast futuristic Wi-Fi signage image ONLY. Do not output any text, explanation, or JSON — return the image only.';
+        $lines[] = '[Task] Generate a high-contrast Wi-Fi signage image ONLY. Do not output any text, explanation, or JSON — return the image only.';
         $lines[] = '';
         $lines[] = '[Canvas]';
         $lines[] = "- Portrait canvas, aspect ratio {$canvas['aspect_ratio']}.";
@@ -52,7 +52,7 @@ class ImagePrompt
             $box = $placeholders[$key];
             $lines[] = "{$step}. {$key} placeholder box: centered at x={$box['box_x_pc']}%, y={$box['box_y_pc']}%, box width≈{$box['box_width_pc']}%, height≈{$box['box_height_pc']}% of canvas.";
             $lines[] = "   - The box's INTERIOR FILL must be solid {$box['box_fill']} — {$box['box_fill_note']}.";
-            $lines[] = "   - A small label \"{$box['label']}\" sits ".$this->describeLabelPosition($box['label_position']).' (on the dark background, not inside the white area).';
+            $lines[] = "   - A small label \"{$box['label']}\" sits ".$this->describeLabelPosition($box['label_position']).' (against the surrounding background, not inside the white area).';
             $lines[] = "   - Nothing else is drawn inside the box — it stays empty and pure {$box['box_fill']}.";
             $step++;
         }
@@ -73,8 +73,8 @@ class ImagePrompt
 
         $lines[] = '';
         $lines[] = '[Strict rules]';
-        $lines[] = '- The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the dark background, not a stylized dark box with a white border.';
-        $lines[] = '- Do not let the starry/cyber background pattern show through or bleed into these three white areas.';
+        $lines[] = '- The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the surrounding background, not a stylized box with a white border.';
+        $lines[] = '- Do not let the background pattern show through or bleed into these three white areas.';
         $lines[] = '- Do not render any text or QR code inside these three areas — leave them blank.';
         $lines[] = '- Final request: generate the finished image now, following every instruction above exactly.';
         $lines[] = '- Output the image only.';
