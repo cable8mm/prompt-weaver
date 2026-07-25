@@ -6,6 +6,8 @@ use GdImage;
 
 final class Calibrator
 {
+    use Traits\PlaceholderGeometryTrait;
+
     /**
      * Detect the actual white placeholder boxes and QR frame in the image,
      * then return the config array with updated coordinates.
@@ -100,73 +102,6 @@ final class Calibrator
         );
 
         return (int) round(($runs[0][0] + $runs[0][1]) / 2);
-    }
-
-    private function whitePixelRatio(GdImage $image, int $left, int $right, int $y): float
-    {
-        $whitePixels = 0;
-        $pixelCount = $right - $left + 1;
-
-        for ($x = $left; $x <= $right; $x++) {
-            $color = imagecolorat($image, $x, $y);
-            $red = ($color >> 16) & 255;
-            $green = ($color >> 8) & 255;
-            $blue = $color & 255;
-
-            if ($red >= 248 && $green >= 248 && $blue >= 248) {
-                $whitePixels++;
-            }
-        }
-
-        return $pixelCount > 0 ? $whitePixels / $pixelCount : 0.0;
-    }
-
-    /**
-     * @param  array<string, mixed>  $placeholder
-     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}
-     */
-    private function placeholderBox(GdImage $image, array $placeholder): array
-    {
-        $imageWidth = imagesx($image);
-        $imageHeight = imagesy($image);
-
-        $centerX = (int) round($this->percentageToPixels((float) ($placeholder['box_x_pc'] ?? 0), $imageWidth));
-        $centerY = (int) round($this->percentageToPixels((float) ($placeholder['box_y_pc'] ?? 0), $imageHeight));
-        $width = (int) round($this->percentageToPixels((float) ($placeholder['box_width_pc'] ?? 0), $imageWidth));
-        $height = (int) round($this->percentageToPixels((float) ($placeholder['box_height_pc'] ?? 0), $imageHeight));
-
-        return [
-            'left' => (int) round($centerX - $width / 2),
-            'top' => (int) round($centerY - $height / 2),
-            'width' => $width,
-            'height' => $height,
-            'center_x' => $centerX,
-            'center_y' => $centerY,
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $placeholder
-     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}
-     */
-    private function qrPlaceholderBox(GdImage $image, array $placeholder): array
-    {
-        $widthPc = $placeholder['box_width_pc'] ?? $placeholder['width_pc'] ?? 0;
-        $heightPc = $placeholder['box_height_pc'] ?? $placeholder['height_pc'] ?? null;
-
-        // QR placeholders are square. Convert the width percentage to the
-        // equivalent height percentage when height_pc is omitted.
-        if ($heightPc === null && is_numeric($widthPc)) {
-            $heightPc = ((float) $widthPc * imagesx($image)) / imagesy($image);
-        }
-
-        return $this->placeholderBox($image, [
-            ...$placeholder,
-            'box_x_pc' => $placeholder['box_x_pc'] ?? $placeholder['x_pc'] ?? 0,
-            'box_y_pc' => $placeholder['box_y_pc'] ?? $placeholder['y_pc'] ?? 0,
-            'box_width_pc' => $widthPc,
-            'box_height_pc' => $heightPc ?? 0,
-        ]);
     }
 
     /**
@@ -275,19 +210,5 @@ final class Calibrator
             'center_x' => $best['center_x'],
             'center_y' => $best['center_y'],
         ];
-    }
-
-    private function isWhitePixel(GdImage $image, int $x, int $y): bool
-    {
-        $color = imagecolorat($image, $x, $y);
-
-        return (($color >> 16) & 255) >= 248
-            && (($color >> 8) & 255) >= 248
-            && ($color & 255) >= 248;
-    }
-
-    private function percentageToPixels(float $percentage, int $size): float
-    {
-        return ($percentage / 100) * $size;
     }
 }
