@@ -5,6 +5,7 @@ namespace Cable8mm\PromptWeaver;
 use BaconQrCode\Common\ErrorCorrectionLevel;
 use BaconQrCode\Renderer\GDLibRenderer;
 use BaconQrCode\Writer;
+use Cable8mm\PromptWeaver\Tools\Calibrator;
 use GdImage;
 use InvalidArgumentException;
 use RuntimeException;
@@ -48,40 +49,21 @@ final class PreviewImage
             throw new RuntimeException("Unable to load background image: {$backgroundPath}");
         }
 
+        $calibrator = new Calibrator;
+        $config = $calibrator->calibrate($config, $image);
+
         $updated = [];
 
         foreach (['ssid', 'password'] as $key) {
-            $placeholder = $config['placeholders'][$key] ?? null;
-
-            if (! is_array($placeholder)) {
-                continue;
+            if (isset($config['placeholders'][$key]['box_y_pc'])) {
+                $updated[$key] = $config['placeholders'][$key]['box_y_pc'];
             }
-
-            $box = $this->placeholderBox($image, $placeholder);
-            $centerY = $this->findWhiteAreaCenterY($image, $box);
-
-            if ($centerY === null) {
-                continue;
-            }
-
-            $coordinate = round(($centerY / imagesy($image)) * 100, 2);
-            $config['placeholders'][$key]['box_y_pc'] = $coordinate;
-            $updated[$key] = $coordinate;
         }
 
-        $qr = $config['placeholders']['qr'] ?? null;
-
-        if (is_array($qr)) {
-            $qrBox = $this->findQrBox($image, $qr);
-
-            if ($qrBox !== null) {
-                $config['placeholders']['qr']['x_pc'] = round(($qrBox['center_x'] / imagesx($image)) * 100, 2);
-                $config['placeholders']['qr']['y_pc'] = round(($qrBox['center_y'] / imagesy($image)) * 100, 2);
-                $config['placeholders']['qr']['width_pc'] = round(($qrBox['width'] / imagesx($image)) * 100, 2);
-                $updated['qr_x'] = $config['placeholders']['qr']['x_pc'];
-                $updated['qr_y'] = $config['placeholders']['qr']['y_pc'];
-                $updated['qr_width'] = $config['placeholders']['qr']['width_pc'];
-            }
+        if (isset($config['placeholders']['qr'])) {
+            $updated['qr_x'] = $config['placeholders']['qr']['x_pc'] ?? 0;
+            $updated['qr_y'] = $config['placeholders']['qr']['y_pc'] ?? 0;
+            $updated['qr_width'] = $config['placeholders']['qr']['width_pc'] ?? 0;
         }
 
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
