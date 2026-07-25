@@ -196,7 +196,7 @@ The commands use the files created or saved in that folder:
 ./weaver preview chatgpt/cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
 
 What each command outputs:
 
@@ -204,7 +204,7 @@ What each command outputs:
 2. `config` prints the JSON-generation prompt you send after you have a design brief result.
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
-5. `preview` renders a human-checkable `preview.png` on top of the fixture background using `calibrate.config.json` when available.
+5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
 
@@ -278,7 +278,23 @@ This detects the actual white text boxes and QR frame in `image.png`. It writes 
 
 This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.png` using `calibrate.config.json` when present, so you can inspect the SSID, password, and QR placement by eye. If `config.json` changes, run `calibrate` again to regenerate the calibrated config.
 
-### 7) Compare against fixtures
+### 7) Generate a browser preview
+
+```bash
+./weaver preview chatgpt/cafe-restaurant --output=html
+```
+
+This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.html` using `image.png`, `calibrate.config.json`, and `fonts/AtkinsonHyperlegible-Regular.woff2` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required. Keep the generated HTML in its fixture directory so its relative asset paths remain valid.
+
+Because browsers commonly block `fetch()` from local `file://` pages, serve the fixture directory through a local web server before opening the HTML:
+
+```bash
+php -S localhost:8000 -t tests/Fixtures/chatgpt/cafe-restaurant
+```
+
+Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
+
+### 8) Compare against fixtures
 
 The repo already includes one complete example:
 
