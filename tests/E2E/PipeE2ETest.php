@@ -46,6 +46,34 @@ it('runs the full pipeline with real OpenRouter API', function () {
         color: 'warm brown and cream',
     );
 
+    // Save fixtures
+    $fixtureDir = __DIR__.'/../Fixtures/openrouter/google-gemma-4-26b-a4b-it-free';
+
+    if (! is_dir($fixtureDir)) {
+        mkdir($fixtureDir, 0777, true);
+    }
+
+    // Save manifest.json
+    $manifest = [
+        'model' => 'openrouter',
+        'scenario' => 'google-gemma-4-26b-a4b-it-free',
+        'product' => 'a Wi-Fi signage template',
+        'category' => 'Cafe/Restaurant',
+        'format' => 'A4/A5 Poster',
+    ];
+    file_put_contents($fixtureDir.'/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+
+    // Save prompts
+    file_put_contents($fixtureDir.'/brief.prompt', $result->briefPrompt.PHP_EOL);
+    file_put_contents($fixtureDir.'/config.prompt', $result->configPrompt.PHP_EOL);
+    file_put_contents($fixtureDir.'/image.prompt', $result->imagePrompt.PHP_EOL);
+
+    // Save JSON responses
+    file_put_contents($fixtureDir.'/design-brief.json', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+    file_put_contents($fixtureDir.'/config.json', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+
+    echo "Fixtures saved to: {$fixtureDir}\n\n";
+
     // Output all prompts and responses for debugging
     echo "=== DESIGN BRIEF PROMPT ===\n";
     echo $result->briefPrompt."\n\n";

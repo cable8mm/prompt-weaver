@@ -377,6 +377,25 @@ The integration test reads those files and checks that:
 3. The image prompt matches the saved `image.txt` fixture.
 4. The preview image can be generated from the fixture background without errors, with credential text and the QR code rendered in the calibrated area.
 
+### 9.5) E2E test fixtures
+
+The repo also includes fixtures generated from real OpenRouter API calls:
+
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/manifest.json`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/brief.prompt`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/design-brief.json`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/config.prompt`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/config.json`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/image.prompt`
+
+These fixtures are generated automatically when you run the E2E test:
+
+```bash
+composer test:e2e
+```
+
+The E2E test uses the OpenRouter API with the `google/gemma-4-26b-a4b-it:free` model and saves all prompts and responses to the fixtures directory for inspection and debugging.
+
 ### 10) Run the tests
 
 ```bash
