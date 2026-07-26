@@ -1,40 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Pipe;
 
-/**
- * Load E2E test configuration from tests/config.json
- *
- * @return array{OPENROUTER_API_KEY: string}
- *
- * @throws RuntimeException If config file is not found
- */
-function loadE2EConfig(): array
-{
-    $configPath = __DIR__.'/../config.json';
+/*
+|--------------------------------------------------------------------------
+| End-to-End Tests (Real API Calls)
+|--------------------------------------------------------------------------
+| These tests make real API calls to OpenRouter and require:
+|   - RUN_E2E_TESTS=1 environment variable
+|   - tests/config.json with valid API keys (copy from tests/config.json.example)
+|
+| Run with:
+|   RUN_E2E_TESTS=1 composer test:e2e
+|
+| These tests are opt-in and skipped by default. They make real API calls
+| and may incur costs.
+*/
 
-    if (! file_exists($configPath)) {
-        throw new RuntimeException("E2E config not found: {$configPath}. Please create it from tests/config.json.example");
+// Load API keys from tests/config.json (gitignored) if it exists.
+$configFile = __DIR__.'/../config.json';
+if (file_exists($configFile)) {
+    $config = json_decode(file_get_contents($configFile), true);
+    if (is_array($config)) {
+        foreach ($config as $key => $value) {
+            putenv("{$key}={$value}");
+        }
     }
-
-    $config = json_decode(file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
-
-    if (! isset($config['OPENROUTER_API_KEY']) || empty($config['OPENROUTER_API_KEY'])) {
-        throw new RuntimeException('OPENROUTER_API_KEY is not set in tests/config.json');
-    }
-
-    return $config;
 }
 
-it('runs the full pipeline with real OpenRouter API', function () {
-    $config = loadE2EConfig();
+uses()->group('e2e');
 
+$skipE2E = ! getenv('RUN_E2E_TESTS');
+$skipMsg = 'Set RUN_E2E_TESTS=1 and create tests/config.json with API keys to run e2e tests.';
+
+it('runs the full pipeline with real OpenRouter API', function () {
     $client = new Client(
         provider: 'openrouter',
-        apiKey: $config['OPENROUTER_API_KEY'],
+        apiKey: getenv('OPENROUTER_API_KEY') ?: null,
         model: 'google/gemma-4-26b-a4b-it:free',
     );
 
@@ -131,4 +138,4 @@ it('runs the full pipeline with real OpenRouter API', function () {
         ->not->toBeEmpty()
         ->and($result->imagePrompt)
         ->toContain('와이파이 연결');
-})->group('e2e');
+})->skip($skipE2E, $skipMsg);

@@ -51,7 +51,7 @@
   "prefer-stable": true,
   "scripts": {
     "test": "./vendor/bin/pest",
-    "test:e2e": "./vendor/bin/pest --group=e2e",
+    "test:e2e": "RUN_E2E_TESTS=1 ./vendor/bin/pest --group=e2e",
     "lint": "./vendor/bin/pint",
     "inspect": "./vendor/bin/pint --test"
   },
