@@ -61,7 +61,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
         'category' => 'Cafe/Restaurant',
         'format' => 'A4/A5 Poster',
     ];
-    file_put_contents($fixtureDir.'/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+    file_put_contents($fixtureDir.'/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).PHP_EOL);
 
     // Save prompts
     file_put_contents($fixtureDir.'/brief.prompt', $result->briefPrompt.PHP_EOL);
