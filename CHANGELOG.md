@@ -1,5 +1,18 @@
 # Release Notes
 
+## v0.2.0 - 2026-07-26
+
+### What's Changed
+
+* chore: update CHANGELOG to include new features and contributors for v0.1.0 by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/8
+* feat: add QR code category and localization support by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/9
+* refactor: replace WifiNoteCategory and WifiNoteFormat with Category and Format enums by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/10
+* feat: add HTML preview generation and improve README by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/11
+* refactor: PreviewImage class and implement rendering features by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/12
+* refactor: namespace and integrate Laravel service provider by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/13
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.1.1...v0.2.0
+
 ## v0.1.1 - 2026-07-25
 
 ### What's Changed
