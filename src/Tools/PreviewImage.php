@@ -1,10 +1,7 @@
 <?php
 
-namespace Cable8mm\PromptWeaver;
+namespace Cable8mm\PromptWeaver\Tools;
 
-use Cable8mm\PromptWeaver\Tools\Calibrator;
-use Cable8mm\PromptWeaver\Tools\RenderHtml;
-use Cable8mm\PromptWeaver\Tools\RenderPng;
 use GdImage;
 use RuntimeException;
 

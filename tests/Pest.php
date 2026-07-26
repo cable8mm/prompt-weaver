@@ -1,6 +1,6 @@
 <?php
 
-use Cable8mm\PromptWeaver\PromptWeaverServiceProvider;
+use Cable8mm\PromptWeaver\Laravel\PromptWeaverServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
