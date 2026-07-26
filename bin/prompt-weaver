@@ -10,7 +10,7 @@ use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\ImagePrompt;
-use Cable8mm\PromptWeaver\PreviewImage;
+use Cable8mm\PromptWeaver\Tools\PreviewImage;
 
 final class PromptWeaverCli
 {
