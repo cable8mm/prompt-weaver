@@ -13,9 +13,10 @@
   ],
   "require": {
     "php": "^8.3",
+    "ext-gd": "*",
     "bacon/bacon-qr-code": "^3.1",
     "cable8mm/enum-getter": "^2.1",
-    "ext-gd": "*"
+    "cable8mm/nano-ai": "^0.1.0"
   },
   "require-dev": {
     "pestphp/pest": "^4.0",
