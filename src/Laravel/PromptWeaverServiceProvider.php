@@ -14,7 +14,7 @@ class PromptWeaverServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../../lang' => $this->app->langPath('vendor/prompt-weaver'),
+                __DIR__.'/../../lang' => $this->app->langPath('vendor/cable8mm/prompt-weaver'),
             ], 'prompt-weaver-translations');
         }
     }
