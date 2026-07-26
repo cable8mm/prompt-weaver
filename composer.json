@@ -5,6 +5,12 @@
   "type": "library",
   "license": "MIT",
   "homepage": "https://github.com/cable8mm/prompt-weaver",
+  "authors": [
+    {
+      "name": "Samgu Lee",
+      "email": "cable8mm@gmail.com"
+    }
+  ],
   "require": {
     "php": "^8.3",
     "bacon/bacon-qr-code": "^3.1",
@@ -33,12 +39,13 @@
       "Cable8mm\\PromptWeaver\\Tests\\": "tests/"
     }
   },
-  "authors": [
-    {
-      "name": "Samgu Lee",
-      "email": "cable8mm@gmail.com"
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Cable8mm\\PromptWeaver\\Laravel\\PromptWeaverServiceProvider"
+      ]
     }
-  ],
+  },
   "minimum-stability": "stable",
   "prefer-stable": true,
   "scripts": {

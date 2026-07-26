@@ -1,6 +1,6 @@
 <?php
 
-use Cable8mm\PromptWeaver\PromptWeaverServiceProvider;
+use Cable8mm\PromptWeaver\Laravel\PromptWeaverServiceProvider;
 
 it('registers the service provider in laravel application', function () {
     expect(app()->getLoadedProviders())
