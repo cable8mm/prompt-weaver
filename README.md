@@ -207,10 +207,13 @@ What each command outputs:
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
+8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses.
 
 ## Output Flow
 
 This package is intended to be used as part of a multi-step generation pipeline:
+
+### Manual workflow
 
 1. Call `DesignBriefPrompt::build()` to create the prompt for the brief-generation model.
 2. Send that prompt to a model and capture the brief text.
@@ -218,6 +221,40 @@ This package is intended to be used as part of a multi-step generation pipeline:
 4. Send that prompt to a model and parse the returned JSON.
 5. Pass the parsed JSON into `ImagePrompt::build()` to create the final image prompt.
 6. Send the final text to your image model or image generator.
+
+### Automated workflow with `pipe`
+
+The `Pipe` class automates the entire three-step pipeline by sending each prompt to an AI model via `cable8mm/nano-ai`:
+
+```php
+use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Pipe;
+
+$client = new Client(
+    provider: 'openai',
+    apiKey: 'sk-your-api-key',
+    model: 'gpt-4o-mini',
+);
+
+$pipe = new Pipe($client);
+$result = $pipe->run(
+    product: 'a Wi-Fi signage template',
+    category: Category::CAFE_RESTAURANT,
+    format: Format::A45_POSTER,
+    color: 'warm brown and cream', // optional
+);
+
+// Access all prompts and responses
+echo $result->briefPrompt;   // Design brief prompt
+echo $result->briefJson;     // Parsed design brief JSON
+echo $result->configPrompt;  // Config generation prompt
+echo $result->config;        // Parsed config JSON
+echo $result->imagePrompt;   // Final image generation prompt
+```
+
+The `PipeResult` object contains all three prompts plus the parsed intermediate JSON responses, making it easy to inspect or log each step of the pipeline.
 
 ## Notes
 
@@ -294,7 +331,37 @@ php -S localhost:8000 -t tests/Fixtures/chatgpt/cafe-restaurant
 
 Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
 
-### 8) Compare against fixtures
+### 8) Run the automated pipeline
+
+If you have an OpenAI API key, you can run the full three-step pipeline automatically:
+
+```bash
+./weaver pipe chatgpt/cafe-restaurant --api-key=sk-your-api-key
+```
+
+Or with explicit options:
+
+```bash
+./weaver pipe \
+  --product="a Wi-Fi signage template" \
+  --category="Cafe/Restaurant" \
+  --format="A4/A5 Poster" \
+  --provider=openai \
+  --api-key=sk-your-api-key \
+  --model=gpt-4o-mini \
+  --color="warm brown and cream"
+```
+
+This command:
+
+1. Generates the design-brief prompt and sends it to the model
+2. Parses the design-brief JSON response
+3. Generates the config prompt and sends it to the model
+4. Parses the config JSON response
+5. Generates the final image prompt
+6. Prints all prompts and intermediate JSON responses
+
+### 9) Compare against fixtures
 
 The repo already includes one complete example:
 
@@ -310,7 +377,26 @@ The integration test reads those files and checks that:
 3. The image prompt matches the saved `image.txt` fixture.
 4. The preview image can be generated from the fixture background without errors, with credential text and the QR code rendered in the calibrated area.
 
-### 8) Run the tests
+### 9.5) E2E test fixtures
+
+The repo also includes fixtures generated from real OpenRouter API calls:
+
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/manifest.json`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/brief.prompt`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/design-brief.json`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/config.prompt`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/config.json`
+- `tests/Fixtures/openrouter/google-gemma-4-26b-a4b-it-free/image.prompt`
+
+These fixtures are generated automatically when you run the E2E test:
+
+```bash
+composer test:e2e
+```
+
+The E2E test uses the OpenRouter API with the `google/gemma-4-26b-a4b-it:free` model and saves all prompts and responses to the fixtures directory for inspection and debugging.
+
+### 10) Run the tests
 
 ```bash
 composer test

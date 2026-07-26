@@ -5,11 +5,13 @@ declare(strict_types=1);
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
+use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\ImagePrompt;
+use Cable8mm\PromptWeaver\Pipe;
 use Cable8mm\PromptWeaver\Tools\PreviewImage;
 
 final class PromptWeaverCli
@@ -37,6 +39,7 @@ final class PromptWeaverCli
                 'config' => $this->config($argv),
                 'image' => $this->image($argv),
                 'chain' => $this->chain($argv),
+                'pipe' => $this->pipe($argv),
                 'help', '--help', '-h' => $this->help(),
                 default => $this->error("Unknown command: {$command}"),
             };
@@ -257,6 +260,60 @@ final class PromptWeaverCli
         return 0;
     }
 
+    private function pipe(array $argv): int
+    {
+        $options = $this->parseOptions($argv);
+
+        $provider = $options['provider'] ?? 'openai';
+        $apiKey = $options['api-key'] ?? null;
+        $model = $options['model'] ?? null;
+
+        $client = new Client(
+            provider: $provider,
+            apiKey: $apiKey,
+            model: $model,
+        );
+
+        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
+            $manifest = $this->readJsonFile($this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT).'/manifest.json');
+            $product = $manifest['product'] ?? null;
+            $category = $manifest['category'] ?? null;
+            $format = $manifest['format'] ?? null;
+        } else {
+            $product = $options['product'] ?? null;
+            $category = $options['category'] ?? null;
+            $format = $options['format'] ?? null;
+        }
+
+        $this->requireValues($product, $category, $format);
+
+        $color = $options['color'] ?? null;
+
+        $result = (new Pipe($client))->run(
+            $product,
+            $this->categoryFromInput($category),
+            $this->formatFromInput($format),
+            $color,
+        );
+
+        echo '=== design-brief prompt ==='.PHP_EOL;
+        echo $result->briefPrompt.PHP_EOL;
+        echo PHP_EOL;
+        echo '=== design-brief response ==='.PHP_EOL;
+        echo json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+        echo PHP_EOL;
+        echo '=== config prompt ==='.PHP_EOL;
+        echo $result->configPrompt.PHP_EOL;
+        echo PHP_EOL;
+        echo '=== config response ==='.PHP_EOL;
+        echo json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+        echo PHP_EOL;
+        echo '=== image prompt ==='.PHP_EOL;
+        echo $result->imagePrompt.PHP_EOL;
+
+        return 0;
+    }
+
     private function categoryFromInput(string $category): Category
     {
         return match ($category) {
@@ -295,6 +352,8 @@ Usage:
   bin/prompt-weaver config model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver image model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --config-file=path/to/config.json
+  bin/prompt-weaver pipe model/scenario [--provider=openai] [--api-key=sk-...] [--model=gpt-4o-mini] [--color=...]
+  bin/prompt-weaver pipe --product="..." --category="..." --format="..." [--provider=openai] [--api-key=sk-...] [--model=gpt-4o-mini]
 
 TEXT;
 

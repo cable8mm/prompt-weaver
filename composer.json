@@ -13,9 +13,10 @@
   ],
   "require": {
     "php": "^8.3",
+    "ext-gd": "*",
     "bacon/bacon-qr-code": "^3.1",
     "cable8mm/enum-getter": "^2.1",
-    "ext-gd": "*"
+    "cable8mm/nano-ai": "^0.1.0"
   },
   "require-dev": {
     "pestphp/pest": "^4.0",
@@ -50,6 +51,7 @@
   "prefer-stable": true,
   "scripts": {
     "test": "./vendor/bin/pest",
+    "test:e2e": "RUN_E2E_TESTS=1 ./vendor/bin/pest --group=e2e",
     "lint": "./vendor/bin/pint",
     "inspect": "./vendor/bin/pint --test"
   },
