@@ -2,65 +2,68 @@
 
 namespace Cable8mm\PromptWeaver;
 
-class ConfigPrompt
+use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\PromptInterface;
+use RuntimeException;
+
+class ConfigPrompt implements PromptInterface
 {
+    private ?string $promptString = null;
+
+    private mixed $response = null;
+
     /**
-     * @param  string  $designBrief  User-provided design brief (e.g., "Autumn cafe vibe, warm brown/cream tones, handwritten-style font, fallen-leaf illustration pattern")
-     * @return string Prompt for generating Gemini Nano Banana Wi-Fi signage template config JSON
+     * @param  string  $designBrief  User-provided design brief describing the visual theme, background style, and mood
+     * @param  string  $colorDirection  Primary color palette description (e.g., "warm brown and cream tones with soft gold accents")
+     * @param  string  $fontMood  Typography feel description (e.g., "rounded handwritten-style Korean font")
+     * @param  string|null  $conceptName  Optional short concept label (e.g., "벚꽃 아르데코"), used only as a reference tag, not a content source
      */
-    public function build(string $designBrief): string
+    public function __construct(
+        private string $designBrief,
+        private string $colorDirection,
+        private string $fontMood,
+        private ?string $conceptName = null,
+    ) {}
+
+    public function build(): void
     {
-        return <<<TEXT
-[Role]
-You are a design-template config generator for a Wi-Fi signage print system called WiFi Note.
-Your ONLY job is to output a single valid JSON object matching the schema below. Do NOT output any explanation, markdown code fences, or text outside the JSON.
+        $conceptLine = $this->conceptName !== null
+            ? "- Concept Name: {$this->conceptName}\n"
+            : '';
 
-[Fixed schema — always follow this exact structure]
-{
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "3:4" },
-  "style": {
-    "theme": "<one-sentence visual theme description>",
-    "background": "<background description: colors, patterns, textures>",
-    "print_target": "black-and-white laser printer safe"
-  },
-  "content": {
-    "title": { "text": "와이파이 연결", "x_pc": 50, "y_pc": 10, "align": "center", "style": "<font/weight description>" },
-    "wifi_icon": { "x_pc": 50, "y_pc": 20, "width_pc": 15, "style": "<icon style description>" },
-    "message": { "text": "스캔하여 연결하세요.", "x_pc": 50, "y_pc": 62, "align": "center" },
-    "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 96, "align": "center" }
-  },
-  "placeholders": {
-    "ssid": {
-      "box_x_pc": 50, "box_y_pc": 40, "box_width_pc": 70, "box_height_pc": 8,
-      "label": "SSID:", "label_position": "outside_above",
-      "box_fill": "#FFFFFF", "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
-      "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111"
-    },
-    "password": {
-      "box_x_pc": 50, "box_y_pc": 52, "box_width_pc": 70, "box_height_pc": 8,
-      "label": "PASSWORD:", "label_position": "outside_above",
-      "box_fill": "#FFFFFF", "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
-      "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111"
-    },
-    "qr": {
-      "x_pc": 50, "y_pc": 80, "width_pc": 28,
-      "style": "<QR frame style description, e.g. corner brackets, border style>"
+        $template = file_get_contents(__DIR__.'/../stubs/config.prompt');
+
+        $this->promptString = strtr($template, [
+            '{{ concept_name_line }}' => $conceptLine,
+            '{{ design_brief }}' => $this->designBrief,
+            '{{ color_direction }}' => $this->colorDirection,
+            '{{ font_mood }}' => $this->fontMood,
+        ]);
     }
-  }
-}
 
-[Rules]
-1. "canvas.aspect_ratio" is always fixed at "3:4". Never change it.
-2. All x_pc/y_pc/width_pc/height_pc values are percentages (0-100) relative to canvas. Keep the same vertical rhythm as the schema above (title near top ~10%, icon ~20%, ssid box ~40%, password box ~52%, message ~62%, qr ~80%, footer ~96%) unless the user's brief explicitly asks for a different layout — layout changes should be deliberate, not incidental.
-3. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
-4. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".
-5. Text content fields ("title.text", "message.text", "footer.text") stay in Korean as shown, unless the user's brief explicitly provides different copy.
-6. "style", "theme", "background", and other free-text description fields should reflect the user's design brief (e.g. futuristic/space, minimal, retro, botanical, seasonal — whatever concept is given) in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
-7. Do not add extra top-level fields. Do not remove any field from the schema, even if a value is just inherited from the default above.
-8. Output must be valid, parseable JSON — no comments, no trailing commas, no markdown fences.
+    public function prompt(): ?string
+    {
+        return $this->promptString;
+    }
 
-[User's design brief]
-{$designBrief}
-TEXT;
+    public function execute(Client $client): mixed
+    {
+        $rawResponse = $client->generate($this->promptString ?? throw new RuntimeException('build() must be called before execute()'));
+
+        // Strip markdown code fences if the model wrapped the JSON in them.
+        $cleaned = preg_replace('/^```(?:json|php)?\s*\n(.*?)\n```\s*$/s', '$1', trim($rawResponse));
+
+        $this->response = json_decode($cleaned, true, 512, JSON_THROW_ON_ERROR);
+
+        if (! is_array($this->response)) {
+            throw new RuntimeException('Config response was not a JSON object.');
+        }
+
+        return $this->response;
+    }
+
+    public function response(): mixed
+    {
+        return $this->response;
     }
 }

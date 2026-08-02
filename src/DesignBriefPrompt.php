@@ -2,10 +2,13 @@
 
 namespace Cable8mm\PromptWeaver;
 
+use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\PromptInterface;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use RuntimeException;
 
-class DesignBriefPrompt
+class DesignBriefPrompt implements PromptInterface
 {
     /**
      * Random creativity seed pool that can be mixed regardless of category.
@@ -47,21 +50,23 @@ class DesignBriefPrompt
 
     private ?string $lastTextureSeed = null;
 
-    /**
-     * @param  string  $product  example "a print-signage product", "a wifi signage template", "a business card design", etc.
-     */
-    public function __construct(
-        public string $product,
-        public string $color = 'black-and-white',
-    ) {}
+    private ?string $promptString = null;
+
+    private mixed $response = null;
 
     /**
-     * Builds a design brief based on the provided category and format.
-     *
+     * @param  string  $product  example "a print-signage product", "a wifi signage template", "a business card design", etc.
      * @param  Category  $category  design brief category
      * @param  Format  $format  design brief format
      */
-    public function build(Category $category, Format $format): string
+    public function __construct(
+        public string $product,
+        private Category $category,
+        private Format $format,
+        public string $color = 'black-and-white',
+    ) {}
+
+    public function build(): void
     {
         $randomSeeds = implode(', ', [
             $this->pickRandom($this->moodSeeds, $this->lastMoodSeed),
@@ -73,33 +78,41 @@ class DesignBriefPrompt
             ? 'assume high-contrast monochrome/greyscale-safe design unless the random seeds clearly suggest a full-color context.'
             : "use a color scheme based on {$this->color} unless the random seeds clearly suggest otherwise.";
 
-        $template = <<<PROMPT
-[Role]
-You are a creative director for {$this->product}. Your job is to write ONE short design brief for {$this->product}, based on the inputs below. Output ONLY a valid JSON object, no explanation, no markdown fences.
+        $template = file_get_contents(__DIR__.'/../stubs/design-brief.prompt');
 
-[Output schema]
-{
-  "concept_name": "<short catchy concept name, 2-6 words>",
-  "design_brief": "<1-3 concise sentences describing the visual theme, background style, and mood — written so it can be dropped directly into an image-generation prompt>",
-  "color_direction": "<primary color palette description, e.g. 'warm brown and cream tones with soft gold accents'>",
-  "font_mood": "<short description of what typography feel fits, e.g. 'rounded handwritten-style Korean font'>"
-}
+        $this->promptString = strtr($template, [
+            '{{ product }}' => $this->product,
+            '{{ category }}' => $this->category->value,
+            '{{ format }}' => $this->format->value,
+            '{{ random_seeds }}' => $randomSeeds,
+            '{{ printing_instruction }}' => $printingInstruction,
+        ]);
+    }
 
-[Inputs]
-- Category: {$category->value}
-- Format: {$format->value}
-- Random creative seeds to incorporate (use these as inspiration, blend them naturally — do not just list them back): {$randomSeeds}
+    public function prompt(): ?string
+    {
+        return $this->promptString;
+    }
 
-[Rules]
-1. The brief must stay realistic and printable — avoid overly complex illustrations that won't reproduce well on a black-and-white laser printer if requested; {$printingInstruction}
-2. Tailor the mood to the Category (e.g. Cafe/Restaurant → warm and inviting; Office/Coworking → clean and minimal; Stay/Hotel → calm and premium; Event/Exhibition → bold and energetic; Other → open interpretation).
-3. Tailor the composition sensibility to the Format (e.g. A4/A5 Poster → can carry more visual detail/background pattern; L-Stand/Table Tent → compact, readable from an angle, less background clutter; Sticker → very simple, bold, single focal motif since it's small; Business Card → extremely minimal, mostly typographic).
-4. Use the random creative seeds as flavor, not as a checklist — blend them into a coherent single concept rather than cramming all of them in.
-5. "design_brief" must be written in English (it feeds an image-generation prompt), but "concept_name" stays in Korean.
-6. Output must be valid, parseable JSON only.
-PROMPT;
+    public function execute(Client $client): mixed
+    {
+        $rawResponse = $client->generate($this->promptString ?? throw new RuntimeException('build() must be called before execute()'));
 
-        return $template;
+        // Strip markdown code fences if the model wrapped the JSON in them.
+        $cleaned = preg_replace('/^```(?:json|php)?\s*\n(.*?)\n```\s*$/s', '$1', trim($rawResponse));
+
+        $this->response = json_decode($cleaned, true, 512, JSON_THROW_ON_ERROR);
+
+        if (! is_array($this->response)) {
+            throw new RuntimeException('Design brief response was not a JSON object.');
+        }
+
+        return $this->response;
+    }
+
+    public function response(): mixed
+    {
+        return $this->response;
     }
 
     private function pickRandom(array $pool, ?string &$lastPicked): string

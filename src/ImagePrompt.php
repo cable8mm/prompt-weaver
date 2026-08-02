@@ -2,46 +2,42 @@
 
 namespace Cable8mm\PromptWeaver;
 
-class ImagePrompt
+use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\PromptInterface;
+use RuntimeException;
+
+class ImagePrompt implements PromptInterface
 {
+    private ?string $promptString = null;
+
+    private mixed $response = null;
+
     /**
      * @param  array  $config  wifi-note template config JSON (canvas, style, content, placeholders)
-     * @return string Gemini Nano Banana image building prompt
      */
-    public function build(array $config): string
+    public function __construct(
+        private array $config,
+    ) {}
+
+    public function build(): void
     {
-        $canvas = $config['canvas'];
-        $style = $config['style'];
-        $content = $config['content'];
-        $placeholders = $config['placeholders'];
+        $canvas = $this->config['canvas'];
+        $style = $this->config['style'];
+        $content = $this->config['content'];
+        $placeholders = $this->config['placeholders'];
 
-        $lines = [];
-
-        $lines[] = '[Task] Generate a high-contrast Wi-Fi signage image ONLY. Do not output any text, explanation, or JSON — return the image only.';
-        $lines[] = '';
-        $lines[] = '[Canvas]';
-        $lines[] = "- Portrait canvas, aspect ratio {$canvas['aspect_ratio']}.";
-        $lines[] = '- Treat the canvas as a 0-100% grid on both axes (0% = top/left, 100% = bottom/right).';
-        $lines[] = '';
-        $lines[] = '[Style]';
-        $lines[] = $this->joinSentences([
-            $style['theme'],
-            $style['background'],
-            $style['print_target'],
-        ]);
-        $lines[] = '';
-        $lines[] = '[Layout — place elements at these exact grid positions]';
+        $layoutLines = [];
 
         $step = 1;
 
         // Title
         $title = $content['title'];
-        $lines[] = "{$step}. Title \"{$title['text']}\": centered at x={$title['x_pc']}%, y={$title['y_pc']}%. {$title['style']}.";
+        $layoutLines[] = "{$step}. Title \"{$title['text']}\": centered at x={$title['x_pc']}%, y={$title['y_pc']}%. {$title['style']}.";
         $step++;
 
         // Wi-Fi icon
         $icon = $content['wifi_icon'];
-        $lines[] = "{$step}. Wi-Fi icon: centered at x={$icon['x_pc']}%, y={$icon['y_pc']}%, width≈{$icon['width_pc']}% of canvas width. {$icon['style']}.";
+        $layoutLines[] = "{$step}. Wi-Fi icon: centered at x={$icon['x_pc']}%, y={$icon['y_pc']}%, width≈{$icon['width_pc']}% of canvas width. {$icon['style']}.";
         $step++;
 
         // placeholder boxes like SSID / PASSWORD
@@ -50,36 +46,55 @@ class ImagePrompt
                 continue;
             }
             $box = $placeholders[$key];
-            $lines[] = "{$step}. {$key} placeholder box: centered at x={$box['box_x_pc']}%, y={$box['box_y_pc']}%, box width≈{$box['box_width_pc']}%, height≈{$box['box_height_pc']}% of canvas.";
-            $lines[] = "   - The box's INTERIOR FILL must be solid {$box['box_fill']} — {$box['box_fill_note']}.";
-            $lines[] = "   - A small label \"{$box['label']}\" sits ".$this->describeLabelPosition($box['label_position']).' (against the surrounding background, not inside the white area).';
-            $lines[] = "   - Nothing else is drawn inside the box — it stays empty and pure {$box['box_fill']}.";
+            $layoutLines[] = "{$step}. {$key} placeholder box: centered at x={$box['box_x_pc']}%, y={$box['box_y_pc']}%, box width≈{$box['box_width_pc']}%, height≈{$box['box_height_pc']}% of canvas.";
+            $layoutLines[] = "   - The box's INTERIOR FILL must be solid {$box['box_fill']} — {$box['box_fill_note']}.";
+            $layoutLines[] = "   - A small label \"{$box['label']}\" sits ".$this->describeLabelPosition($box['label_position']).' (against the surrounding background, not inside the white area).';
+            $layoutLines[] = "   - Nothing else is drawn inside the box — it stays empty and pure {$box['box_fill']}.";
             $step++;
         }
 
         // Message
         $message = $content['message'];
-        $lines[] = "{$step}. Message \"{$message['text']}\": centered at x={$message['x_pc']}%, y={$message['y_pc']}%.";
+        $layoutLines[] = "{$step}. Message \"{$message['text']}\": centered at x={$message['x_pc']}%, y={$message['y_pc']}%.";
         $step++;
 
         // QR
         $qr = $placeholders['qr'];
-        $lines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}.";
+        $layoutLines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}.";
         $step++;
 
         // Footer
         $footer = $content['footer'];
-        $lines[] = "{$step}. Footer \"{$footer['text']}\": centered at x={$footer['x_pc']}%, y={$footer['y_pc']}%.";
+        $layoutLines[] = "{$step}. Footer \"{$footer['text']}\": centered at x={$footer['x_pc']}%, y={$footer['y_pc']}%.";
 
-        $lines[] = '';
-        $lines[] = '[Strict rules]';
-        $lines[] = '- The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the surrounding background, not a stylized box with a white border.';
-        $lines[] = '- Do not let the background pattern show through or bleed into these three white areas.';
-        $lines[] = '- Do not render any text or QR code inside these three areas — leave them blank.';
-        $lines[] = '- Final request: generate the finished image now, following every instruction above exactly.';
-        $lines[] = '- Output the image only.';
+        $template = file_get_contents(__DIR__.'/../stubs/image.prompt');
 
-        return implode("\n", $lines);
+        $this->promptString = strtr($template, [
+            '{{ aspect_ratio }}' => $canvas['aspect_ratio'],
+            '{{ style }}' => $this->joinSentences([
+                $style['theme'],
+                $style['background'],
+                $style['print_target'],
+            ]),
+            '{{ layout_items }}' => implode("\n", $layoutLines),
+        ]);
+    }
+
+    public function prompt(): ?string
+    {
+        return $this->promptString;
+    }
+
+    public function execute(Client $client): mixed
+    {
+        $this->response = $client->generate($this->promptString ?? throw new RuntimeException('build() must be called before execute()'));
+
+        return $this->response;
+    }
+
+    public function response(): mixed
+    {
+        return $this->response;
     }
 
     private function describeLabelPosition(string $position): string

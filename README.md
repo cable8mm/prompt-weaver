@@ -37,9 +37,10 @@ The library contains three prompt builders:
 
 They work together like this:
 
-1. `DesignBriefPrompt` takes a product, category, and format, then returns a prompt for generating a short design brief.
-2. `ConfigPrompt` takes that design brief text, then returns a prompt for generating strict JSON.
-3. `ImagePrompt` takes the parsed JSON config, then returns the final image-generation prompt you can paste into a model.
+1. `DesignBriefPrompt` takes a product, category, and format in the constructor, then `build()` generates the prompt and `prompt()` returns it.
+2. `ConfigPrompt` takes the design brief text, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
+3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
+4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
 
 The final prompt text is also stored in the fixture example at
 [`tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`](/Users/cable8mm/Herd/prompt-weaver/tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt).
@@ -51,11 +52,17 @@ The final prompt text is also stored in the fixture example at
 Input:
 
 ```php
-$briefPrompt = new DesignBriefPrompt(product: 'a Wi-Fi signage template');
-$promptText = $briefPrompt->build(
-    category: 'Cafe/Restaurant',
-    format: 'A4/A5 Poster'
+use Cable8mm\PromptWeaver\DesignBriefPrompt;
+use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\Format;
+
+$briefPrompt = new DesignBriefPrompt(
+    product: 'a Wi-Fi signage template',
+    category: Category::CAFE_RESTAURANT,
+    format: Format::A45_POSTER,
 );
+$briefPrompt->build();
+$promptText = $briefPrompt->prompt();
 ```
 
 Output:
@@ -77,14 +84,17 @@ That returned text is not the final design brief yet. It is the prompt you send 
 ```php
 use Cable8mm\PromptWeaver\ConfigPrompt;
 
-$configPrompt = new ConfigPrompt();
-
 // This would usually be the model's response to Step 1.
 $designBrief = 'A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones.';
 
-$promptText = $configPrompt->build(
-    designBrief: $designBrief
+$configPrompt = new ConfigPrompt(
+    designBrief: $designBrief,
+    colorDirection: 'warm brown and cream tones with soft gold accents',
+    fontMood: 'rounded handwritten-style Korean font',
+    conceptName: '카페 시그니처', // optional
 );
+$configPrompt->build();
+$promptText = $configPrompt->prompt();
 ```
 
 Output:
@@ -102,8 +112,6 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 
 ```php
 use Cable8mm\PromptWeaver\ImagePrompt;
-
-$imagePrompt = new ImagePrompt();
 
 // This would usually be the parsed JSON response from Step 2.
 $config = [
@@ -169,7 +177,9 @@ $config = [
     ],
 ];
 
-$promptText = $imagePrompt->build($config);
+$imagePrompt = new ImagePrompt($config);
+$imagePrompt->build();
+$promptText = $imagePrompt->prompt();
 ```
 
 ## CLI Workflow
@@ -215,12 +225,13 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 ### Manual workflow
 
-1. Call `DesignBriefPrompt::build()` to create the prompt for the brief-generation model.
+1. Create a `DesignBriefPrompt` with product, category, and format, call `build()`, then retrieve the prompt via `prompt()`.
 2. Send that prompt to a model and capture the brief text.
-3. Pass the brief text into `ConfigPrompt::build()` to create the JSON-generation prompt.
+3. Create a `ConfigPrompt` with the design brief, color direction, font mood, and optional concept name, call `build()`, then retrieve the prompt via `prompt()`.
 4. Send that prompt to a model and parse the returned JSON.
-5. Pass the parsed JSON into `ImagePrompt::build()` to create the final image prompt.
+5. Create an `ImagePrompt` with the parsed config, call `build()`, then retrieve the prompt via `prompt()`.
 6. Send the final text to your image model or image generator.
+7. (Optional) Call `execute(Client $client)` on any prompt class to send the prompt to an AI model, then `response()` to get the result.
 
 ### Automated workflow with `pipe`
 
