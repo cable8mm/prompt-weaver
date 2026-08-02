@@ -306,9 +306,9 @@ final class PromptWeaverCli
     {
         $options = $this->parseOptions($argv);
 
-        $provider = $options['provider'] ?? 'openai';
+        $provider = $options['provider'] ?? 'openrouter';
         $apiKey = $options['api-key'] ?? null;
-        $model = $options['model'] ?? null;
+        $model = $options['model'] ?? 'google/gemma-4-26b-a4b-it:free';
 
         $client = new Client(
             provider: $provider,
@@ -394,8 +394,8 @@ Usage:
   bin/prompt-weaver config model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver image model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --color-direction="..." --font-mood="..." [--concept-name="..."] --config-file=path/to/config.json
-  bin/prompt-weaver pipe model/scenario [--provider=openai] [--api-key=sk-...] [--model=gpt-4o-mini] [--color=...]
-  bin/prompt-weaver pipe --product="..." --category="..." --format="..." [--provider=openai] [--api-key=sk-...] [--model=gpt-4o-mini]
+  bin/prompt-weaver pipe model/scenario [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free] [--color=...]
+  bin/prompt-weaver pipe --product="..." --category="..." --format="..." [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free]
 
 TEXT;
 

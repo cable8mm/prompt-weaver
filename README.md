@@ -217,7 +217,7 @@ What each command outputs:
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
-8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses.
+8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 
 ## Output Flow
 
@@ -344,10 +344,10 @@ Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `c
 
 ### 8) Run the automated pipeline
 
-If you have an OpenAI API key, you can run the full three-step pipeline automatically:
+If you have an OpenRouter API key, you can run the full three-step pipeline automatically. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
 
 ```bash
-./weaver pipe chatgpt/cafe-restaurant --api-key=sk-your-api-key
+./weaver pipe chatgpt/cafe-restaurant --api-key=sk-or-v1-...
 ```
 
 Or with explicit options:
@@ -357,10 +357,16 @@ Or with explicit options:
   --product="a Wi-Fi signage template" \
   --category="Cafe/Restaurant" \
   --format="A4/A5 Poster" \
-  --provider=openai \
-  --api-key=sk-your-api-key \
-  --model=gpt-4o-mini \
+  --provider=openrouter \
+  --api-key=sk-or-v1-... \
+  --model=google/gemma-4-26b-a4b-it:free \
   --color="warm brown and cream"
+```
+
+To use OpenAI instead, pass `--provider=openai` and an OpenAI API key:
+
+```bash
+./weaver pipe chatgpt/cafe-restaurant --provider=openai --api-key=sk-... --model=gpt-4o-mini
 ```
 
 This command:
