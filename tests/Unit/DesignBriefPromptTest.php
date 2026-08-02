@@ -12,13 +12,18 @@ function set_private_property(object $object, string $property, array $value): v
 }
 
 it('builds a design brief prompt using the provided product, category, and format', function () {
-    $promptBuilder = new DesignBriefPrompt(product: 'a Wi-Fi signage template');
+    $promptBuilder = new DesignBriefPrompt(
+        product: 'a Wi-Fi signage template',
+        category: Category::CAFE_RESTAURANT,
+        format: Format::A45_POSTER,
+    );
 
     set_private_property($promptBuilder, 'moodSeeds', ['minimal Scandinavian']);
     set_private_property($promptBuilder, 'seasonSeeds', ['winter frost and pine mood']);
     set_private_property($promptBuilder, 'textureSeeds', ['subtle grid pattern']);
 
-    $prompt = $promptBuilder->build(Category::CAFE_RESTAURANT, Format::A45_POSTER);
+    $promptBuilder->build();
+    $prompt = $promptBuilder->prompt();
 
     expect($prompt)
         ->toContain('[Role]')
@@ -35,27 +40,44 @@ it('builds a design brief prompt using the provided product, category, and forma
 });
 
 it('uses the configured color in rule one', function () {
-    $blackAndWhitePrompt = (new DesignBriefPrompt(product: 'a Wi-Fi signage template'))
-        ->build(Category::OTHER, Format::CARD);
-    $colorPrompt = (new DesignBriefPrompt(product: 'a Wi-Fi signage template', color: 'ocean blue and coral'))
-        ->build(Category::OTHER, Format::CARD);
+    $blackAndWhitePrompt = new DesignBriefPrompt(
+        product: 'a Wi-Fi signage template',
+        category: Category::OTHER,
+        format: Format::CARD,
+    );
+    $blackAndWhitePrompt->build();
+    $blackAndWhiteText = $blackAndWhitePrompt->prompt();
 
-    expect($blackAndWhitePrompt)
+    $colorPrompt = new DesignBriefPrompt(
+        product: 'a Wi-Fi signage template',
+        category: Category::OTHER,
+        format: Format::CARD,
+        color: 'ocean blue and coral',
+    );
+    $colorPrompt->build();
+    $colorText = $colorPrompt->prompt();
+
+    expect($blackAndWhiteText)
         ->toContain('assume high-contrast monochrome/greyscale-safe design')
         ->not->toContain('use a color scheme based on ocean blue and coral');
 
-    expect($colorPrompt)
+    expect($colorText)
         ->toContain('use a color scheme based on ocean blue and coral')
         ->not->toContain('assume high-contrast monochrome/greyscale-safe design');
 });
 
 it('does not immediately repeat a random seed within a pool', function () {
-    $promptBuilder = new DesignBriefPrompt(product: 'a Wi-Fi signage template');
+    $promptBuilder = new DesignBriefPrompt(
+        product: 'a Wi-Fi signage template',
+        category: Category::OTHER,
+        format: Format::CARD,
+    );
 
     $previous = null;
 
     foreach (range(1, 25) as $iteration) {
-        $prompt = $promptBuilder->build(Category::OTHER, Format::CARD);
+        $promptBuilder->build();
+        $prompt = $promptBuilder->prompt();
         preg_match('/Random creative seeds .*: (.+)/', $prompt, $matches);
         $current = $matches[1];
 

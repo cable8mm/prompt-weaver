@@ -5,7 +5,6 @@ namespace Cable8mm\PromptWeaver;
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
-use RuntimeException;
 
 /**
  * Orchestrates the three-step prompt chain (design brief → config → image prompt)
@@ -28,53 +27,51 @@ final class Pipe
      * 3. Builds the final image-generation prompt from the parsed config.
      *
      * @param  string  $product  e.g. "a Wi-Fi signage template"
+     * @param  Category  $category  The category enum
+     * @param  Format  $format  The format enum
      * @param  string|null  $color  Optional color direction passed to DesignBriefPrompt.
      * @return PipeResult Contains all three prompts plus the parsed intermediate JSON.
      */
     public function run(string $product, Category $category, Format $format, ?string $color = null): PipeResult
     {
         // Step 1 — design brief
-        $briefPrompt = (new DesignBriefPrompt($product, $color ?? 'black-and-white'))
-            ->build($category, $format);
-
-        $briefResponse = $this->client->generate($briefPrompt);
-        $briefJson = $this->parseJson($briefResponse, 'design brief');
+        $briefPrompt = new DesignBriefPrompt(
+            product: $product,
+            category: $category,
+            format: $format,
+            color: $color ?? 'black-and-white',
+        );
+        $briefPrompt->build();
+        $briefJson = $briefPrompt->execute($this->client);
 
         $designBrief = $briefJson['design_brief']
-            ?? throw new RuntimeException('Design brief response missing "design_brief" field.');
+            ?? throw new \RuntimeException('Design brief response missing "design_brief" field.');
+        $colorDirection = $briefJson['color_direction']
+            ?? throw new \RuntimeException('Design brief response missing "color_direction" field.');
+        $fontMood = $briefJson['font_mood']
+            ?? throw new \RuntimeException('Design brief response missing "font_mood" field.');
+        $conceptName = $briefJson['concept_name'] ?? null;
 
         // Step 2 — config JSON
-        $configPrompt = (new ConfigPrompt)->build($designBrief);
+        $configPrompt = new ConfigPrompt(
+            designBrief: $designBrief,
+            colorDirection: $colorDirection,
+            fontMood: $fontMood,
+            conceptName: $conceptName,
+        );
+        $configPrompt->build();
+        $config = $configPrompt->execute($this->client);
 
-        $configResponse = $this->client->generate($configPrompt);
-        $config = $this->parseJson($configResponse, 'config');
-
-        // Step 3 — final image prompt
-        $imagePrompt = (new ImagePrompt)->build($config);
+        // Step 3 — final image prompt (build only, execution is left to the caller)
+        $imagePrompt = new ImagePrompt($config);
+        $imagePrompt->build();
 
         return new PipeResult(
-            briefPrompt: $briefPrompt,
+            briefPrompt: $briefPrompt->prompt() ?? '',
             briefJson: $briefJson,
-            configPrompt: $configPrompt,
+            configPrompt: $configPrompt->prompt() ?? '',
             config: $config,
-            imagePrompt: $imagePrompt,
+            imagePrompt: $imagePrompt->prompt() ?? '',
         );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function parseJson(string $text, string $step): array
-    {
-        // Strip markdown code fences if the model wrapped the JSON in them.
-        $cleaned = preg_replace('/^```(?:json|php)?\s*\n(.*?)\n```\s*$/s', '$1', trim($text));
-
-        $decoded = json_decode($cleaned, true, 512, JSON_THROW_ON_ERROR);
-
-        if (! is_array($decoded)) {
-            throw new RuntimeException("{$step} response was not a JSON object.");
-        }
-
-        return $decoded;
     }
 }

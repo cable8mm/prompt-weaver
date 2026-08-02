@@ -67,8 +67,13 @@ final class PromptWeaverCli
 
         $this->requireValues($product, $category, $format);
 
-        $prompt = new DesignBriefPrompt($product);
-        $promptText = $prompt->build($this->categoryFromInput($category), $this->formatFromInput($format));
+        $designBriefPrompt = new DesignBriefPrompt(
+            product: $product,
+            category: $this->categoryFromInput($category),
+            format: $this->formatFromInput($format),
+        );
+        $designBriefPrompt->build();
+        $promptText = $designBriefPrompt->prompt();
 
         if ($fixtureReference !== null) {
             $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
@@ -170,13 +175,30 @@ final class PromptWeaverCli
     {
         $options = $this->parseOptions($argv);
         $fixtureReference = $this->firstPositional($argv);
-        $designBrief = $fixtureReference === null
-            ? ($options['brief'] ?? null)
-            : ($this->readJsonFile($this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT).'/design-brief.json')['design_brief'] ?? null);
 
-        $this->requireValues($designBrief);
+        if ($fixtureReference === null) {
+            $designBrief = $options['brief'] ?? null;
+            $colorDirection = $options['color-direction'] ?? null;
+            $fontMood = $options['font-mood'] ?? null;
+            $conceptName = $options['concept-name'] ?? null;
+        } else {
+            $designBriefJson = $this->readJsonFile($this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT).'/design-brief.json');
+            $designBrief = $designBriefJson['design_brief'] ?? null;
+            $colorDirection = $designBriefJson['color_direction'] ?? null;
+            $fontMood = $designBriefJson['font_mood'] ?? null;
+            $conceptName = $designBriefJson['concept_name'] ?? null;
+        }
 
-        $promptText = (new ConfigPrompt)->build($designBrief);
+        $this->requireValues($designBrief, $colorDirection, $fontMood);
+
+        $configPrompt = new ConfigPrompt(
+            designBrief: $designBrief,
+            colorDirection: $colorDirection,
+            fontMood: $fontMood,
+            conceptName: $conceptName,
+        );
+        $configPrompt->build();
+        $promptText = $configPrompt->prompt();
 
         if ($fixtureReference !== null) {
             $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
@@ -207,7 +229,10 @@ final class PromptWeaverCli
         }
 
         $config = $this->readJsonFile($configPath);
-        $promptText = (new ImagePrompt)->build($config);
+
+        $imagePrompt = new ImagePrompt($config);
+        $imagePrompt->build();
+        $promptText = $imagePrompt->prompt();
 
         if ($fixtureReference !== null) {
             $fixtureDirectory = $this->fixtureDirectory($fixtureReference, $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT);
@@ -231,9 +256,12 @@ final class PromptWeaverCli
         $category = $options['category'] ?? null;
         $format = $options['format'] ?? null;
         $brief = $options['brief'] ?? null;
+        $colorDirection = $options['color-direction'] ?? null;
+        $fontMood = $options['font-mood'] ?? null;
+        $conceptName = $options['concept-name'] ?? null;
         $configFile = $options['config-file'] ?? null;
 
-        $this->requireValues($product, $category, $format, $brief, $configFile);
+        $this->requireValues($product, $category, $format, $brief, $colorDirection, $fontMood, $configFile);
 
         if (! is_string($configFile) || ! is_file($configFile)) {
             throw new RuntimeException("Config file not found: {$configFile}");
@@ -241,21 +269,35 @@ final class PromptWeaverCli
 
         $config = json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR);
 
-        $briefPrompt = (new DesignBriefPrompt($product))->build(
-            $this->categoryFromInput($category),
-            $this->formatFromInput($format),
+        $briefPrompt = new DesignBriefPrompt(
+            product: $product,
+            category: $this->categoryFromInput($category),
+            format: $this->formatFromInput($format),
         );
-        $configPrompt = (new ConfigPrompt)->build($brief);
-        $imagePrompt = (new ImagePrompt)->build($config);
+        $briefPrompt->build();
+        $briefPromptText = $briefPrompt->prompt();
+
+        $configPrompt = new ConfigPrompt(
+            designBrief: $brief,
+            colorDirection: $colorDirection,
+            fontMood: $fontMood,
+            conceptName: $conceptName,
+        );
+        $configPrompt->build();
+        $configPromptText = $configPrompt->prompt();
+
+        $imagePrompt = new ImagePrompt($config);
+        $imagePrompt->build();
+        $imagePromptText = $imagePrompt->prompt();
 
         echo '=== design-brief prompt ==='.PHP_EOL;
-        echo $briefPrompt.PHP_EOL;
+        echo $briefPromptText.PHP_EOL;
         echo PHP_EOL;
         echo '=== config prompt ==='.PHP_EOL;
-        echo $configPrompt.PHP_EOL;
+        echo $configPromptText.PHP_EOL;
         echo PHP_EOL;
         echo '=== image prompt ==='.PHP_EOL;
-        echo $imagePrompt.PHP_EOL;
+        echo $imagePromptText.PHP_EOL;
 
         return 0;
     }
@@ -351,7 +393,7 @@ Usage:
   bin/prompt-weaver brief model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver config model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver image model/scenario [--fixtures-root=tests/Fixtures]
-  bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --config-file=path/to/config.json
+  bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --color-direction="..." --font-mood="..." [--concept-name="..."] --config-file=path/to/config.json
   bin/prompt-weaver pipe model/scenario [--provider=openai] [--api-key=sk-...] [--model=gpt-4o-mini] [--color=...]
   bin/prompt-weaver pipe --product="..." --category="..." --format="..." [--provider=openai] [--api-key=sk-...] [--model=gpt-4o-mini]
 
