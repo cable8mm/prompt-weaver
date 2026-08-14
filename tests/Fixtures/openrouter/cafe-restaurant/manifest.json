@@ -1,5 +1,5 @@
 {
-    "model": "chatgpt",
+    "model": "openrouter",
     "scenario": "cafe-restaurant",
     "product": "a Wi-Fi signage template",
     "category": "Cafe/Restaurant",

@@ -3,7 +3,7 @@
 use Cable8mm\PromptWeaver\Tools\RenderPng;
 
 beforeEach(function () {
-    $fixtureDir = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $fixtureDir = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $configPath = $fixtureDir.'/config.json';
     $imagePath = $fixtureDir.'/image.png';
 

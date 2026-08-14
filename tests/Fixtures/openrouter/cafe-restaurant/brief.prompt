@@ -12,7 +12,7 @@ You are a creative director for a Wi-Fi signage template. Your job is to write O
 [Inputs]
 - Category: Cafe / Restaurant
 - Format: A4/A5 Poster Type
-- Random creative seeds to incorporate (use these as inspiration, blend them naturally — do not just list them back): playful pop art, summer beach and citrus mood, halftone dot pattern
+- Random creative seeds to incorporate (use these as inspiration, blend them naturally — do not just list them back): Japanese wabi-sabi, winter frost and pine mood, soft gradient mesh
 
 [Rules]
 1. The brief must stay realistic and printable — avoid overly complex illustrations that won't reproduce well on a black-and-white laser printer if requested; assume high-contrast monochrome/greyscale-safe design unless the random seeds clearly suggest a full-color context.
@@ -21,3 +21,4 @@ You are a creative director for a Wi-Fi signage template. Your job is to write O
 4. Use the random creative seeds as flavor, not as a checklist — blend them into a coherent single concept rather than cramming all of them in.
 5. "design_brief" must be written in English (it feeds an image-generation prompt), but "concept_name" stays in Korean.
 6. Output must be valid, parseable JSON only.
+

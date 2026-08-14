@@ -7,6 +7,7 @@ function run_prompt_weaver_preview(array $args, ?string $cwd = null): array
     $command = implode(' ', array_map('escapeshellarg', array_merge(['php', 'bin/prompt-weaver'], $args)));
 
     $descriptors = [
+        0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];
@@ -83,7 +84,7 @@ function remove_directory_preview(string $directory): void
 }
 
 it('creates a preview image by overlaying qr and credential text on the background', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-preview-'.bin2hex(random_bytes(4));
 
     try {
@@ -141,7 +142,7 @@ it('creates a preview image by overlaying qr and credential text on the backgrou
 });
 
 it('calibrates placeholder coordinates in config from the generated image', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-calibrate-'.bin2hex(random_bytes(4));
 
     try {
@@ -169,7 +170,7 @@ it('calibrates placeholder coordinates in config from the generated image', func
 });
 
 it('calibrates the qr position and width from the generated image', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-calibrate-qr-'.bin2hex(random_bytes(4));
 
     try {

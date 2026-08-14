@@ -7,6 +7,7 @@ function run_prompt_weaver_cmd(array $args, ?string $cwd = null): array
     $command = implode(' ', array_map('escapeshellarg', array_merge(['php', 'bin/prompt-weaver'], $args)));
 
     $descriptors = [
+        0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];
@@ -83,16 +84,16 @@ function remove_directory_cmd(string $directory): void
 }
 
 it('generates a design brief prompt from fixture and saves to brief.prompt', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-brief-'.bin2hex(random_bytes(4));
-    $fixtureDir = $workingFixture.'/chatgpt/cafe-restaurant';
+    $fixtureDir = $workingFixture.'/openrouter/cafe-restaurant';
 
     try {
         copy_directory_cmd($sourceFixture, $fixtureDir);
 
         $result = run_prompt_weaver_cmd([
             'brief',
-            'chatgpt/cafe-restaurant',
+            'openrouter/cafe-restaurant',
             '--fixtures-root='.$workingFixture,
         ]);
 
@@ -131,16 +132,16 @@ it('fails brief command when required options are missing', function () {
 });
 
 it('generates a config prompt from fixture and saves to config.prompt', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-config-'.bin2hex(random_bytes(4));
-    $fixtureDir = $workingFixture.'/chatgpt/cafe-restaurant';
+    $fixtureDir = $workingFixture.'/openrouter/cafe-restaurant';
 
     try {
         copy_directory_cmd($sourceFixture, $fixtureDir);
 
         $result = run_prompt_weaver_cmd([
             'config',
-            'chatgpt/cafe-restaurant',
+            'openrouter/cafe-restaurant',
             '--fixtures-root='.$workingFixture,
         ]);
 
@@ -179,16 +180,16 @@ it('fails config command when required options are missing', function () {
 });
 
 it('generates an image prompt from fixture and saves to image.prompt', function () {
-    $sourceFixture = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant';
+    $sourceFixture = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-image-'.bin2hex(random_bytes(4));
-    $fixtureDir = $workingFixture.'/chatgpt/cafe-restaurant';
+    $fixtureDir = $workingFixture.'/openrouter/cafe-restaurant';
 
     try {
         copy_directory_cmd($sourceFixture, $fixtureDir);
 
         $result = run_prompt_weaver_cmd([
             'image',
-            'chatgpt/cafe-restaurant',
+            'openrouter/cafe-restaurant',
             '--fixtures-root='.$workingFixture,
         ]);
 
@@ -205,7 +206,7 @@ it('generates an image prompt from fixture and saves to image.prompt', function 
 });
 
 it('generates an image prompt from a config file', function () {
-    $configPath = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant/config.json';
+    $configPath = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant/config.json';
 
     $result = run_prompt_weaver_cmd([
         'image',
@@ -228,7 +229,7 @@ it('fails image command when config file is missing', function () {
 });
 
 it('runs the chain command with all required options', function () {
-    $configPath = dirname(__DIR__).'/Fixtures/chatgpt/cafe-restaurant/config.json';
+    $configPath = dirname(__DIR__).'/Fixtures/openrouter/cafe-restaurant/config.json';
 
     $result = run_prompt_weaver_cmd([
         'chain',
