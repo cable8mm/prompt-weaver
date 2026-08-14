@@ -17,7 +17,8 @@
     "bacon/bacon-qr-code": "^3.1",
     "cable8mm/enum-getter": "^2.1",
     "cable8mm/nano-ai": "^0.1.0",
-    "laravel/prompts": "^0.3.22"
+    "laravel/prompts": "^0.3.22",
+    "symfony/console": "^8.1"
   },
   "require-dev": {
     "pestphp/pest": "^4.0",
