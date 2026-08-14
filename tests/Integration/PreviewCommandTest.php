@@ -7,6 +7,7 @@ function run_prompt_weaver_preview(array $args, ?string $cwd = null): array
     $command = implode(' ', array_map('escapeshellarg', array_merge(['php', 'bin/prompt-weaver'], $args)));
 
     $descriptors = [
+        0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];

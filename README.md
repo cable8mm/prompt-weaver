@@ -190,6 +190,14 @@ The CLI uses one fixture reference in the form `model/scenario`. All commands be
 ./weaver init chatgpt/cafe-restaurant
 ```
 
+You can also specify the product, category, and format when creating a fixture:
+
+```bash
+./weaver init chatgpt/cafe-restaurant --category="Office/Coworking" --format="Business Card"
+```
+
+When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `L-Stand/Table Tent`, `Sticker`, and `Business Card`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
+
 This creates:
 
 ```text
@@ -216,7 +224,7 @@ What each command outputs:
 4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
-7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`.
+7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`, or with the values you pass via `--product`, `--category`, and `--format`.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 
 ## Output Flow
@@ -284,7 +292,13 @@ The easiest way to test this package is to create one fixture and keep all gener
 ./weaver init chatgpt/cafe-restaurant
 ```
 
-This creates `tests/Fixtures/chatgpt/cafe-restaurant/manifest.json` with default values for `product`, `category`, and `format`.
+This creates `tests/Fixtures/chatgpt/cafe-restaurant/manifest.json` with default values for `product`, `category`, and `format`. You can also pass `--product`, `--category`, and `--format` to customize the manifest:
+
+```bash
+./weaver init chatgpt/cafe-restaurant --category="Office/Coworking" --format="Business Card"
+```
+
+When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. Run `./weaver --help` to see the available categories and formats.
 
 ### 2) Generate the design-brief prompt
 

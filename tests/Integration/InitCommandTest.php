@@ -7,6 +7,7 @@ function run_prompt_weaver(array $args, ?string $cwd = null): array
     $command = implode(' ', array_map('escapeshellarg', array_merge(['php', 'bin/prompt-weaver'], $args)));
 
     $descriptors = [
+        0 => ['pipe', 'r'],
         1 => ['pipe', 'w'],
         2 => ['pipe', 'w'],
     ];
@@ -87,6 +88,79 @@ it('creates a new fixture manifest with default values', function () {
     } finally {
         remove_directory($fixturesRoot);
     }
+});
+
+it('creates a new fixture manifest with custom product, category, and format', function () {
+    $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-fixtures-'.bin2hex(random_bytes(4));
+
+    try {
+        $result = run_prompt_weaver([
+            'init',
+            '--model=gemini-54-flash',
+            '--scenario=wifi-warm-cafe-in-summer',
+            '--product=a business card design',
+            '--category=Office/Coworking',
+            '--format=Business Card',
+            '--fixtures-root='.$fixturesRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        expect($result['stderr'])->toBe('');
+
+        $manifestPath = $fixturesRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json';
+        expect(is_file($manifestPath))->toBeTrue();
+
+        $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+
+        expect($manifest)->toMatchArray([
+            'model' => 'gemini-54-flash',
+            'scenario' => 'wifi-warm-cafe-in-summer',
+            'product' => 'a business card design',
+            'category' => 'Office/Coworking',
+            'format' => 'Business Card',
+        ]);
+    } finally {
+        remove_directory($fixturesRoot);
+    }
+});
+
+it('shows available categories and formats in help output', function () {
+    $result = run_prompt_weaver([
+        'help',
+    ]);
+
+    expect($result['exitCode'])->toBe(0);
+    expect($result['stdout'])
+        ->toContain('Available categories')
+        ->toContain('Cafe/Restaurant, Office/Coworking, Stay/Hotel, Event/Exhibition, Other')
+        ->toContain('Available formats')
+        ->toContain('A4/A5 Poster, L-Stand/Table Tent, Sticker, Business Card');
+});
+
+it('shows valid categories in error message for an unknown category', function () {
+    $result = run_prompt_weaver([
+        'brief',
+        '--product=a Wi-Fi signage template',
+        '--category=Unknown Category',
+        '--format=A4/A5 Poster',
+    ]);
+
+    expect($result['exitCode'])->not->toBe(0);
+    expect($result['stderr'])->toContain('Unknown category')
+        ->and($result['stderr'])->toContain('Cafe/Restaurant, Office/Coworking, Stay/Hotel, Event/Exhibition, Other');
+});
+
+it('shows valid formats in error message for an unknown format', function () {
+    $result = run_prompt_weaver([
+        'brief',
+        '--product=a Wi-Fi signage template',
+        '--category=Cafe/Restaurant',
+        '--format=Unknown Format',
+    ]);
+
+    expect($result['exitCode'])->not->toBe(0);
+    expect($result['stderr'])->toContain('Unknown format')
+        ->and($result['stderr'])->toContain('A4/A5 Poster, L-Stand/Table Tent, Sticker, Business Card');
 });
 
 it('fails when the same model and scenario already exist', function () {

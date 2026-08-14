@@ -24,6 +24,21 @@ final class PromptWeaverCli
 
     private const DEFAULT_FORMAT = 'A4/A5 Poster';
 
+    private const CATEGORY_CHOICES = [
+        'Cafe/Restaurant',
+        'Office/Coworking',
+        'Stay/Hotel',
+        'Event/Exhibition',
+        'Other',
+    ];
+
+    private const FORMAT_CHOICES = [
+        'A4/A5 Poster',
+        'L-Stand/Table Tent',
+        'Sticker',
+        'Business Card',
+    ];
+
     public function run(array $argv): int
     {
         array_shift($argv);
@@ -98,9 +113,12 @@ final class PromptWeaverCli
         if (($fixtureReference = $this->firstPositional($argv)) !== null) {
             [$model, $scenario] = $this->parseFixtureReference($fixtureReference);
         } else {
-            $model = $options['model'] ?? null;
-            $scenario = $options['scenario'] ?? null;
-            $this->requireValues($model, $scenario);
+            $model = $options['model'] ?? $this->promptForText('model', 'chatgpt');
+            $scenario = $options['scenario'] ?? $this->promptForText('scenario', 'cafe-restaurant');
+
+            if (! is_string($model) || ! is_string($scenario) || $model === '' || $scenario === '') {
+                throw new InvalidArgumentException('Missing required argument: model/scenario (e.g. init chatgpt/cafe-restaurant)');
+            }
         }
 
         $model = $this->validatePathSegment($model, 'model');
@@ -119,12 +137,15 @@ final class PromptWeaverCli
             throw new RuntimeException("Unable to create directory: {$directory}");
         }
 
+        $category = $options['category'] ?? $this->promptForChoice('category', self::CATEGORY_CHOICES, self::DEFAULT_CATEGORY);
+        $format = $options['format'] ?? $this->promptForChoice('format', self::FORMAT_CHOICES, self::DEFAULT_FORMAT);
+
         $manifest = [
             'model' => $model,
             'scenario' => $scenario,
-            'product' => self::DEFAULT_PRODUCT,
-            'category' => self::DEFAULT_CATEGORY,
-            'format' => self::DEFAULT_FORMAT,
+            'product' => $options['product'] ?? self::DEFAULT_PRODUCT,
+            'category' => $category,
+            'format' => $format,
         ];
 
         $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
@@ -364,7 +385,7 @@ final class PromptWeaverCli
             'Stay/Hotel', 'Stay / Hotel Type' => Category::STAY_HOTEL,
             'Event/Exhibition', 'Event / Exhibition Type' => Category::EVENT_EXHIBITION,
             'Other' => Category::OTHER,
-            default => throw new InvalidArgumentException("Unknown category: {$category}"),
+            default => throw new InvalidArgumentException("Unknown category: {$category}".PHP_EOL.'Valid categories: '.implode(', ', self::CATEGORY_CHOICES)),
         };
     }
 
@@ -375,7 +396,7 @@ final class PromptWeaverCli
             'L-Stand/Table Tent', 'L-Shape Stand / Table Tent Type' => Format::L_STAND,
             'Sticker', 'Sticker Type (Round/Square)' => Format::STICKER,
             'Business Card', 'Business Card Type' => Format::CARD,
-            default => throw new InvalidArgumentException("Unknown format: {$format}"),
+            default => throw new InvalidArgumentException("Unknown format: {$format}".PHP_EOL.'Valid formats: '.implode(', ', self::FORMAT_CHOICES)),
         };
     }
 
@@ -385,7 +406,7 @@ final class PromptWeaverCli
 Prompt Weaver CLI
 
 Usage:
-  bin/prompt-weaver init model/scenario [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver init model/scenario [--product="..."] [--category="..."] [--format="..."] [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver calibrate model/scenario [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver preview --fixture="path/to/fixture"
   bin/prompt-weaver preview --fixture="path/to/fixture" --output="path/to/preview.html"
@@ -396,6 +417,12 @@ Usage:
   bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --color-direction="..." --font-mood="..." [--concept-name="..."] --config-file=path/to/config.json
   bin/prompt-weaver pipe model/scenario [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free] [--color=...]
   bin/prompt-weaver pipe --product="..." --category="..." --format="..." [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free]
+
+Available categories:
+  Cafe/Restaurant, Office/Coworking, Stay/Hotel, Event/Exhibition, Other
+
+Available formats:
+  A4/A5 Poster, L-Stand/Table Tent, Sticker, Business Card
 
 TEXT;
 
@@ -528,6 +555,62 @@ TEXT;
         }
 
         return $value;
+    }
+
+    /**
+     * Prompt the user to enter free text when running interactively.
+     * Returns an empty string when STDIN is not a TTY (e.g. tests, CI, pipes).
+     */
+    private function promptForText(string $label, string $example): string
+    {
+        if (! stream_isatty(STDIN)) {
+            return '';
+        }
+
+        fwrite(STDOUT, "Enter {$label} (e.g. {$example}): ");
+
+        $input = trim((string) fgets(STDIN));
+
+        return $input;
+    }
+
+    /**
+     * Prompt the user to select from a list of choices when running interactively.
+     * Falls back to the default value when STDIN is not a TTY (e.g. tests, CI, pipes).
+     *
+     * @param  array<int, string>  $choices
+     */
+    private function promptForChoice(string $label, array $choices, string $default): string
+    {
+        if (! stream_isatty(STDIN)) {
+            return $default;
+        }
+
+        fwrite(STDOUT, "Select a {$label}:".PHP_EOL);
+
+        foreach ($choices as $index => $choice) {
+            fwrite(STDOUT, '  '.($index + 1).') '.$choice.PHP_EOL);
+        }
+
+        $defaultIndex = array_search($default, $choices, true);
+        $promptSuffix = $defaultIndex === false ? '' : ' ['.($defaultIndex + 1).']';
+        fwrite(STDOUT, "Enter number{$promptSuffix}: ");
+
+        $input = trim((string) fgets(STDIN));
+
+        if ($input === '') {
+            return $default;
+        }
+
+        $index = (int) $input - 1;
+
+        if (isset($choices[$index])) {
+            return $choices[$index];
+        }
+
+        fwrite(STDOUT, "Invalid selection. Using default: {$default}".PHP_EOL);
+
+        return $default;
     }
 }
 
