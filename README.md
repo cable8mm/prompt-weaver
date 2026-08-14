@@ -20,11 +20,20 @@ The package is centered around the **WiFi Note** signage flow, where a design br
 ## Requirements
 
 - PHP 8.3 or newer
+- Composer 2.x
 
 ## Installation
 
 ```bash
 composer require cable8mm/prompt-weaver
+```
+
+To work on this repository locally, install the development dependencies instead:
+
+```bash
+git clone https://github.com/cable8mm/prompt-weaver.git
+cd prompt-weaver
+composer install
 ```
 
 ## What It Does
@@ -43,7 +52,7 @@ They work together like this:
 4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
 
 The final prompt text is also stored in the fixture example at
-[`tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`](/Users/cable8mm/Herd/prompt-weaver/tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt).
+[`tests/Fixtures/openrouter/cafe-restaurant/image.prompt`](tests/Fixtures/openrouter/cafe-restaurant/image.prompt).
 
 ## Usage
 
@@ -184,34 +193,51 @@ $promptText = $imagePrompt->prompt();
 
 ## CLI Workflow
 
-The CLI uses one fixture reference in the form `model/scenario`. All commands below operate on the same fixture folder:
+The repository includes the `./weaver` wrapper, which invokes `bin/prompt-weaver`:
 
 ```bash
-./weaver init chatgpt/cafe-restaurant
+./weaver --help
+./weaver --version
+```
+
+You can also invoke the PHP entry point directly:
+
+```bash
+php bin/prompt-weaver --help
+```
+
+The CLI uses one fixture reference in the form `model/scenario`. The checked-in example uses `openrouter/cafe-restaurant`, matching the default provider used by `pipe`.
+
+All commands below operate on the same fixture folder:
+
+```bash
+./weaver init openrouter/cafe-restaurant
 ```
 
 You can also specify the product, category, and format when creating a fixture:
 
 ```bash
-./weaver init chatgpt/cafe-restaurant --category="Office/Coworking" --format="Business Card"
+./weaver init openrouter/cafe-restaurant --category="Office/Coworking" --format="Business Card"
 ```
 
 When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `L-Stand/Table Tent`, `Sticker`, and `Business Card`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
 
+The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
+
 This creates:
 
 ```text
-tests/Fixtures/chatgpt/cafe-restaurant/manifest.json
+tests/Fixtures/openrouter/cafe-restaurant/manifest.json
 ```
 
 The commands use the files created or saved in that folder:
 
 ```bash
-./weaver brief chatgpt/cafe-restaurant
-./weaver config chatgpt/cafe-restaurant
-./weaver image chatgpt/cafe-restaurant
-./weaver calibrate chatgpt/cafe-restaurant
-./weaver preview chatgpt/cafe-restaurant
+./weaver brief openrouter/cafe-restaurant
+./weaver config openrouter/cafe-restaurant
+./weaver image openrouter/cafe-restaurant
+./weaver calibrate openrouter/cafe-restaurant
+./weaver preview openrouter/cafe-restaurant
 ```
 
 `brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
@@ -226,6 +252,8 @@ What each command outputs:
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`, or with the values you pass via `--product`, `--category`, and `--format`.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+
+For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
 ## Output Flow
 
@@ -280,7 +308,7 @@ The `PipeResult` object contains all three prompts plus the parsed intermediate 
 - `DesignBriefPrompt` intentionally adds a small amount of randomness so the generated briefs feel less repetitive.
 - `ConfigPrompt` is strict about JSON structure so the next step can parse the output reliably.
 - `ImagePrompt` focuses on layout, contrast, and print-safe composition.
-- The `tests/Fixtures/gpt-54-mini/wifi-note-cafe/` folder shows one complete example of the chain, including the final image prompt.
+- The `tests/Fixtures/openrouter/cafe-restaurant/` folder shows one complete example of the chain, including the final image prompt.
 
 ## Testing
 
@@ -289,13 +317,13 @@ The easiest way to test this package is to create one fixture and keep all gener
 ### 1) Create a fixture folder
 
 ```bash
-./weaver init chatgpt/cafe-restaurant
+./weaver init openrouter/cafe-restaurant
 ```
 
-This creates `tests/Fixtures/chatgpt/cafe-restaurant/manifest.json` with default values for `product`, `category`, and `format`. You can also pass `--product`, `--category`, and `--format` to customize the manifest:
+This creates `tests/Fixtures/openrouter/cafe-restaurant/manifest.json` with default values for `product`, `category`, and `format`. You can also pass `--product`, `--category`, and `--format` to customize the manifest:
 
 ```bash
-./weaver init chatgpt/cafe-restaurant --category="Office/Coworking" --format="Business Card"
+./weaver init openrouter/cafe-restaurant --category="Office/Coworking" --format="Business Card"
 ```
 
 When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. Run `./weaver --help` to see the available categories and formats.
@@ -303,31 +331,31 @@ When run from a terminal, `init` interactively prompts you to select a category 
 ### 2) Generate the design-brief prompt
 
 ```bash
-./weaver brief chatgpt/cafe-restaurant
+./weaver brief openrouter/cafe-restaurant
 ```
 
-The prompt is also saved automatically as `tests/Fixtures/chatgpt/cafe-restaurant/brief.prompt`. Send it to a model and save its JSON response as `tests/Fixtures/chatgpt/cafe-restaurant/design-brief.json`.
+The prompt is also saved automatically as `tests/Fixtures/openrouter/cafe-restaurant/brief.prompt`. Send it to a model and save its JSON response as `tests/Fixtures/openrouter/cafe-restaurant/design-brief.json`.
 
 ### 3) Generate the config prompt
 
 ```bash
-./weaver config chatgpt/cafe-restaurant
+./weaver config openrouter/cafe-restaurant
 ```
 
-The command reads `design-brief.json`, takes its `design_brief` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/chatgpt/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/chatgpt/cafe-restaurant/config.json`.
+The command reads `design-brief.json`, takes its `design_brief` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/openrouter/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/openrouter/cafe-restaurant/config.json`.
 
 ### 4) Generate the final image prompt
 
 ```bash
-./weaver image chatgpt/cafe-restaurant
+./weaver image openrouter/cafe-restaurant
 ```
 
-The command reads `config.json`, prints the final image-generation prompt, and saves it as `tests/Fixtures/chatgpt/cafe-restaurant/image.prompt`.
+The command reads `config.json`, prints the final image-generation prompt, and saves it as `tests/Fixtures/openrouter/cafe-restaurant/image.prompt`.
 
 ### 5) Calibrate the config to the generated image
 
 ```bash
-./weaver calibrate chatgpt/cafe-restaurant
+./weaver calibrate openrouter/cafe-restaurant
 ```
 
 This detects the actual white text boxes and QR frame in `image.png`. It writes the calibrated SSID/password `box_y_pc` values and QR `x_pc`, `y_pc`, and `width_pc` values to `calibrate.config.json`, leaving the original `config.json` unchanged.
@@ -335,23 +363,23 @@ This detects the actual white text boxes and QR frame in `image.png`. It writes 
 ### 6) Generate a preview image
 
 ```bash
-./weaver preview chatgpt/cafe-restaurant
+./weaver preview openrouter/cafe-restaurant
 ```
 
-This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.png` using `calibrate.config.json` when present, so you can inspect the SSID, password, and QR placement by eye. If `config.json` changes, run `calibrate` again to regenerate the calibrated config.
+This creates `tests/Fixtures/openrouter/cafe-restaurant/preview.png` using `calibrate.config.json` when present, so you can inspect the SSID, password, and QR placement by eye. If `config.json` changes, run `calibrate` again to regenerate the calibrated config.
 
 ### 7) Generate a browser preview
 
 ```bash
-./weaver preview chatgpt/cafe-restaurant --output=html
+./weaver preview openrouter/cafe-restaurant --output=html
 ```
 
-This creates `tests/Fixtures/chatgpt/cafe-restaurant/preview.html` using `image.png`, `calibrate.config.json`, and `fonts/AtkinsonHyperlegible-Regular.woff2` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required. Keep the generated HTML in its fixture directory so its relative asset paths remain valid.
+This creates `tests/Fixtures/openrouter/cafe-restaurant/preview.html` using `image.png`, `calibrate.config.json`, and `fonts/AtkinsonHyperlegible-Regular.woff2` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required. Keep the generated HTML in its fixture directory so its relative asset paths remain valid.
 
 Because browsers commonly block `fetch()` from local `file://` pages, serve the fixture directory through a local web server before opening the HTML:
 
 ```bash
-php -S localhost:8000 -t tests/Fixtures/chatgpt/cafe-restaurant
+php -S localhost:8000 -t tests/Fixtures/openrouter/cafe-restaurant
 ```
 
 Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
@@ -361,7 +389,7 @@ Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `c
 If you have an OpenRouter API key, you can run the full three-step pipeline automatically. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
 
 ```bash
-./weaver pipe chatgpt/cafe-restaurant --api-key=sk-or-v1-...
+./weaver pipe openrouter/cafe-restaurant --api-key=sk-or-v1-...
 ```
 
 Or with explicit options:
@@ -380,7 +408,7 @@ Or with explicit options:
 To use OpenAI instead, pass `--provider=openai` and an OpenAI API key:
 
 ```bash
-./weaver pipe chatgpt/cafe-restaurant --provider=openai --api-key=sk-... --model=gpt-4o-mini
+./weaver pipe openrouter/cafe-restaurant --provider=openai --api-key=sk-... --model=gpt-4o-mini
 ```
 
 This command:
@@ -396,16 +424,16 @@ This command:
 
 The repo already includes one complete example:
 
-- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/manifest.json`
-- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/design-brief.json`
-- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/config.json`
-- `tests/Fixtures/gpt-54-mini/wifi-note-cafe/image.txt`
+- `tests/Fixtures/openrouter/cafe-restaurant/manifest.json`
+- `tests/Fixtures/openrouter/cafe-restaurant/design-brief.json`
+- `tests/Fixtures/openrouter/cafe-restaurant/config.json`
+- `tests/Fixtures/openrouter/cafe-restaurant/image.prompt`
 
 The integration test reads those files and checks that:
 
 1. The design-brief prompt is generated correctly.
 2. The config prompt includes the generated brief.
-3. The image prompt matches the saved `image.txt` fixture.
+3. The image prompt matches the saved `image.prompt` fixture.
 4. The preview image can be generated from the fixture background without errors, with credential text and the QR code rendered in the calibrated area.
 
 ### 9.5) E2E test fixtures

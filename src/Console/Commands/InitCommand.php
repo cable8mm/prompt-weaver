@@ -74,11 +74,11 @@ final class InitCommand extends PromptWeaverCommand
             return $this->parseFixtureReference($fixtureReference);
         }
 
-        $model = $input->getOption('model') ?? $this->askText('model', 'chatgpt');
+        $model = $input->getOption('model') ?? $this->askText('model', 'openrouter');
         $scenario = $input->getOption('scenario') ?? $this->askText('scenario', 'cafe-restaurant');
 
         if ($model === '' || $scenario === '') {
-            throw new \InvalidArgumentException('Missing required argument: model/scenario (e.g. init chatgpt/cafe-restaurant)');
+            throw new \InvalidArgumentException('Missing required argument: model/scenario (e.g. init openrouter/cafe-restaurant)');
         }
 
         return [$model, $scenario];
