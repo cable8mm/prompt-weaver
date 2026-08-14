@@ -18,4 +18,30 @@ enum Category: string
     {
         return __($this->value);
     }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function cliChoices(): array
+    {
+        return [
+            'Cafe/Restaurant',
+            'Office/Coworking',
+            'Stay/Hotel',
+            'Event/Exhibition',
+            'Other',
+        ];
+    }
+
+    public static function fromCliInput(string $value): self
+    {
+        return match ($value) {
+            'Cafe/Restaurant', 'Cafe / Restaurant' => self::CAFE_RESTAURANT,
+            'Office/Coworking', 'Office / Coworking Space' => self::OFFICE_COWORKING,
+            'Stay/Hotel', 'Stay / Hotel Type' => self::STAY_HOTEL,
+            'Event/Exhibition', 'Event / Exhibition Type' => self::EVENT_EXHIBITION,
+            'Other' => self::OTHER,
+            default => throw new \InvalidArgumentException("Unknown category: {$value}".PHP_EOL.'Valid categories: '.implode(', ', self::cliChoices())),
+        };
+    }
 }

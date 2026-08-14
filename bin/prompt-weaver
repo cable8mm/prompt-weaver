@@ -29,21 +29,6 @@ final class PromptWeaverCli
 
     private const DEFAULT_FORMAT = 'A4/A5 Poster';
 
-    private const CATEGORY_CHOICES = [
-        'Cafe/Restaurant',
-        'Office/Coworking',
-        'Stay/Hotel',
-        'Event/Exhibition',
-        'Other',
-    ];
-
-    private const FORMAT_CHOICES = [
-        'A4/A5 Poster',
-        'L-Stand/Table Tent',
-        'Sticker',
-        'Business Card',
-    ];
-
     public function run(array $argv): int
     {
         array_shift($argv);
@@ -89,8 +74,8 @@ final class PromptWeaverCli
 
         $designBriefPrompt = new DesignBriefPrompt(
             product: $product,
-            category: $this->categoryFromInput($category),
-            format: $this->formatFromInput($format),
+            category: Category::fromCliInput($category),
+            format: Format::fromCliInput($format),
         );
         $designBriefPrompt->build();
         $promptText = $designBriefPrompt->prompt();
@@ -115,16 +100,7 @@ final class PromptWeaverCli
 
         $fixturesRoot = $options['fixtures-root'] ?? self::DEFAULT_FIXTURES_ROOT;
 
-        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
-            [$model, $scenario] = $this->parseFixtureReference($fixtureReference);
-        } else {
-            $model = $options['model'] ?? $this->promptForText('model', 'chatgpt');
-            $scenario = $options['scenario'] ?? $this->promptForText('scenario', 'cafe-restaurant');
-
-            if (! is_string($model) || ! is_string($scenario) || $model === '' || $scenario === '') {
-                throw new InvalidArgumentException('Missing required argument: model/scenario (e.g. init chatgpt/cafe-restaurant)');
-            }
-        }
+        [$model, $scenario] = $this->resolveInitIdentifiers($argv, $options);
 
         $model = $this->validatePathSegment($model, 'model');
         $scenario = $this->validatePathSegment($scenario, 'scenario');
@@ -142,8 +118,8 @@ final class PromptWeaverCli
             throw new RuntimeException("Unable to create directory: {$directory}");
         }
 
-        $category = $options['category'] ?? $this->promptForChoice('category', self::CATEGORY_CHOICES, self::DEFAULT_CATEGORY);
-        $format = $options['format'] ?? $this->promptForChoice('format', self::FORMAT_CHOICES, self::DEFAULT_FORMAT);
+        $category = $options['category'] ?? $this->askChoice('category', Category::cliChoices(), self::DEFAULT_CATEGORY);
+        $format = $options['format'] ?? $this->askChoice('format', Format::cliChoices(), self::DEFAULT_FORMAT);
 
         $manifest = [
             'model' => $model,
@@ -293,12 +269,12 @@ final class PromptWeaverCli
             throw new RuntimeException("Config file not found: {$configFile}");
         }
 
-        $config = json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR);
+        $config = $this->readJsonFile($configFile);
 
         $briefPrompt = new DesignBriefPrompt(
             product: $product,
-            category: $this->categoryFromInput($category),
-            format: $this->formatFromInput($format),
+            category: Category::fromCliInput($category),
+            format: Format::fromCliInput($format),
         );
         $briefPrompt->build();
         $briefPromptText = $briefPrompt->prompt();
@@ -354,8 +330,8 @@ final class PromptWeaverCli
 
         $result = (new Pipe($client))->run(
             $product,
-            $this->categoryFromInput($category),
-            $this->formatFromInput($format),
+            Category::fromCliInput($category),
+            Format::fromCliInput($format),
             $color,
         );
 
@@ -366,29 +342,6 @@ final class PromptWeaverCli
         $this->displaySection('image prompt', $result->imagePrompt);
 
         return 0;
-    }
-
-    private function categoryFromInput(string $category): Category
-    {
-        return match ($category) {
-            'Cafe/Restaurant', 'Cafe / Restaurant' => Category::CAFE_RESTAURANT,
-            'Office/Coworking', 'Office / Coworking Space' => Category::OFFICE_COWORKING,
-            'Stay/Hotel', 'Stay / Hotel Type' => Category::STAY_HOTEL,
-            'Event/Exhibition', 'Event / Exhibition Type' => Category::EVENT_EXHIBITION,
-            'Other' => Category::OTHER,
-            default => throw new InvalidArgumentException("Unknown category: {$category}".PHP_EOL.'Valid categories: '.implode(', ', self::CATEGORY_CHOICES)),
-        };
-    }
-
-    private function formatFromInput(string $format): Format
-    {
-        return match ($format) {
-            'A4/A5 Poster', 'A4/A5 Poster Type' => Format::A45_POSTER,
-            'L-Stand/Table Tent', 'L-Shape Stand / Table Tent Type' => Format::L_STAND,
-            'Sticker', 'Sticker Type (Round/Square)' => Format::STICKER,
-            'Business Card', 'Business Card Type' => Format::CARD,
-            default => throw new InvalidArgumentException("Unknown format: {$format}".PHP_EOL.'Valid formats: '.implode(', ', self::FORMAT_CHOICES)),
-        };
     }
 
     private function help(): int
@@ -464,6 +417,27 @@ TEXT);
         }
 
         return null;
+    }
+
+    /**
+     * @param  array<int, string>  $argv
+     * @param  array<string, string>  $options
+     * @return array{0: string, 1: string}
+     */
+    private function resolveInitIdentifiers(array $argv, array $options): array
+    {
+        if (($fixtureReference = $this->firstPositional($argv)) !== null) {
+            return $this->parseFixtureReference($fixtureReference);
+        }
+
+        $model = $options['model'] ?? $this->askText('model', 'chatgpt');
+        $scenario = $options['scenario'] ?? $this->askText('scenario', 'cafe-restaurant');
+
+        if ($model === '' || $scenario === '') {
+            throw new InvalidArgumentException('Missing required argument: model/scenario (e.g. init chatgpt/cafe-restaurant)');
+        }
+
+        return [$model, $scenario];
     }
 
     private function resolveFixtureDirectory(array $argv): string
@@ -552,7 +526,7 @@ TEXT);
      * Prompt the user to enter free text when running interactively.
      * Returns an empty string when STDIN is not a TTY (e.g. tests, CI, pipes).
      */
-    private function promptForText(string $label, string $example): string
+    private function askText(string $label, string $example): string
     {
         if (! stream_isatty(STDIN)) {
             return '';
@@ -567,7 +541,7 @@ TEXT);
      *
      * @param  array<int, string>  $choices
      */
-    private function promptForChoice(string $label, array $choices, string $default): string
+    private function askChoice(string $label, array $choices, string $default): string
     {
         if (! stream_isatty(STDIN)) {
             return $default;
