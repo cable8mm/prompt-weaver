@@ -14,6 +14,11 @@ use Cable8mm\PromptWeaver\ImagePrompt;
 use Cable8mm\PromptWeaver\Pipe;
 use Cable8mm\PromptWeaver\Tools\PreviewImage;
 
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\note;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
+
 final class PromptWeaverCli
 {
     private const DEFAULT_FIXTURES_ROOT = 'tests/Fixtures';
@@ -59,7 +64,7 @@ final class PromptWeaverCli
                 default => $this->error("Unknown command: {$command}"),
             };
         } catch (Throwable $throwable) {
-            fwrite(STDERR, $throwable->getMessage().PHP_EOL);
+            $this->displayError($throwable->getMessage());
 
             return 1;
         }
@@ -154,7 +159,7 @@ final class PromptWeaverCli
             throw new RuntimeException("Unable to write manifest: {$manifestPath}");
         }
 
-        echo "Created {$manifestPath}".PHP_EOL;
+        info("Created {$manifestPath}");
 
         return 0;
     }
@@ -176,7 +181,7 @@ final class PromptWeaverCli
             $preview->render($outputPath, $options);
         }
 
-        echo "Created {$outputPath}".PHP_EOL;
+        info("Created {$outputPath}");
 
         return 0;
     }
@@ -187,7 +192,7 @@ final class PromptWeaverCli
 
         (new PreviewImage($fixtureDirectory))->calibrate();
 
-        echo 'Updated '.rtrim($fixtureDirectory, '/').'/calibrate.config.json'.PHP_EOL;
+        info('Updated '.rtrim($fixtureDirectory, '/').'/calibrate.config.json');
 
         return 0;
     }
@@ -311,14 +316,9 @@ final class PromptWeaverCli
         $imagePrompt->build();
         $imagePromptText = $imagePrompt->prompt();
 
-        echo '=== design-brief prompt ==='.PHP_EOL;
-        echo $briefPromptText.PHP_EOL;
-        echo PHP_EOL;
-        echo '=== config prompt ==='.PHP_EOL;
-        echo $configPromptText.PHP_EOL;
-        echo PHP_EOL;
-        echo '=== image prompt ==='.PHP_EOL;
-        echo $imagePromptText.PHP_EOL;
+        $this->displaySection('design-brief prompt', $briefPromptText);
+        $this->displaySection('config prompt', $configPromptText);
+        $this->displaySection('image prompt', $imagePromptText);
 
         return 0;
     }
@@ -359,20 +359,11 @@ final class PromptWeaverCli
             $color,
         );
 
-        echo '=== design-brief prompt ==='.PHP_EOL;
-        echo $result->briefPrompt.PHP_EOL;
-        echo PHP_EOL;
-        echo '=== design-brief response ==='.PHP_EOL;
-        echo json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
-        echo PHP_EOL;
-        echo '=== config prompt ==='.PHP_EOL;
-        echo $result->configPrompt.PHP_EOL;
-        echo PHP_EOL;
-        echo '=== config response ==='.PHP_EOL;
-        echo json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
-        echo PHP_EOL;
-        echo '=== image prompt ==='.PHP_EOL;
-        echo $result->imagePrompt.PHP_EOL;
+        $this->displaySection('design-brief prompt', $result->briefPrompt);
+        $this->displaySection('design-brief response', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $this->displaySection('config prompt', $result->configPrompt);
+        $this->displaySection('config response', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $this->displaySection('image prompt', $result->imagePrompt);
 
         return 0;
     }
@@ -402,7 +393,7 @@ final class PromptWeaverCli
 
     private function help(): int
     {
-        echo <<<'TEXT'
+        note(<<<'TEXT'
 Prompt Weaver CLI
 
 Usage:
@@ -424,15 +415,15 @@ Available categories:
 Available formats:
   A4/A5 Poster, L-Stand/Table Tent, Sticker, Business Card
 
-TEXT;
+TEXT);
 
         return 0;
     }
 
     private function error(string $message): int
     {
-        fwrite(STDERR, $message.PHP_EOL);
-        fwrite(STDERR, 'Try: bin/prompt-weaver --help'.PHP_EOL);
+        $this->displayError($message);
+        $this->displayError('Try: bin/prompt-weaver --help');
 
         return 1;
     }
@@ -567,11 +558,7 @@ TEXT;
             return '';
         }
 
-        fwrite(STDOUT, "Enter {$label} (e.g. {$example}): ");
-
-        $input = trim((string) fgets(STDIN));
-
-        return $input;
+        return text("Enter {$label}", placeholder: $example);
     }
 
     /**
@@ -586,31 +573,31 @@ TEXT;
             return $default;
         }
 
-        fwrite(STDOUT, "Select a {$label}:".PHP_EOL);
-
-        foreach ($choices as $index => $choice) {
-            fwrite(STDOUT, '  '.($index + 1).') '.$choice.PHP_EOL);
-        }
-
         $defaultIndex = array_search($default, $choices, true);
-        $promptSuffix = $defaultIndex === false ? '' : ' ['.($defaultIndex + 1).']';
-        fwrite(STDOUT, "Enter number{$promptSuffix}: ");
+        $selection = select(
+            label: "Select a {$label}",
+            options: $choices,
+            default: $defaultIndex === false ? null : $defaultIndex,
+        );
 
-        $input = trim((string) fgets(STDIN));
+        return $choices[(int) $selection] ?? $default;
+    }
 
-        if ($input === '') {
-            return $default;
+    private function displaySection(string $title, ?string $content): void
+    {
+        echo "=== {$title} ===".PHP_EOL;
+        echo ($content ?? '').PHP_EOL.PHP_EOL;
+    }
+
+    private function displayError(string $message): void
+    {
+        if (stream_isatty(STDERR)) {
+            note($message, 'error');
+
+            return;
         }
 
-        $index = (int) $input - 1;
-
-        if (isset($choices[$index])) {
-            return $choices[$index];
-        }
-
-        fwrite(STDOUT, "Invalid selection. Using default: {$default}".PHP_EOL);
-
-        return $default;
+        fwrite(STDERR, $message.PHP_EOL);
     }
 }
 
