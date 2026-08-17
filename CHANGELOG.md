@@ -1,5 +1,16 @@
 # Release Notes
 
+## v0.3.0 - 2026-08-14
+
+### What's Changed
+
+* feat: implement pipeline automation and E2E tests for OpenRouter API by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/14
+* feat: Implement PromptInterface and refactor DesignBriefPrompt and ImagePrompt by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/15
+* feat: Update default provider and model in CLI for pipeline execution by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/16
+* feat: Enhance cli by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/17
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.2.0...v0.3.0
+
 ## v0.2.0 - 2026-07-26
 
 ### What's Changed
