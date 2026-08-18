@@ -1,10 +1,11 @@
 {
-  "Cafe / Restaurant": "카페/레스토랑형",
-  "Office / Coworking Space": "오피스/공유 오피스형",
-  "Stay / Hotel Type": "스테이/호텔형",
-  "Event / Exhibition Type": "이벤트/전시회형",
+  "Cafe/Restaurant": "카페/레스토랑형",
+  "Office/Coworking Space": "오피스/공유 오피스형",
+  "Stay/Hotel Type": "스테이/호텔형",
+  "Event/Exhibition Type": "이벤트/전시회형",
   "Other": "기타",
-  "A4/A5 Poster Type": "A4/A5 포스터형",
+  "A4/A5 Poster": "A4/A5 포스터형",
+  "A6/A7 Poster": "A6/A7 포스터형",
   "L-Shape Stand / Table Tent Type": "L자 스탠드/테이블 텐트형",
   "Sticker Type (Round/Square)": "스티커형 (원형/사각형)",
   "Business Card Type": "명함형"

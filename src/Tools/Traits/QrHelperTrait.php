@@ -8,6 +8,8 @@ use BaconQrCode\Writer;
 
 trait QrHelperTrait
 {
+    use PlaceholderGeometryTrait;
+
     /**
      * @param  array<string, mixed>  $placeholder
      */

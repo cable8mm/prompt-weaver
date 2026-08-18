@@ -42,8 +42,8 @@ final class InitCommand extends PromptWeaverCommand
             throw new \RuntimeException("Unable to create directory: {$directory}");
         }
 
-        $category = $input->getOption('category') ?? $this->askChoice('category', Category::cliChoices(), self::DEFAULT_CATEGORY);
-        $format = $input->getOption('format') ?? $this->askChoice('format', Format::cliChoices(), self::DEFAULT_FORMAT);
+        $category = $input->getOption('category') ?? $this->askChoice('category', Category::keys(), self::DEFAULT_CATEGORY);
+        $format = $input->getOption('format') ?? $this->askChoice('format', Format::keys(), self::DEFAULT_FORMAT);
 
         $manifest = [
             'model' => $model,

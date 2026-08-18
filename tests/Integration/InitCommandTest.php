@@ -134,7 +134,7 @@ it('shows available categories and formats in help output', function () {
         ->toContain('Available categories')
         ->toContain('Cafe/Restaurant, Office/Coworking, Stay/Hotel, Event/Exhibition, Other')
         ->toContain('Available formats')
-        ->toContain('A4/A5 Poster, L-Stand/Table Tent, Sticker, Business Card');
+        ->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square');
 });
 
 it('shows valid categories in error message for an unknown category', function () {
@@ -160,7 +160,7 @@ it('shows valid formats in error message for an unknown format', function () {
 
     expect($result['exitCode'])->not->toBe(0);
     expect($result['stderr'])->toContain('Unknown format')
-        ->and($result['stderr'])->toContain('A4/A5 Poster, L-Stand/Table Tent, Sticker, Business Card');
+        ->and($result['stderr'])->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square');
 });
 
 it('fails when the same model and scenario already exist', function () {
