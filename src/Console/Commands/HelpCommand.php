@@ -16,8 +16,8 @@ final class HelpCommand extends SymfonyHelpCommand
 {
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $categories = implode(', ', Category::cliChoices());
-        $formats = implode(', ', Format::cliChoices());
+        $categories = implode(', ', Category::keys());
+        $formats = implode(', ', Format::keys());
 
         note(<<<TEXT
 Prompt Weaver CLI

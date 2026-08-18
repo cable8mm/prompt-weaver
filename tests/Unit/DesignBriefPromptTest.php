@@ -28,8 +28,8 @@ it('builds a design brief prompt using the provided product, category, and forma
     expect($prompt)
         ->toContain('[Role]')
         ->toContain('You are a creative director for a Wi-Fi signage template.')
-        ->toContain('Category: Cafe / Restaurant')
-        ->toContain('Format: A4/A5 Poster Type')
+        ->toContain('Category: Cafe/Restaurant')
+        ->toContain('Format: A4/A5 Poster')
         ->toContain('minimal Scandinavian, winter frost and pine mood, subtle grid pattern')
         ->toContain('"concept_name": "<short catchy concept name, 2-6 words>"')
         ->toContain('"design_brief": "<1-3 concise sentences')
@@ -43,7 +43,7 @@ it('uses the configured color in rule one', function () {
     $blackAndWhitePrompt = new DesignBriefPrompt(
         product: 'a Wi-Fi signage template',
         category: Category::OTHER,
-        format: Format::CARD,
+        format: Format::A45_POSTER,
     );
     $blackAndWhitePrompt->build();
     $blackAndWhiteText = $blackAndWhitePrompt->prompt();
@@ -51,7 +51,7 @@ it('uses the configured color in rule one', function () {
     $colorPrompt = new DesignBriefPrompt(
         product: 'a Wi-Fi signage template',
         category: Category::OTHER,
-        format: Format::CARD,
+        format: Format::A45_POSTER,
         color: 'ocean blue and coral',
     );
     $colorPrompt->build();
@@ -70,7 +70,7 @@ it('does not immediately repeat a random seed within a pool', function () {
     $promptBuilder = new DesignBriefPrompt(
         product: 'a Wi-Fi signage template',
         category: Category::OTHER,
-        format: Format::CARD,
+        format: Format::A45_POSTER,
     );
 
     $previous = null;
