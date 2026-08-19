@@ -42,6 +42,8 @@ final class InitCommand extends PromptWeaverCommand
         $category = $input->getOption('category') ?? $this->askChoice('category', Category::keys(), self::DEFAULT_CATEGORY);
         $format = $input->getOption('format') ?? $this->askChoice('format', Format::keys(), self::DEFAULT_FORMAT);
         $colorMode = $input->getOption('color-mode') ?? $this->askChoice('color mode', ColorMode::keys(), self::DEFAULT_COLOR_MODE);
+        $category = Category::fromCliInput($category)->value;
+        $format = Format::fromCliInput($format)->value;
         $colorMode = ColorMode::fromCliInput($colorMode);
 
         $manifest = [
