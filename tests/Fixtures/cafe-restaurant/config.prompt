@@ -41,20 +41,21 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 [Rules]
 1. "canvas.aspect_ratio" must be "5:7". Never change it.
 2. "color_mode" must be "mono". Use "color" for full-color output and "mono" for monochrome output.
-2. "ssid", "password", and "qr" MUST keep the fixed vertical rhythm above (ssid ~40%, password ~52%, qr ~80%) — these positions are required for downstream automated overlay and must not shift.
-3. "title", "wifi_icon", "message", "footer" positions are flexible — vary their placement, size, and composition to match the mood of the Design Brief and Name, as long as they don't overlap the ssid/password/qr zones (see rule 2). Avoid defaulting to the same layout every time.
-4. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
-5. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".
-6. Text content fields ("title.text", "message.text", "footer.text") stay in Korean as shown, unless the template description explicitly provides different copy.
-7. "style", "theme", "background", and other free-text description fields should reflect the template description in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
-8. For "style.background" specifically, treat "Color Direction" below as the authoritative source for palette — if "Description" and "Color Direction" seem to imply slightly different colors, "Color Direction" wins.
-9. For "content.title.style" and any other typography-related description, treat "Font Mood" below as the authoritative source — do not invent a different font feel from the description alone.
-10. "Name" (if provided) is a reference label only — do not copy it verbatim into any output field; use it only to keep the overall mood consistent.
-11. Do not add extra top-level fields. Do not remove any field from the schema, even if a value is just inherited from the default above.
-12. Output must be valid, parseable JSON — no comments, no trailing commas, no markdown fences.
+3. "ssid", "password", and "qr" MUST keep the fixed vertical rhythm above (ssid ~40%, password ~52%, qr ~80%) — these positions are required for downstream automated overlay and must not shift.
+4. "title", "wifi_icon", "message", "footer" positions are flexible — vary their placement, size, and composition to match the mood of the Design Brief and Name, as long as they don't overlap the ssid/password/qr zones (see rule 3). Avoid defaulting to the same layout every time.
+5. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
+6. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".
+7. Text content fields ("title.text", "message.text", "footer.text") stay in Korean as shown, unless the template description explicitly provides different copy.
+8. "style", "theme", "background", and other free-text description fields should reflect the template description in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
+9. For "style.background" specifically, treat "Color Direction" below as the authoritative source for palette — if "Description" and "Color Direction" seem to imply slightly different colors, "Color Direction" wins.
+10. For "content.title.style" and any other typography-related description, treat "Font Mood" below as the authoritative source — do not invent a different font feel from the description alone.
+11. "Name" (if provided) is a reference label only — do not copy it verbatim into any output field; use it only to keep the overall mood consistent.
+12. Do not add extra top-level fields. Do not remove any field from the schema, even if a value is just inherited from the default above.
+13. Output must be valid, parseable JSON — no comments, no trailing commas, no markdown fences.
 
 [Inputs]
 - Name: 벚꽃 아르데코
-- Description: A warm and inviting cafe poster featuring elegant Art Deco geometry softened with subtle cherry blossom-inspired accents and refined geometric line-art patterns. Use a clean, high-contrast composition with generous whitespace, crisp borders, and understated decorative elements that remain printable in monochrome while conveying a fresh spring atmosphere.
-- Color Direction: charcoal, ivory, and warm gray with optional muted blush accents that remain effective in grayscale
-- Font Mood: elegant rounded sans-serif with subtle Art Deco influence
+- Description: 은은한 벚꽃 장식과 정교한 기하학적 라인 패턴을 더한 따뜻하고 편안한 카페 분위기의 포스터입니다. 넉넉한 여백과 선명한 테두리를 사용해 모노크롬 인쇄에서도 잘 보이도록 구성합니다.
+- Color Direction: 차콜, 아이보리, 웜 그레이를 중심으로 하고 회색조에서도 구분되는 은은한 블러시 포인트를 더합니다.
+- Font Mood: 은은한 아르데코 감성을 더한 우아하고 둥근 산세리프 한글 글꼴
+

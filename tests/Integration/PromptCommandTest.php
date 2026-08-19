@@ -289,9 +289,9 @@ it('exports a generated png and config for Laravel import', function () {
                     'format' => 'A4/A5 Poster',
                     'color_mode' => 'mono',
                     'name' => '벚꽃 아르데코',
-                    'description' => 'A warm and inviting cafe poster featuring elegant Art Deco geometry softened with subtle cherry blossom-inspired accents and refined geometric line-art patterns. Use a clean, high-contrast composition with generous whitespace, crisp borders, and understated decorative elements that remain printable in monochrome while conveying a fresh spring atmosphere.',
-                    'color_direction' => 'charcoal, ivory, and warm gray with optional muted blush accents that remain effective in grayscale',
-                    'font_mood' => 'elegant rounded sans-serif with subtle Art Deco influence',
+                    'description' => '은은한 벚꽃 장식과 정교한 기하학적 라인 패턴을 더한 따뜻하고 편안한 카페 분위기의 포스터입니다. 넉넉한 여백과 선명한 테두리를 사용해 모노크롬 인쇄에서도 잘 보이도록 구성합니다.',
+                    'color_direction' => '차콜, 아이보리, 웜 그레이를 중심으로 하고 회색조에서도 구분되는 은은한 블러시 포인트를 더합니다.',
+                    'font_mood' => '은은한 아르데코 감성을 더한 우아하고 둥근 산세리프 한글 글꼴',
                 ],
             ]);
         expect(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($fixtureDirectory.'/image.png'));
