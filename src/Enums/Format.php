@@ -26,13 +26,12 @@ enum Format: string
             );
     }
 
-    public static function canvasSizeFrom(string $value): array
+    public function pages(): array
     {
-        return match ($value) {
-            self::A45_POSTER => [2480, 3508],
-            self::A67_POSTER => [1240, 1748],
-            self::MINI_SQUARE => [1000, 1000],
-            default => throw new \InvalidArgumentException("Unknown format: {$value}".PHP_EOL.'Valid formats: '.implode(', ', self::keys())),
+        return match ($this) {
+            self::A45_POSTER => ['a4', 'a5'],
+            self::A67_POSTER => ['a6', 'a7'],
+            self::MINI_SQUARE => ['mini-square'],
         };
     }
 }
