@@ -26,6 +26,7 @@ final class ExportCommand extends PromptWeaverCommand
         $code = (string) $input->getArgument('fixture');
         $fixtureDirectory = $this->fixtureDirectoryFromReference($code, $this->fixturesRoot($input));
         $manifestPath = $fixtureDirectory.'/manifest.json';
+        $designBriefPath = $fixtureDirectory.'/design-brief.json';
         $configPath = is_file($fixtureDirectory.'/calibrate.config.json')
             ? $fixtureDirectory.'/calibrate.config.json'
             : $fixtureDirectory.'/config.json';
@@ -37,6 +38,10 @@ final class ExportCommand extends PromptWeaverCommand
             throw new RuntimeException("Manifest file not found: {$manifestPath}");
         }
 
+        if (! is_file($designBriefPath)) {
+            throw new RuntimeException("Design brief file not found: {$designBriefPath}");
+        }
+
         if (! is_file($configPath)) {
             throw new RuntimeException("Config file not found: {$configPath}");
         }
@@ -46,7 +51,10 @@ final class ExportCommand extends PromptWeaverCommand
         }
 
         $manifest = $this->readJsonFile($manifestPath);
+        $designBrief = $this->readJsonFile($designBriefPath);
         $config = $this->readJsonFile($configPath);
+        $config['schema_version'] = 1;
+        $config['metadata'] = $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath);
         $this->validateConfig($config, $configPath);
         $this->validateImage($imagePath, $config);
 
@@ -54,7 +62,6 @@ final class ExportCommand extends PromptWeaverCommand
             throw new RuntimeException("Unable to create output directory: {$outputDirectory}");
         }
 
-        $this->writeJson($outputDirectory.'/manifest.json', $manifest);
         $this->writeJson($outputDirectory.'/config.json', $config);
 
         if (! copy($imagePath, $outputDirectory.'/image.png')) {
@@ -64,6 +71,33 @@ final class ExportCommand extends PromptWeaverCommand
         $this->displayCreated($outputDirectory);
 
         return self::SUCCESS;
+    }
+
+    /** @param array<string, mixed> $manifest @param array<string, mixed> $designBrief @return array<string, string> */
+    private function metadata(array $manifest, array $designBrief, string $manifestPath, string $designBriefPath): array
+    {
+        $fields = [
+            'code' => [$manifest, 'code', $manifestPath],
+            'category' => [$manifest, 'category', $manifestPath],
+            'format' => [$manifest, 'format', $manifestPath],
+            'color_mode' => [$manifest, 'color_mode', $manifestPath],
+            'name' => [$designBrief, 'name', $designBriefPath],
+            'description' => [$designBrief, 'description', $designBriefPath],
+            'color_direction' => [$designBrief, 'color_direction', $designBriefPath],
+            'font_mood' => [$designBrief, 'font_mood', $designBriefPath],
+        ];
+
+        $metadata = [];
+        foreach ($fields as $key => [$source, $sourceKey, $path]) {
+            $value = $source[$sourceKey] ?? null;
+            if (! is_string($value) || trim($value) === '') {
+                throw new RuntimeException("Metadata field '{$sourceKey}' is missing or invalid: {$path}");
+            }
+
+            $metadata[$key] = $value;
+        }
+
+        return $metadata;
     }
 
     /** @param array<string, mixed> $config */

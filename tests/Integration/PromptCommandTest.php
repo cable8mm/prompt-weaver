@@ -277,9 +277,23 @@ it('exports a generated png and config for Laravel import', function () {
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
         expect($result['stdout'])->toContain('Created '.$outputDirectory);
-        expect(is_file($outputDirectory.'/manifest.json'))->toBeTrue();
         expect(is_file($outputDirectory.'/config.json'))->toBeTrue();
         expect(is_file($outputDirectory.'/image.png'))->toBeTrue();
+        expect(is_file($outputDirectory.'/manifest.json'))->toBeFalse();
+        expect(json_decode((string) file_get_contents($outputDirectory.'/config.json'), true, 512, JSON_THROW_ON_ERROR))
+            ->toMatchArray([
+                'schema_version' => 1,
+                'metadata' => [
+                    'code' => 'cafe-restaurant',
+                    'category' => 'Cafe/Restaurant',
+                    'format' => 'A4/A5 Poster',
+                    'color_mode' => 'mono',
+                    'name' => '벚꽃 아르데코',
+                    'description' => 'A warm and inviting cafe poster featuring elegant Art Deco geometry softened with subtle cherry blossom-inspired accents and refined geometric line-art patterns. Use a clean, high-contrast composition with generous whitespace, crisp borders, and understated decorative elements that remain printable in monochrome while conveying a fresh spring atmosphere.',
+                    'color_direction' => 'charcoal, ivory, and warm gray with optional muted blush accents that remain effective in grayscale',
+                    'font_mood' => 'elegant rounded sans-serif with subtle Art Deco influence',
+                ],
+            ]);
         expect(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($fixtureDirectory.'/image.png'));
     } finally {
         remove_directory_cmd($workingRoot);

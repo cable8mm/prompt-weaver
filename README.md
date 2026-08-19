@@ -401,16 +401,33 @@ The package does not call an image-generation API. Generate the image with your 
 
 If `--image` is omitted, the command uses `tests/Fixtures/cafe-restaurant/image.png`. If `calibrate.config.json` exists, it is used as the exported `config.json`; otherwise the command uses `config.json`.
 
-The export command validates that the manifest and config exist, the image is a PNG, and its aspect ratio matches `canvas.aspect_ratio`. The resulting directory contains:
+The export command validates that the manifest, design brief, and config exist, the image is a PNG, and its aspect ratio matches `canvas.aspect_ratio`. The resulting directory contains:
 
 ```text
 dist/cafe-restaurant/
-├── manifest.json
 ├── config.json
 └── image.png
 ```
 
-These files are intended to be imported by the Laravel service. The command does not delete existing files in the output directory, but it overwrites these three named output files.
+The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields:
+
+```json
+{
+  "schema_version": 1,
+  "metadata": {
+    "code": "cafe-restaurant",
+    "category": "Cafe/Restaurant",
+    "format": "A4/A5 Poster",
+    "color_mode": "mono",
+    "name": "...",
+    "description": "...",
+    "color_direction": "...",
+    "font_mood": "..."
+  }
+}
+```
+
+These two files are intended to be imported by the Laravel service. The command does not delete existing files in the output directory, but it overwrites `config.json` and `image.png`.
 
 ### 9) Run the automated text pipeline
 
