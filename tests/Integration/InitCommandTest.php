@@ -96,7 +96,7 @@ it('creates a new fixture manifest with custom category and format', function ()
             'init',
             'wifi-warm-cafe-in-summer',
             '--category=Office/Coworking',
-            '--format=Business Card',
+            '--format=A6/A7 Poster',
             '--color-mode=color',
             '--fixtures-root='.$fixturesRoot,
         ]);
@@ -112,7 +112,7 @@ it('creates a new fixture manifest with custom category and format', function ()
         expect($manifest)->toMatchArray([
             'code' => 'wifi-warm-cafe-in-summer',
             'category' => 'Office/Coworking',
-            'format' => 'Business Card',
+            'format' => 'A6/A7 Poster',
             'color_mode' => 'color',
         ]);
     } finally {

@@ -219,10 +219,10 @@ All commands below operate on the same fixture folder:
 You can also specify the category and format when creating a fixture:
 
 ```bash
-./weaver init cafe-restaurant --category="Office/Coworking" --format="Business Card"
+./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
 ```
 
-When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `L-Stand/Table Tent`, `Sticker`, and `Business Card`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
+When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `A6/A7 Poster`, and `Mini Square`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
 
 The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
 
@@ -326,7 +326,7 @@ The easiest way to test this package is to create one fixture and keep all gener
 This creates `tests/Fixtures/cafe-restaurant/manifest.json` with the template `code` and default values for `category` and `format`. You can also pass `--category` and `--format` to customize the manifest:
 
 ```bash
-./weaver init cafe-restaurant --category="Office/Coworking" --format="Business Card"
+./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
 ```
 
 When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. Run `./weaver --help` to see the available categories and formats.
