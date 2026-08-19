@@ -3,13 +3,13 @@
 use Cable8mm\PromptWeaver\ConfigPrompt;
 
 it('injects the design brief, color direction, and font mood into the config prompt', function () {
-    $designBrief = 'A cozy cafe Wi-Fi sign with warm brown and cream tones.';
+    $description = 'A cozy cafe Wi-Fi sign with warm brown and cream tones.';
     $colorDirection = 'warm brown and cream tones with soft gold accents';
     $fontMood = 'rounded handwritten-style Korean font';
     $name = '카페 시그니처';
 
     $configPrompt = new ConfigPrompt(
-        designBrief: $designBrief,
+        description: $description,
         colorDirection: $colorDirection,
         fontMood: $fontMood,
         name: $name,
@@ -20,12 +20,12 @@ it('injects the design brief, color direction, and font mood into the config pro
     expect($prompt)
         ->toContain('[Role]')
         ->toContain('[Fixed schema')
-        ->toContain($designBrief)
+        ->toContain($description)
         ->toContain($colorDirection)
         ->toContain($fontMood)
         ->toContain($name)
         ->toContain('"canvas"')
         ->toContain('"content"')
         ->toContain('"placeholders"')
-        ->not->toContain('{$designBrief}');
+        ->not->toContain('{$description}');
 });

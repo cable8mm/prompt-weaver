@@ -45,7 +45,7 @@ final class FakeHttpClient implements HttpClientInterface
 it('runs the full three-step pipeline and returns all prompts', function () {
     $briefJson = json_encode([
         'name' => '따뜻한 카페',
-        'design_brief' => 'A warm cafe Wi-Fi sign with cream and brown tones.',
+        'description' => 'A warm cafe Wi-Fi sign with cream and brown tones.',
         'color_direction' => 'warm brown and cream',
         'font_mood' => 'rounded sans-serif',
     ]);
@@ -103,7 +103,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
         ->toContain('You are a creative director for a Wi-Fi signage template');
 
     // Brief JSON should be parsed correctly
-    expect($result->briefJson['design_brief'])->toBe('A warm cafe Wi-Fi sign with cream and brown tones.');
+    expect($result->briefJson['description'])->toBe('A warm cafe Wi-Fi sign with cream and brown tones.');
 
     // Config prompt should contain the design brief
     expect($result->configPrompt)
@@ -124,7 +124,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
 it('strips markdown code fences from model responses', function () {
     $briefJson = "```json\n".json_encode([
         'name' => '테스트',
-        'design_brief' => 'A test design brief.',
+        'description' => 'A test design brief.',
         'color_direction' => 'test colors',
         'font_mood' => 'test font',
     ])."\n```";
@@ -159,12 +159,12 @@ it('strips markdown code fences from model responses', function () {
         format: Format::A45_POSTER,
     );
 
-    expect($result->briefJson['design_brief'])->toBe('A test design brief.');
+    expect($result->briefJson['description'])->toBe('A test design brief.');
     expect($result->config['style']['theme'])->toBe('test');
 });
 
-it('throws when the design brief response is missing the design_brief field', function () {
-    $briefJson = json_encode(['name' => 'test']); // missing design_brief
+it('throws when the design brief response is missing the description field', function () {
+    $briefJson = json_encode(['name' => 'test']); // missing description
 
     $httpClient = new FakeHttpClient([$briefJson]);
 
@@ -180,12 +180,12 @@ it('throws when the design brief response is missing the design_brief field', fu
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
-})->throws(RuntimeException::class, 'Design brief response missing "design_brief" field.');
+})->throws(RuntimeException::class, 'Design brief response missing "description" field.');
 
 it('passes the color option to DesignBriefPrompt', function () {
     $briefJson = json_encode([
         'name' => '색칠',
-        'design_brief' => 'A colorful design brief.',
+        'description' => 'A colorful design brief.',
         'color_direction' => 'vibrant colors',
         'font_mood' => 'bold font',
     ]);

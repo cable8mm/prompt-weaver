@@ -42,7 +42,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 3. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
 4. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".
 5. Text content fields ("title.text", "message.text", "footer.text") stay in Korean as shown, unless the user's brief explicitly provides different copy.
-6. "style", "theme", "background", and other free-text description fields should reflect the user's design brief (e.g. futuristic/space, minimal, retro, botanical, seasonal — whatever concept is given) in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
+6. "style", "theme", "background", and other free-text description fields should reflect the template description (e.g. futuristic/space, minimal, retro, botanical, seasonal — whatever direction is given) in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
 7. Do not add extra top-level fields. Do not remove any field from the schema, even if a value is just inherited from the default above.
 8. Output must be valid, parseable JSON — no comments, no trailing commas, no markdown fences.
 

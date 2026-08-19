@@ -21,7 +21,7 @@ final class ChainCommand extends PromptWeaverCommand
         foreach ([
             'category',
             'format',
-            'brief',
+            'description',
             'color-direction',
             'font-mood',
             'name',
@@ -35,13 +35,13 @@ final class ChainCommand extends PromptWeaverCommand
     {
         $category = $input->getOption('category');
         $format = $input->getOption('format');
-        $brief = $input->getOption('brief');
+        $description = $input->getOption('description');
         $colorDirection = $input->getOption('color-direction');
         $fontMood = $input->getOption('font-mood');
         $name = $input->getOption('name');
         $configFile = $input->getOption('config-file');
 
-        $this->requireValues($category, $format, $brief, $colorDirection, $fontMood, $configFile);
+        $this->requireValues($category, $format, $description, $colorDirection, $fontMood, $configFile);
 
         if (! is_file($configFile)) {
             throw new \RuntimeException("Config file not found: {$configFile}");
@@ -50,7 +50,7 @@ final class ChainCommand extends PromptWeaverCommand
         $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), Format::fromCliInput($format));
         $briefPrompt->build();
 
-        $configPrompt = new ConfigPrompt($brief, $colorDirection, $fontMood, $name);
+        $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, $name);
         $configPrompt->build();
 
         $imagePrompt = new ImagePrompt($this->readJsonFile($configFile));

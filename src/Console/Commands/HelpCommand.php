@@ -31,7 +31,7 @@ Usage:
   bin/prompt-weaver brief code [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver config code [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver image code [--fixtures-root=tests/Fixtures]
-  bin/prompt-weaver chain --category="..." --format="..." --brief="..." --color-direction="..." --font-mood="..." [--name="..."] --config-file=path/to/config.json
+  bin/prompt-weaver chain --category="..." --format="..." --description="..." --color-direction="..." --font-mood="..." [--name="..."] --config-file=path/to/config.json
   bin/prompt-weaver pipe code [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free] [--color=...]
   bin/prompt-weaver pipe --category="..." --format="..." [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free]
 

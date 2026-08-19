@@ -47,7 +47,7 @@ The library contains three prompt builders:
 They work together like this:
 
 1. `DesignBriefPrompt` takes a category and format in the constructor, then `build()` generates a Wi-Fi signage design brief prompt and `prompt()` returns it.
-2. `ConfigPrompt` takes the design brief text, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
+2. `ConfigPrompt` takes the template description, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
 
@@ -93,10 +93,10 @@ That returned text is not the final design brief yet. It is the prompt you send 
 use Cable8mm\PromptWeaver\ConfigPrompt;
 
 // This would usually be the model's response to Step 1.
-$designBrief = 'A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones.';
+$description = 'A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones.';
 
 $configPrompt = new ConfigPrompt(
-    designBrief: $designBrief,
+    description: $description,
     colorDirection: 'warm brown and cream tones with soft gold accents',
     fontMood: 'rounded handwritten-style Korean font',
     name: '카페 시그니처', // optional
@@ -239,12 +239,12 @@ The commands use the files created or saved in that folder:
 ./weaver preview cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
 
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
-2. `config` prints the JSON-generation prompt you send after you have a design brief result.
+2. `config` prints the JSON-generation prompt you send after you have a template description.
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
@@ -261,8 +261,8 @@ This package is intended to be used as part of a multi-step generation pipeline:
 ### Manual workflow
 
 1. Create a `DesignBriefPrompt` with category and format, call `build()`, then retrieve the prompt via `prompt()`.
-2. Send that prompt to a model and capture the brief text.
-3. Create a `ConfigPrompt` with the design brief, color direction, font mood, and optional template name, call `build()`, then retrieve the prompt via `prompt()`.
+2. Send that prompt to a model and capture the description.
+3. Create a `ConfigPrompt` with the description, color direction, font mood, and optional template name, call `build()`, then retrieve the prompt via `prompt()`.
 4. Send that prompt to a model and parse the returned JSON.
 5. Create an `ImagePrompt` with the parsed config, call `build()`, then retrieve the prompt via `prompt()`.
 6. Send the final text to your image model or image generator.
@@ -340,7 +340,7 @@ The prompt is also saved automatically as `tests/Fixtures/cafe-restaurant/brief.
 ./weaver config cafe-restaurant
 ```
 
-The command reads `design-brief.json`, takes its `design_brief` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/cafe-restaurant/config.json`.
+The command reads `design-brief.json`, takes its `description` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/cafe-restaurant/config.json`.
 
 ### 4) Generate the final image prompt
 

@@ -159,7 +159,7 @@ it('generates a config prompt from fixture and saves to config.prompt', function
 it('generates a config prompt from direct options', function () {
     $result = run_prompt_weaver_cmd([
         'config',
-        '--brief=A warm and inviting cafe poster',
+        '--description=A warm and inviting cafe poster',
         '--color-direction=charcoal, ivory, and warm gray',
         '--font-mood=elegant rounded sans-serif',
     ]);
@@ -234,7 +234,7 @@ it('runs the chain command with all required options', function () {
         'chain',
         '--category=Cafe/Restaurant',
         '--format=A4/A5 Poster',
-        '--brief=A warm and inviting cafe poster featuring elegant Art Deco geometry',
+        '--description=A warm and inviting cafe poster featuring elegant Art Deco geometry',
         '--color-direction=charcoal, ivory, and warm gray with optional muted blush accents',
         '--font-mood=elegant rounded sans-serif with subtle Art Deco influence',
         '--config-file='.$configPath,

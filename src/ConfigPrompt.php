@@ -13,13 +13,13 @@ class ConfigPrompt implements PromptInterface
     private mixed $response = null;
 
     /**
-     * @param  string  $designBrief  User-provided design brief describing the visual theme, background style, and mood
+     * @param  string  $description  Template description describing the visual theme, background style, and mood
      * @param  string  $colorDirection  Primary color palette description (e.g., "warm brown and cream tones with soft gold accents")
      * @param  string  $fontMood  Typography feel description (e.g., "rounded handwritten-style Korean font")
      * @param  string|null  $name  Optional template name (e.g., "벚꽃 아르데코"), used only as a reference tag, not a content source
      */
     public function __construct(
-        private string $designBrief,
+        private string $description,
         private string $colorDirection,
         private string $fontMood,
         private ?string $name = null,
@@ -35,7 +35,7 @@ class ConfigPrompt implements PromptInterface
 
         $this->promptString = strtr($template, [
             '{{ name_line }}' => $nameLine,
-            '{{ design_brief }}' => $this->designBrief,
+            '{{ description }}' => $this->description,
             '{{ color_direction }}' => $this->colorDirection,
             '{{ font_mood }}' => $this->fontMood,
         ]);

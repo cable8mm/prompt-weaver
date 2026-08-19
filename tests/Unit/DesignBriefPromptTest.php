@@ -31,10 +31,10 @@ it('builds a Wi-Fi signage design brief prompt using the category and format', f
         ->toContain('Format: A4/A5 Poster')
         ->toContain('minimal Scandinavian, winter frost and pine mood, subtle grid pattern')
         ->toContain('"name": "<short template name, 2-6 words>"')
-        ->toContain('"design_brief": "<1-3 concise sentences')
+        ->toContain('"description": "<1-3 concise sentences')
         ->toContain('"color_direction": "<primary color palette description')
         ->toContain('"font_mood": "<short description of what typography feel fits')
-        ->toContain('"design_brief" must be written in English')
+        ->toContain('"description" must be written in English')
         ->toContain('Output ONLY a valid JSON object');
 });
 

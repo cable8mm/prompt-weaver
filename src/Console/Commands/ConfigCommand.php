@@ -16,7 +16,7 @@ final class ConfigCommand extends PromptWeaverCommand
     {
         $this->setName('config')->setDescription('Generate a config prompt.');
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
-        $this->addOption('brief', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('description', null, InputOption::VALUE_REQUIRED);
         $this->addOption('color-direction', null, InputOption::VALUE_REQUIRED);
         $this->addOption('font-mood', null, InputOption::VALUE_REQUIRED);
         $this->addOption('name', null, InputOption::VALUE_REQUIRED);
@@ -29,21 +29,21 @@ final class ConfigCommand extends PromptWeaverCommand
 
         if (is_string($fixtureReference) && $fixtureReference !== '') {
             $designBriefJson = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/design-brief.json');
-            $designBrief = $designBriefJson['design_brief'] ?? null;
+            $description = $designBriefJson['description'] ?? null;
             $colorDirection = $designBriefJson['color_direction'] ?? null;
             $fontMood = $designBriefJson['font_mood'] ?? null;
             $name = $designBriefJson['name'] ?? null;
         } else {
-            $designBrief = $input->getOption('brief');
+            $description = $input->getOption('description');
             $colorDirection = $input->getOption('color-direction');
             $fontMood = $input->getOption('font-mood');
             $name = $input->getOption('name');
         }
 
-        $this->requireValues($designBrief, $colorDirection, $fontMood);
+        $this->requireValues($description, $colorDirection, $fontMood);
 
         $prompt = new ConfigPrompt(
-            designBrief: $designBrief,
+            description: $description,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
             name: $name,

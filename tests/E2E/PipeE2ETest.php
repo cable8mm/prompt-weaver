@@ -96,8 +96,8 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     // Verify design brief response
     expect($result->briefJson)
-        ->toHaveKey('design_brief')
-        ->and($result->briefJson['design_brief'])
+        ->toHaveKey('description')
+        ->and($result->briefJson['description'])
         ->not->toBeEmpty();
 
     // Verify config response structure
