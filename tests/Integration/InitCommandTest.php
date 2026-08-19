@@ -177,3 +177,24 @@ it('fails when the same template code already exists', function () {
         remove_directory($fixturesRoot);
     }
 });
+
+it('rejects an unknown category or format before writing a manifest', function () {
+    $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-fixtures-'.bin2hex(random_bytes(4));
+    $fixtureDirectory = $fixturesRoot.'/invalid-fixture';
+
+    try {
+        $result = run_prompt_weaver([
+            'init',
+            'invalid-fixture',
+            '--category=Unknown',
+            '--format=Unknown',
+            '--fixtures-root='.$fixturesRoot,
+        ]);
+
+        expect($result['exitCode'])->not->toBe(0);
+        expect($result['stderr'])->toContain('Unknown category');
+        expect(is_file($fixtureDirectory.'/manifest.json'))->toBeFalse();
+    } finally {
+        remove_directory($fixturesRoot);
+    }
+});

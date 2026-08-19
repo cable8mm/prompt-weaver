@@ -21,6 +21,7 @@ The package is centered around the **WiFi Note** signage flow, where a design br
 
 - PHP 8.3 or newer
 - Composer 2.x
+- GD extension (required by preview, calibration, and QR rendering)
 
 ## Installation
 
@@ -254,6 +255,7 @@ What each command outputs:
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+9. `export` packages a manually generated PNG and the fixture config into a Laravel-ready `dist/<code>` directory.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
@@ -273,7 +275,7 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 ### Automated workflow with `pipe`
 
-The `Pipe` class automates the entire three-step pipeline by sending each prompt to an AI model via `cable8mm/nano-ai`:
+The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `cable8mm/nano-ai`. It returns the final image-generation prompt; the image itself is generated externally and imported through the export workflow:
 
 ```php
 use Cable8mm\NanoAI\Client;
@@ -298,9 +300,9 @@ $result = $pipe->run(
 
 // Access all prompts and responses
 echo $result->briefPrompt;   // Design brief prompt
-echo $result->briefJson;     // Parsed design brief JSON
+echo json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE); // Parsed design brief JSON
 echo $result->configPrompt;  // Config generation prompt
-echo $result->config;        // Parsed config JSON
+echo json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);     // Parsed config JSON
 echo $result->imagePrompt;   // Final image generation prompt
 ```
 
@@ -387,9 +389,32 @@ php -S localhost:8000 -t tests/Fixtures/cafe-restaurant
 
 Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
 
-### 8) Run the automated pipeline
+### 8) Export the externally generated image
 
-If you have an OpenRouter API key, you can run the full three-step pipeline automatically. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
+The package does not call an image-generation API. Generate the image with your preferred chat-based image tool, then package it together with the fixture config:
+
+```bash
+./weaver export cafe-restaurant \
+  --image=/path/to/generated-image.png \
+  --output-dir=dist/cafe-restaurant
+```
+
+If `--image` is omitted, the command uses `tests/Fixtures/cafe-restaurant/image.png`. If `calibrate.config.json` exists, it is used as the exported `config.json`; otherwise the command uses `config.json`.
+
+The export command validates that the manifest and config exist, the image is a PNG, and its aspect ratio matches `canvas.aspect_ratio`. The resulting directory contains:
+
+```text
+dist/cafe-restaurant/
+├── manifest.json
+├── config.json
+└── image.png
+```
+
+These files are intended to be imported by the Laravel service. The command does not delete existing files in the output directory, but it overwrites these three named output files.
+
+### 9) Run the automated text pipeline
+
+If you have an OpenRouter API key, you can run the automated brief/config/image-prompt pipeline. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
 
 ```bash
 ./weaver pipe cafe-restaurant --api-key=sk-or-v1-...

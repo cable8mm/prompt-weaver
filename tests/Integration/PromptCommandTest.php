@@ -256,3 +256,61 @@ it('fails chain command when required options are missing', function () {
     expect($result['exitCode'])->not->toBe(0);
     expect($result['stderr'])->toContain('must be of type string');
 });
+
+it('exports a generated png and config for Laravel import', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-export-'.bin2hex(random_bytes(4));
+    $fixtureDirectory = $workingRoot.'/fixtures/cafe-restaurant';
+    $outputDirectory = $workingRoot.'/dist/cafe-restaurant';
+
+    try {
+        copy_directory_cmd($sourceFixture, $fixtureDirectory);
+
+        $result = run_prompt_weaver_cmd([
+            'export',
+            'cafe-restaurant',
+            '--fixtures-root='.$workingRoot.'/fixtures',
+            '--image='.$fixtureDirectory.'/image.png',
+            '--output-dir='.$outputDirectory,
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        expect($result['stderr'])->toBe('');
+        expect($result['stdout'])->toContain('Created '.$outputDirectory);
+        expect(is_file($outputDirectory.'/manifest.json'))->toBeTrue();
+        expect(is_file($outputDirectory.'/config.json'))->toBeTrue();
+        expect(is_file($outputDirectory.'/image.png'))->toBeTrue();
+        expect(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($fixtureDirectory.'/image.png'));
+    } finally {
+        remove_directory_cmd($workingRoot);
+    }
+});
+
+it('rejects an exported image with the wrong aspect ratio', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-export-'.bin2hex(random_bytes(4));
+    $fixtureDirectory = $workingRoot.'/fixtures/cafe-restaurant';
+    $outputDirectory = $workingRoot.'/dist/cafe-restaurant';
+    $wrongImage = $workingRoot.'/wrong.png';
+
+    try {
+        copy_directory_cmd($sourceFixture, $fixtureDirectory);
+        $wrongImageResource = imagecreatetruecolor(100, 100);
+        imagepng($wrongImageResource, $wrongImage);
+        imagedestroy($wrongImageResource);
+
+        $result = run_prompt_weaver_cmd([
+            'export',
+            'cafe-restaurant',
+            '--fixtures-root='.$workingRoot.'/fixtures',
+            '--image='.$wrongImage,
+            '--output-dir='.$outputDirectory,
+        ]);
+
+        expect($result['exitCode'])->not->toBe(0);
+        expect($result['stderr'])->toContain('aspect ratio');
+        expect(is_file($outputDirectory.'/image.png'))->toBeFalse();
+    } finally {
+        remove_directory_cmd($workingRoot);
+    }
+});

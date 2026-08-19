@@ -8,7 +8,7 @@ use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 
 /**
- * Orchestrates the three-step prompt chain (design brief → config → image prompt)
+ * Orchestrates the three-step text prompt chain (design brief → config → image prompt)
  * by sending each generated prompt to an AI model via the NanoAI Client.
  */
 final class Pipe
@@ -21,7 +21,7 @@ final class Pipe
     ) {}
 
     /**
-     * Runs the full prompt pipeline.
+     * Runs the full text prompt pipeline. Image generation is external.
      *
      * 1. Builds a design-brief prompt and sends it to the model → receives a design-brief JSON.
      * 2. Builds a config prompt from that brief and sends it to the model → receives a config JSON.

@@ -1,0 +1,121 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cable8mm\PromptWeaver\Console\Commands;
+
+use RuntimeException;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+
+final class ExportCommand extends PromptWeaverCommand
+{
+    protected function configure(): void
+    {
+        $this->setName('export')->setDescription('Package a generated image and fixture config for Laravel import.');
+        $this->addArgument('fixture', InputArgument::REQUIRED, 'Template code.');
+        $this->addOption('image', null, InputOption::VALUE_REQUIRED, 'Generated image path. Uses fixture/image.png when omitted.');
+        $this->addOption('output-dir', null, InputOption::VALUE_REQUIRED, 'Output directory.', null);
+        $this->addFixturesRootOption();
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $code = (string) $input->getArgument('fixture');
+        $fixtureDirectory = $this->fixtureDirectoryFromReference($code, $this->fixturesRoot($input));
+        $manifestPath = $fixtureDirectory.'/manifest.json';
+        $configPath = is_file($fixtureDirectory.'/calibrate.config.json')
+            ? $fixtureDirectory.'/calibrate.config.json'
+            : $fixtureDirectory.'/config.json';
+        $imagePath = $input->getOption('image') ?? $fixtureDirectory.'/image.png';
+        $outputDirectory = $input->getOption('output-dir')
+            ?? 'dist/'.$this->validatePathSegment($code, 'code');
+
+        if (! is_file($manifestPath)) {
+            throw new RuntimeException("Manifest file not found: {$manifestPath}");
+        }
+
+        if (! is_file($configPath)) {
+            throw new RuntimeException("Config file not found: {$configPath}");
+        }
+
+        if (! is_string($imagePath) || ! is_file($imagePath)) {
+            throw new RuntimeException("Image file not found: {$imagePath}");
+        }
+
+        $manifest = $this->readJsonFile($manifestPath);
+        $config = $this->readJsonFile($configPath);
+        $this->validateConfig($config, $configPath);
+        $this->validateImage($imagePath, $config);
+
+        if (! is_dir($outputDirectory) && ! mkdir($outputDirectory, 0777, true) && ! is_dir($outputDirectory)) {
+            throw new RuntimeException("Unable to create output directory: {$outputDirectory}");
+        }
+
+        $this->writeJson($outputDirectory.'/manifest.json', $manifest);
+        $this->writeJson($outputDirectory.'/config.json', $config);
+
+        if (! copy($imagePath, $outputDirectory.'/image.png')) {
+            throw new RuntimeException("Unable to copy image to: {$outputDirectory}/image.png");
+        }
+
+        $this->displayCreated($outputDirectory);
+
+        return self::SUCCESS;
+    }
+
+    /** @param array<string, mixed> $config */
+    private function validateConfig(array $config, string $path): void
+    {
+        foreach (['canvas', 'style', 'content', 'placeholders'] as $key) {
+            if (! isset($config[$key]) || ! is_array($config[$key])) {
+                throw new RuntimeException("Config is missing object '{$key}': {$path}");
+            }
+        }
+
+        $aspectRatio = $config['canvas']['aspect_ratio'] ?? null;
+        if (! is_string($aspectRatio) || ! preg_match('/^\d+(?:\.\d+)?:\d+(?:\.\d+)?$/', $aspectRatio)) {
+            throw new RuntimeException("Config has an invalid canvas.aspect_ratio: {$path}");
+        }
+    }
+
+    /** @param array<string, mixed> $config */
+    private function validateImage(string $path, array $config): void
+    {
+        $dimensions = getimagesize($path);
+        if ($dimensions === false || ($dimensions[0] ?? 0) < 1 || ($dimensions[1] ?? 0) < 1) {
+            throw new RuntimeException("Unable to read image dimensions: {$path}");
+        }
+
+        $aspectRatio = (string) $config['canvas']['aspect_ratio'];
+        [$expectedWidth, $expectedHeight] = array_map('floatval', explode(':', $aspectRatio));
+        $actual = $dimensions[0] / $dimensions[1];
+        $expected = $expectedWidth / $expectedHeight;
+
+        if (abs($actual - $expected) / $expected > 0.05) {
+            throw new RuntimeException(sprintf(
+                'Image aspect ratio %.4f does not match config aspect ratio %s: %s',
+                $actual,
+                $aspectRatio,
+                $path,
+            ));
+        }
+
+        $mime = $dimensions['mime'] ?? null;
+        if ($mime !== 'image/png') {
+            throw new RuntimeException("Export image must be a PNG: {$path}");
+        }
+    }
+
+    /** @param array<string, mixed> $json */
+    private function writeJson(string $path, array $json): void
+    {
+        $contents = json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
+
+        if (file_put_contents($path, $contents) === false) {
+            throw new RuntimeException("Unable to write: {$path}");
+        }
+    }
+}
