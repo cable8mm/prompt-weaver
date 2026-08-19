@@ -115,7 +115,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
     expect($result->config['style'])
         ->toHaveKey('theme')
         ->toHaveKey('background')
-        ->toHaveKey('print_target');
+        ->toHaveKey('color_mode');
 
     // Verify content structure
     expect($result->config['content'])

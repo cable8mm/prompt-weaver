@@ -55,7 +55,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
         'style' => [
             'theme' => 'warm cafe',
             'background' => 'cream paper',
-            'print_target' => 'black-and-white laser printer safe',
+            'color_mode' => 'mono',
         ],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
@@ -131,7 +131,7 @@ it('strips markdown code fences from model responses', function () {
 
     $configJson = "```json\n".json_encode([
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
-        'style' => ['theme' => 'test', 'background' => 'test bg', 'print_target' => 'black-and-white laser printer safe'],
+        'style' => ['theme' => 'test', 'background' => 'test bg', 'color_mode' => 'mono'],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
             'wifi_icon' => ['x_pc' => 50, 'y_pc' => 20, 'width_pc' => 15, 'style' => 'icon'],
@@ -192,7 +192,7 @@ it('passes the color option to DesignBriefPrompt', function () {
 
     $configJson = json_encode([
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
-        'style' => ['theme' => 'colorful', 'background' => 'rainbow', 'print_target' => 'black-and-white laser printer safe'],
+        'style' => ['theme' => 'colorful', 'background' => 'rainbow', 'color_mode' => 'mono'],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
             'wifi_icon' => ['x_pc' => 50, 'y_pc' => 20, 'width_pc' => 15, 'style' => 'icon'],

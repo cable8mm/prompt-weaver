@@ -7,6 +7,7 @@ namespace Cable8mm\PromptWeaver\Console\Commands;
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\ImagePrompt;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +22,7 @@ final class ChainCommand extends PromptWeaverCommand
         foreach ([
             'category',
             'format',
+            'color-mode',
             'description',
             'color-direction',
             'font-mood',
@@ -35,6 +37,7 @@ final class ChainCommand extends PromptWeaverCommand
     {
         $category = $input->getOption('category');
         $format = $input->getOption('format');
+        $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
         $description = $input->getOption('description');
         $colorDirection = $input->getOption('color-direction');
         $fontMood = $input->getOption('font-mood');
@@ -47,10 +50,12 @@ final class ChainCommand extends PromptWeaverCommand
             throw new \RuntimeException("Config file not found: {$configFile}");
         }
 
-        $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), Format::fromCliInput($format));
+        $format = Format::fromCliInput($format);
+        $colorMode = ColorMode::fromCliInput($colorMode);
+        $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), $format, colorMode: $colorMode);
         $briefPrompt->build();
 
-        $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, Format::fromCliInput($format), $name);
+        $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, $format, name: $name, colorMode: $colorMode);
         $configPrompt->build();
 
         $imagePrompt = new ImagePrompt($this->readJsonFile($configFile));

@@ -1,5 +1,6 @@
 {
     "code": "cafe-restaurant",
     "category": "Cafe/Restaurant",
-    "format": "A4/A5 Poster"
+    "format": "A4/A5 Poster",
+    "color_mode": "mono"
 }

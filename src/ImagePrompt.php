@@ -74,7 +74,7 @@ class ImagePrompt implements PromptInterface
             '{{ style }}' => $this->joinSentences([
                 $style['theme'],
                 $style['background'],
-                $style['print_target'],
+                $style['color_mode'],
             ]),
             '{{ layout_items }}' => implode("\n", $layoutLines),
         ]);

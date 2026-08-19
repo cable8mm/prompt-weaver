@@ -4,6 +4,7 @@ namespace Cable8mm\PromptWeaver;
 
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 
 /**
@@ -28,15 +29,17 @@ final class Pipe
      *
      * @param  Category  $category  The category enum
      * @param  Format  $format  The format enum
+     * @param  ColorMode  $colorMode  Color output mode
      * @param  string|null  $color  Optional color direction passed to DesignBriefPrompt.
      * @return PipeResult Contains all three prompts plus the parsed intermediate JSON.
      */
-    public function run(Category $category, Format $format, ?string $color = null): PipeResult
+    public function run(Category $category, Format $format, ?string $color = null, ColorMode $colorMode = ColorMode::MONO): PipeResult
     {
         // Step 1 — design brief
         $briefPrompt = new DesignBriefPrompt(
             category: $category,
             format: $format,
+            colorMode: $colorMode,
             color: $color ?? 'black-and-white',
         );
         $briefPrompt->build();
@@ -56,6 +59,7 @@ final class Pipe
             colorDirection: $colorDirection,
             fontMood: $fontMood,
             format: $format,
+            colorMode: $colorMode,
             name: $name,
         );
         $configPrompt->build();

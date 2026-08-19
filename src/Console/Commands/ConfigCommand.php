@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +22,7 @@ final class ConfigCommand extends PromptWeaverCommand
         $this->addOption('color-direction', null, InputOption::VALUE_REQUIRED);
         $this->addOption('font-mood', null, InputOption::VALUE_REQUIRED);
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('color-mode', null, InputOption::VALUE_REQUIRED);
         $this->addOption('name', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }
@@ -37,12 +39,14 @@ final class ConfigCommand extends PromptWeaverCommand
             $name = $designBriefJson['name'] ?? null;
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
             $format = isset($manifest['format']) ? Format::fromCliInput($manifest['format']) : null;
+            $colorMode = ColorMode::fromCliInput($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE);
         } else {
             $description = $input->getOption('description');
             $colorDirection = $input->getOption('color-direction');
             $fontMood = $input->getOption('font-mood');
             $name = $input->getOption('name');
             $format = $input->getOption('format');
+            $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
         }
 
         $this->requireValues($description, $colorDirection, $fontMood);
@@ -56,6 +60,7 @@ final class ConfigCommand extends PromptWeaverCommand
             colorDirection: $colorDirection,
             fontMood: $fontMood,
             format: $format,
+            colorMode: $colorMode instanceof ColorMode ? $colorMode : ColorMode::fromCliInput($colorMode),
             name: $name,
         );
         $prompt->build();

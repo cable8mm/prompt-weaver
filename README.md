@@ -64,6 +64,7 @@ Input:
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 
 $briefPrompt = new DesignBriefPrompt(
     category: Category::CAFE_RESTAURANT,
@@ -100,6 +101,7 @@ $configPrompt = new ConfigPrompt(
     colorDirection: 'warm brown and cream tones with soft gold accents',
     fontMood: 'rounded handwritten-style Korean font',
     format: Format::A45_POSTER,
+    colorMode: ColorMode::MONO,
     name: '카페 시그니처', // optional
 );
 $configPrompt->build();
@@ -130,7 +132,7 @@ $config = [
     'style' => [
         'theme' => 'Warm cafe vibe with a soft analog feel',
         'background' => 'cream paper texture with subtle grain',
-        'print_target' => 'black-and-white laser printer safe',
+        'color_mode' => ColorMode::MONO->value,
     ],
     'content' => [
         'title' => [
@@ -250,7 +252,7 @@ What each command outputs:
 4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
-7. `init` creates a new fixture manifest folder with the template `code` and default values for `category` and `format`, or with the values you pass via `--category` and `--format`.
+7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
@@ -277,6 +279,7 @@ The `Pipe` class automates the entire three-step pipeline by sending each prompt
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Pipe;
 
 $client = new Client(
@@ -290,6 +293,7 @@ $result = $pipe->run(
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
     color: 'warm brown and cream', // optional
+    colorMode: ColorMode::MONO,
 );
 
 // Access all prompts and responses
@@ -397,6 +401,7 @@ Or with explicit options:
 ./weaver pipe \
   --category="Cafe/Restaurant" \
   --format="A4/A5 Poster" \
+  --color-mode=mono \
   --provider=openrouter \
   --api-key=sk-or-v1-... \
   --model=google/gemma-4-26b-a4b-it:free \

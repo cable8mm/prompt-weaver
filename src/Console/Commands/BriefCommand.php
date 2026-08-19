@@ -6,6 +6,7 @@ namespace Cable8mm\PromptWeaver\Console\Commands;
 
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +21,7 @@ final class BriefCommand extends PromptWeaverCommand
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         $this->addOption('category', null, InputOption::VALUE_REQUIRED);
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('color-mode', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }
 
@@ -31,9 +33,11 @@ final class BriefCommand extends PromptWeaverCommand
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
             $category = $manifest['category'] ?? null;
             $format = $manifest['format'] ?? null;
+            $colorMode = $manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE;
         } else {
             $category = $input->getOption('category');
             $format = $input->getOption('format');
+            $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
         }
 
         $this->requireValues($category, $format);
@@ -41,6 +45,7 @@ final class BriefCommand extends PromptWeaverCommand
         $prompt = new DesignBriefPrompt(
             category: Category::fromCliInput($category),
             format: Format::fromCliInput($format),
+            colorMode: ColorMode::fromCliInput($colorMode),
         );
         $prompt->build();
         $promptText = $prompt->prompt();

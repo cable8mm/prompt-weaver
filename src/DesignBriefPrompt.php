@@ -5,6 +5,7 @@ namespace Cable8mm\PromptWeaver;
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
 use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use RuntimeException;
 
@@ -57,11 +58,13 @@ class DesignBriefPrompt implements PromptInterface
     /**
      * @param  Category  $category  design brief category
      * @param  Format  $format  design brief format
+     * @param  ColorMode  $colorMode  color output mode
      */
     public function __construct(
         private Category $category,
         private Format $format,
         public string $color = 'black-and-white',
+        private ColorMode $colorMode = ColorMode::MONO,
     ) {}
 
     public function build(): void
@@ -72,15 +75,18 @@ class DesignBriefPrompt implements PromptInterface
             $this->pickRandom($this->textureSeeds, $this->lastTextureSeed),
         ]);
 
-        $printingInstruction = $this->color === 'black-and-white'
-            ? 'assume high-contrast monochrome/greyscale-safe design unless the random seeds clearly suggest a full-color context.'
-            : "use a color scheme based on {$this->color} unless the random seeds clearly suggest otherwise.";
+        $printingInstruction = $this->colorMode === ColorMode::MONO
+            ? ($this->color === 'black-and-white'
+                ? 'assume high-contrast monochrome/greyscale-safe design unless the random seeds clearly suggest a full-color context.'
+                : "design for a black-and-white laser printer with high-contrast, greyscale-safe choices; use a color scheme based on {$this->color} only when it remains distinguishable in grayscale.")
+            : "design for a color inkjet printer with strong contrast and bleed-safe details; use a color scheme based on {$this->color} unless the random seeds clearly suggest otherwise.";
 
         $template = file_get_contents(__DIR__.'/../stubs/design-brief.prompt');
 
         $this->promptString = strtr($template, [
             '{{ category }}' => $this->category->value,
             '{{ format }}' => $this->format->value,
+            '{{ color_mode }}' => $this->colorMode->value,
             '{{ random_seeds }}' => $randomSeeds,
             '{{ printing_instruction }}' => $printingInstruction,
         ]);

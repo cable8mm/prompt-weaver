@@ -12,6 +12,7 @@ You are a creative director for a Wi-Fi signage template. Your job is to write O
 [Inputs]
 - Category: {{ category }}
 - Format: {{ format }}
+- Color Mode: {{ color_mode }}
 - Random creative seeds to incorporate (use these as inspiration, blend them naturally — do not just list them back): {{ random_seeds }}
 
 [Rules]

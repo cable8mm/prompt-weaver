@@ -21,6 +21,8 @@ abstract class PromptWeaverCommand extends Command
 
     protected const DEFAULT_FORMAT = 'A4/A5 Poster';
 
+    protected const DEFAULT_COLOR_MODE = 'mono';
+
     protected function fixturesRoot(InputInterface $input): string
     {
         return (string) $input->getOption('fixtures-root');

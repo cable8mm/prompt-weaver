@@ -1,6 +1,7 @@
 <?php
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 
 it('injects the design brief, color direction, and font mood into the config prompt', function () {
@@ -15,6 +16,7 @@ it('injects the design brief, color direction, and font mood into the config pro
         fontMood: $fontMood,
         format: Format::A45_POSTER,
         name: $name,
+        colorMode: ColorMode::MONO,
     );
     $configPrompt->build();
     $prompt = $configPrompt->prompt();
@@ -28,6 +30,7 @@ it('injects the design brief, color direction, and font mood into the config pro
         ->toContain($name)
         ->toContain('"canvas"')
         ->toContain('"aspect_ratio": "5:7"')
+        ->toContain('"color_mode": "mono"')
         ->toContain('"content"')
         ->toContain('"placeholders"')
         ->not->toContain('{$description}');
