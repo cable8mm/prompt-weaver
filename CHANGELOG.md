@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.3.2 - 2026-08-19
+
+### What's Changed
+
+* feat: add Korean translations for category and format labels with tests by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/19
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.3.1...v0.3.2
+
 ## v0.3.1 - 2026-08-18
 
 ### What's Changed
