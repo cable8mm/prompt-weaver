@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.3.1 - 2026-08-18
+
+### What's Changed
+
+* feat: standardize category and format naming by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/18
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.3.0...v0.3.1
+
 ## v0.3.0 - 2026-08-14
 
 ### What's Changed
