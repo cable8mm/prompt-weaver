@@ -4,7 +4,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 
 [Fixed schema — always follow this exact structure]
 {
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "210:297" },
+  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "5:7" },
   "style": {
     "theme": "<one-sentence visual theme description>",
     "background": "<background description: colors, patterns, textures>",

@@ -15,7 +15,7 @@ final class CalibrateCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('calibrate')->setDescription('Calibrate fixture placeholder coordinates.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         $this->addOption('fixture', null, InputOption::VALUE_REQUIRED, 'Fixture directory path.');
         $this->addFixturesRootOption();
     }

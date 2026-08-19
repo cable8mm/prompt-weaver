@@ -15,7 +15,7 @@ final class ConfigCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('config')->setDescription('Generate a config prompt.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         $this->addOption('brief', null, InputOption::VALUE_REQUIRED);
         $this->addOption('color-direction', null, InputOption::VALUE_REQUIRED);
         $this->addOption('font-mood', null, InputOption::VALUE_REQUIRED);

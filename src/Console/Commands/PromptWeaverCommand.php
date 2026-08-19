@@ -12,7 +12,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 
 abstract class PromptWeaverCommand extends Command
 {
@@ -42,11 +41,10 @@ abstract class PromptWeaverCommand extends Command
         }
 
         if (! is_string($fixtureDirectory) || $fixtureDirectory === '') {
-            $model = $input->getOption('model');
-            $scenario = $input->getOption('scenario');
+            $code = $input->getOption('code');
 
-            $this->requireValues($model, $scenario);
-            $fixtureDirectory = rtrim($this->fixturesRoot($input), '/').'/'.$this->validatePathSegment($model, 'model').'/'.$this->validatePathSegment($scenario, 'scenario');
+            $this->requireValues($code);
+            $fixtureDirectory = rtrim($this->fixturesRoot($input), '/').'/'.$this->validatePathSegment($code, 'code');
         }
 
         if (! is_dir($fixtureDirectory)) {
@@ -57,27 +55,24 @@ abstract class PromptWeaverCommand extends Command
     }
 
     /**
-     * @return array{0: string, 1: string}
+     * @return array{0: string}
      */
     protected function parseFixtureReference(string $reference): array
     {
-        $parts = explode('/', trim($reference, '/'));
+        $code = trim($reference, '/');
 
-        if (count($parts) !== 2 || in_array('', $parts, true)) {
-            throw new \InvalidArgumentException("Fixture must be in the form model/scenario: {$reference}");
+        if ($code === '' || str_contains($code, '/')) {
+            throw new \InvalidArgumentException("Fixture code must be a single path segment: {$reference}");
         }
 
-        return [
-            $this->validatePathSegment($parts[0], 'model'),
-            $this->validatePathSegment($parts[1], 'scenario'),
-        ];
+        return [$this->validatePathSegment($code, 'code')];
     }
 
     protected function fixtureDirectoryFromReference(string $reference, string $fixturesRoot): string
     {
-        [$model, $scenario] = $this->parseFixtureReference($reference);
+        [$code] = $this->parseFixtureReference($reference);
 
-        return rtrim($fixturesRoot, '/').'/'.$model.'/'.$scenario;
+        return rtrim($fixturesRoot, '/').'/'.$code;
     }
 
     /**
@@ -114,15 +109,6 @@ abstract class PromptWeaverCommand extends Command
         }
 
         return $value;
-    }
-
-    protected function askText(string $label, string $example): string
-    {
-        if (! stream_isatty(STDIN)) {
-            return '';
-        }
-
-        return text("Enter {$label}", placeholder: $example);
     }
 
     /**
@@ -169,7 +155,7 @@ abstract class PromptWeaverCommand extends Command
 
     protected function addFixtureArgument(): static
     {
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
 
         return $this;
     }

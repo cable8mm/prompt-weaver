@@ -59,24 +59,22 @@ it('creates a new fixture manifest with default values', function () {
     try {
         $result = run_prompt_weaver([
             'init',
-            '--model=gemini-54-flash',
-            '--scenario=wifi-warm-cafe-in-summer',
+            'wifi-warm-cafe-in-summer',
             '--fixtures-root='.$fixturesRoot,
         ]);
 
         expect($result['exitCode'])->toBe(0);
-        expect($result['stdout'])->toContain('Created '.$fixturesRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json');
+        expect($result['stdout'])->toContain('Created '.$fixturesRoot.'/wifi-warm-cafe-in-summer/manifest.json');
         expect($result['stderr'])->toBe('');
 
-        $manifestPath = $fixturesRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json';
+        $manifestPath = $fixturesRoot.'/wifi-warm-cafe-in-summer/manifest.json';
         expect(is_file($manifestPath))->toBeTrue();
 
         $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
         $manifestJson = (string) file_get_contents($manifestPath);
 
         expect($manifest)->toMatchArray([
-            'model' => 'gemini-54-flash',
-            'scenario' => 'wifi-warm-cafe-in-summer',
+            'code' => 'wifi-warm-cafe-in-summer',
             'product' => 'a Wi-Fi signage template',
             'category' => 'Cafe/Restaurant',
             'format' => 'A4/A5 Poster',
@@ -96,8 +94,7 @@ it('creates a new fixture manifest with custom product, category, and format', f
     try {
         $result = run_prompt_weaver([
             'init',
-            '--model=gemini-54-flash',
-            '--scenario=wifi-warm-cafe-in-summer',
+            'wifi-warm-cafe-in-summer',
             '--product=a business card design',
             '--category=Office/Coworking',
             '--format=Business Card',
@@ -107,14 +104,13 @@ it('creates a new fixture manifest with custom product, category, and format', f
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
 
-        $manifestPath = $fixturesRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json';
+        $manifestPath = $fixturesRoot.'/wifi-warm-cafe-in-summer/manifest.json';
         expect(is_file($manifestPath))->toBeTrue();
 
         $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
 
         expect($manifest)->toMatchArray([
-            'model' => 'gemini-54-flash',
-            'scenario' => 'wifi-warm-cafe-in-summer',
+            'code' => 'wifi-warm-cafe-in-summer',
             'product' => 'a business card design',
             'category' => 'Office/Coworking',
             'format' => 'Business Card',
@@ -163,9 +159,9 @@ it('shows valid formats in error message for an unknown format', function () {
         ->and($result['stderr'])->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square');
 });
 
-it('fails when the same model and scenario already exist', function () {
+it('fails when the same template code already exists', function () {
     $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-fixtures-'.bin2hex(random_bytes(4));
-    $manifestPath = $fixturesRoot.'/gemini-54-flash/wifi-warm-cafe-in-summer/manifest.json';
+    $manifestPath = $fixturesRoot.'/wifi-warm-cafe-in-summer/manifest.json';
 
     try {
         mkdir(dirname($manifestPath), 0777, true);
@@ -173,8 +169,7 @@ it('fails when the same model and scenario already exist', function () {
 
         $result = run_prompt_weaver([
             'init',
-            '--model=gemini-54-flash',
-            '--scenario=wifi-warm-cafe-in-summer',
+            'wifi-warm-cafe-in-summer',
             '--fixtures-root='.$fixturesRoot,
         ]);
 
