@@ -15,7 +15,7 @@ final class ImageCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('image')->setDescription('Generate an image prompt.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         $this->addOption('config-file', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }

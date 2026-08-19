@@ -16,9 +16,7 @@ final class InitCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('init')->setDescription('Create a fixture manifest.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
-        $this->addOption('model', null, InputOption::VALUE_REQUIRED);
-        $this->addOption('scenario', null, InputOption::VALUE_REQUIRED);
+        $this->addArgument('fixture', InputArgument::REQUIRED, 'Template code.');
         $this->addOption('product', null, InputOption::VALUE_REQUIRED);
         $this->addOption('category', null, InputOption::VALUE_REQUIRED);
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);
@@ -27,11 +25,9 @@ final class InitCommand extends PromptWeaverCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        [$model, $scenario] = $this->resolveIdentifiers($input);
-        $model = $this->validatePathSegment($model, 'model');
-        $scenario = $this->validatePathSegment($scenario, 'scenario');
+        $code = $this->validatePathSegment((string) $input->getArgument('fixture'), 'code');
 
-        $manifestPath = rtrim($this->fixturesRoot($input), '/').'/'.$model.'/'.$scenario.'/manifest.json';
+        $manifestPath = rtrim($this->fixturesRoot($input), '/').'/'.$code.'/manifest.json';
 
         if (is_file($manifestPath)) {
             throw new \RuntimeException("Fixture already exists: {$manifestPath}");
@@ -46,8 +42,7 @@ final class InitCommand extends PromptWeaverCommand
         $format = $input->getOption('format') ?? $this->askChoice('format', Format::keys(), self::DEFAULT_FORMAT);
 
         $manifest = [
-            'model' => $model,
-            'scenario' => $scenario,
+            'code' => $code,
             'product' => $input->getOption('product') ?? self::DEFAULT_PRODUCT,
             'category' => $category,
             'format' => $format,
@@ -61,26 +56,5 @@ final class InitCommand extends PromptWeaverCommand
         $this->displayCreated($manifestPath);
 
         return self::SUCCESS;
-    }
-
-    /**
-     * @return array{0: string, 1: string}
-     */
-    private function resolveIdentifiers(InputInterface $input): array
-    {
-        $fixtureReference = $input->getArgument('fixture');
-
-        if (is_string($fixtureReference) && $fixtureReference !== '') {
-            return $this->parseFixtureReference($fixtureReference);
-        }
-
-        $model = $input->getOption('model') ?? $this->askText('model', 'openrouter');
-        $scenario = $input->getOption('scenario') ?? $this->askText('scenario', 'cafe-restaurant');
-
-        if ($model === '' || $scenario === '') {
-            throw new \InvalidArgumentException('Missing required argument: model/scenario (e.g. init openrouter/cafe-restaurant)');
-        }
-
-        return [$model, $scenario];
     }
 }

@@ -17,7 +17,7 @@ final class BriefCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('brief')->setDescription('Generate a design-brief prompt.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         $this->addOption('product', null, InputOption::VALUE_REQUIRED);
         $this->addOption('category', null, InputOption::VALUE_REQUIRED);
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);

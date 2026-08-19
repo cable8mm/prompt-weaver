@@ -15,10 +15,9 @@ final class PreviewCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('preview')->setDescription('Render a fixture preview.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         $this->addOption('fixture', null, InputOption::VALUE_REQUIRED, 'Fixture directory path.');
-        $this->addOption('model', null, InputOption::VALUE_REQUIRED);
-        $this->addOption('scenario', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('code', null, InputOption::VALUE_REQUIRED);
         $this->addOption('output', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }

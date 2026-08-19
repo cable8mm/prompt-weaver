@@ -18,7 +18,7 @@ final class PipeCommand extends PromptWeaverCommand
     protected function configure(): void
     {
         $this->setName('pipe')->setDescription('Run the complete AI prompt pipeline.');
-        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Fixture reference in the form model/scenario.');
+        $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         foreach (['product', 'category', 'format', 'provider', 'api-key', 'model', 'color', 'fixtures-root'] as $option) {
             $this->addOption($option, null, InputOption::VALUE_REQUIRED, default: $option === 'provider' ? 'openrouter' : ($option === 'model' ? 'google/gemma-4-26b-a4b-it:free' : ($option === 'fixtures-root' ? self::DEFAULT_FIXTURES_ROOT : null)));
         }

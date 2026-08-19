@@ -1,7 +1,7 @@
 [Task] Generate a high-contrast Wi-Fi signage image ONLY. Do not output any text, explanation, or JSON — return the image only.
 
 [Canvas]
-- Portrait canvas, aspect ratio 3:4.
+- Portrait canvas, aspect ratio 5:7.
 - Treat the canvas as a 0-100% grid on both axes (0% = top/left, 100% = bottom/right).
 
 [Style]

@@ -54,7 +54,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
     );
 
     // Save fixtures
-    $fixtureDir = __DIR__.'/../Fixtures/openrouter/google-gemma-4-26b-a4b-it-free';
+    $fixtureDir = __DIR__.'/../Fixtures/google-gemma-4-26b-a4b-it-free';
 
     if (! is_dir($fixtureDir)) {
         mkdir($fixtureDir, 0777, true);
@@ -62,8 +62,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     // Save manifest.json
     $manifest = [
-        'model' => 'openrouter',
-        'scenario' => 'google-gemma-4-26b-a4b-it-free',
+        'code' => 'google-gemma-4-26b-a4b-it-free',
         'product' => 'a Wi-Fi signage template',
         'category' => 'Cafe/Restaurant',
         'format' => 'A4/A5 Poster',
