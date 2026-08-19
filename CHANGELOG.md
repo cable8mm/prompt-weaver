@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.3.3 - 2026-08-19
+
+### What's Changed
+
+* refactor: update pages method to use enum context for format handling by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/20
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.3.2...v0.3.3
+
 ## v0.3.2 - 2026-08-19
 
 ### What's Changed
