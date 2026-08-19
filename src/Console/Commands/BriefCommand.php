@@ -18,7 +18,6 @@ final class BriefCommand extends PromptWeaverCommand
     {
         $this->setName('brief')->setDescription('Generate a design-brief prompt.');
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
-        $this->addOption('product', null, InputOption::VALUE_REQUIRED);
         $this->addOption('category', null, InputOption::VALUE_REQUIRED);
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
@@ -30,19 +29,16 @@ final class BriefCommand extends PromptWeaverCommand
 
         if (is_string($fixtureReference) && $fixtureReference !== '') {
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
-            $product = $manifest['product'] ?? null;
             $category = $manifest['category'] ?? null;
             $format = $manifest['format'] ?? null;
         } else {
-            $product = $input->getOption('product');
             $category = $input->getOption('category');
             $format = $input->getOption('format');
         }
 
-        $this->requireValues($product, $category, $format);
+        $this->requireValues($category, $format);
 
         $prompt = new DesignBriefPrompt(
-            product: $product,
             category: Category::fromCliInput($category),
             format: Format::fromCliInput($format),
         );

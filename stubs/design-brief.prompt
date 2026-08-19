@@ -1,5 +1,5 @@
 [Role]
-You are a creative director for {{ product }}. Your job is to write ONE short design brief for {{ product }}, based on the inputs below. Output ONLY a valid JSON object, no explanation, no markdown fences.
+You are a creative director for a Wi-Fi signage template. Your job is to write ONE short design brief for a Wi-Fi signage template, based on the inputs below. Output ONLY a valid JSON object, no explanation, no markdown fences.
 
 [Output schema]
 {

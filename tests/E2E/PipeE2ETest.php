@@ -47,7 +47,6 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
         color: 'warm brown and cream',
@@ -63,7 +62,6 @@ it('runs the full pipeline with real OpenRouter API', function () {
     // Save manifest.json
     $manifest = [
         'code' => 'google-gemma-4-26b-a4b-it-free',
-        'product' => 'a Wi-Fi signage template',
         'category' => 'Cafe/Restaurant',
         'format' => 'A4/A5 Poster',
     ];

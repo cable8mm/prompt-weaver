@@ -19,7 +19,6 @@ final class ChainCommand extends PromptWeaverCommand
     {
         $this->setName('chain')->setDescription('Generate all three prompts in one run.');
         foreach ([
-            'product',
             'category',
             'format',
             'brief',
@@ -34,7 +33,6 @@ final class ChainCommand extends PromptWeaverCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $product = $input->getOption('product');
         $category = $input->getOption('category');
         $format = $input->getOption('format');
         $brief = $input->getOption('brief');
@@ -43,13 +41,13 @@ final class ChainCommand extends PromptWeaverCommand
         $conceptName = $input->getOption('concept-name');
         $configFile = $input->getOption('config-file');
 
-        $this->requireValues($product, $category, $format, $brief, $colorDirection, $fontMood, $configFile);
+        $this->requireValues($category, $format, $brief, $colorDirection, $fontMood, $configFile);
 
         if (! is_file($configFile)) {
             throw new \RuntimeException("Config file not found: {$configFile}");
         }
 
-        $briefPrompt = new DesignBriefPrompt($product, Category::fromCliInput($category), Format::fromCliInput($format));
+        $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), Format::fromCliInput($format));
         $briefPrompt->build();
 
         $configPrompt = new ConfigPrompt($brief, $colorDirection, $fontMood, $conceptName);

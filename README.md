@@ -46,7 +46,7 @@ The library contains three prompt builders:
 
 They work together like this:
 
-1. `DesignBriefPrompt` takes a product, category, and format in the constructor, then `build()` generates the prompt and `prompt()` returns it.
+1. `DesignBriefPrompt` takes a category and format in the constructor, then `build()` generates a Wi-Fi signage design brief prompt and `prompt()` returns it.
 2. `ConfigPrompt` takes the design brief text, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
@@ -66,7 +66,6 @@ use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 
 $briefPrompt = new DesignBriefPrompt(
-    product: 'a Wi-Fi signage template',
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
 );
@@ -214,7 +213,7 @@ All commands below operate on the same fixture folder:
 ./weaver init cafe-restaurant
 ```
 
-You can also specify the product, category, and format when creating a fixture:
+You can also specify the category and format when creating a fixture:
 
 ```bash
 ./weaver init cafe-restaurant --category="Office/Coworking" --format="Business Card"
@@ -250,7 +249,7 @@ What each command outputs:
 4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
-7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`, or with the values you pass via `--product`, `--category`, and `--format`.
+7. `init` creates a new fixture manifest folder with the template `code` and default values for `category` and `format`, or with the values you pass via `--category` and `--format`.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
@@ -261,7 +260,7 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 ### Manual workflow
 
-1. Create a `DesignBriefPrompt` with product, category, and format, call `build()`, then retrieve the prompt via `prompt()`.
+1. Create a `DesignBriefPrompt` with category and format, call `build()`, then retrieve the prompt via `prompt()`.
 2. Send that prompt to a model and capture the brief text.
 3. Create a `ConfigPrompt` with the design brief, color direction, font mood, and optional concept name, call `build()`, then retrieve the prompt via `prompt()`.
 4. Send that prompt to a model and parse the returned JSON.
@@ -287,7 +286,6 @@ $client = new Client(
 
 $pipe = new Pipe($client);
 $result = $pipe->run(
-    product: 'a Wi-Fi signage template',
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
     color: 'warm brown and cream', // optional
@@ -320,7 +318,7 @@ The easiest way to test this package is to create one fixture and keep all gener
 ./weaver init cafe-restaurant
 ```
 
-This creates `tests/Fixtures/cafe-restaurant/manifest.json` with the template `code` and default values for `product`, `category`, and `format`. You can also pass `--product`, `--category`, and `--format` to customize the manifest:
+This creates `tests/Fixtures/cafe-restaurant/manifest.json` with the template `code` and default values for `category` and `format`. You can also pass `--category` and `--format` to customize the manifest:
 
 ```bash
 ./weaver init cafe-restaurant --category="Office/Coworking" --format="Business Card"
@@ -396,7 +394,6 @@ Or with explicit options:
 
 ```bash
 ./weaver pipe \
-  --product="a Wi-Fi signage template" \
   --category="Cafe/Restaurant" \
   --format="A4/A5 Poster" \
   --provider=openrouter \

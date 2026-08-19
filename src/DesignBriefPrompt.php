@@ -55,12 +55,10 @@ class DesignBriefPrompt implements PromptInterface
     private mixed $response = null;
 
     /**
-     * @param  string  $product  example "a print-signage product", "a wifi signage template", "a business card design", etc.
      * @param  Category  $category  design brief category
      * @param  Format  $format  design brief format
      */
     public function __construct(
-        public string $product,
         private Category $category,
         private Format $format,
         public string $color = 'black-and-white',
@@ -81,7 +79,6 @@ class DesignBriefPrompt implements PromptInterface
         $template = file_get_contents(__DIR__.'/../stubs/design-brief.prompt');
 
         $this->promptString = strtr($template, [
-            '{{ product }}' => $this->product,
             '{{ category }}' => $this->category->value,
             '{{ format }}' => $this->format->value,
             '{{ random_seeds }}' => $randomSeeds,

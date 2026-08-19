@@ -75,7 +75,6 @@ it('creates a new fixture manifest with default values', function () {
 
         expect($manifest)->toMatchArray([
             'code' => 'wifi-warm-cafe-in-summer',
-            'product' => 'a Wi-Fi signage template',
             'category' => 'Cafe/Restaurant',
             'format' => 'A4/A5 Poster',
         ]);
@@ -88,14 +87,13 @@ it('creates a new fixture manifest with default values', function () {
     }
 });
 
-it('creates a new fixture manifest with custom product, category, and format', function () {
+it('creates a new fixture manifest with custom category and format', function () {
     $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-fixtures-'.bin2hex(random_bytes(4));
 
     try {
         $result = run_prompt_weaver([
             'init',
             'wifi-warm-cafe-in-summer',
-            '--product=a business card design',
             '--category=Office/Coworking',
             '--format=Business Card',
             '--fixtures-root='.$fixturesRoot,
@@ -111,7 +109,6 @@ it('creates a new fixture manifest with custom product, category, and format', f
 
         expect($manifest)->toMatchArray([
             'code' => 'wifi-warm-cafe-in-summer',
-            'product' => 'a business card design',
             'category' => 'Office/Coworking',
             'format' => 'Business Card',
         ]);
@@ -136,7 +133,6 @@ it('shows available categories and formats in help output', function () {
 it('shows valid categories in error message for an unknown category', function () {
     $result = run_prompt_weaver([
         'brief',
-        '--product=a Wi-Fi signage template',
         '--category=Unknown Category',
         '--format=A4/A5 Poster',
     ]);
@@ -149,7 +145,6 @@ it('shows valid categories in error message for an unknown category', function (
 it('shows valid formats in error message for an unknown format', function () {
     $result = run_prompt_weaver([
         'brief',
-        '--product=a Wi-Fi signage template',
         '--category=Cafe/Restaurant',
         '--format=Unknown Format',
     ]);

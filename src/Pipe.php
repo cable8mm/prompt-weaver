@@ -26,17 +26,15 @@ final class Pipe
      * 2. Builds a config prompt from that brief and sends it to the model → receives a config JSON.
      * 3. Builds the final image-generation prompt from the parsed config.
      *
-     * @param  string  $product  e.g. "a Wi-Fi signage template"
      * @param  Category  $category  The category enum
      * @param  Format  $format  The format enum
      * @param  string|null  $color  Optional color direction passed to DesignBriefPrompt.
      * @return PipeResult Contains all three prompts plus the parsed intermediate JSON.
      */
-    public function run(string $product, Category $category, Format $format, ?string $color = null): PipeResult
+    public function run(Category $category, Format $format, ?string $color = null): PipeResult
     {
         // Step 1 — design brief
         $briefPrompt = new DesignBriefPrompt(
-            product: $product,
             category: $category,
             format: $format,
             color: $color ?? 'black-and-white',

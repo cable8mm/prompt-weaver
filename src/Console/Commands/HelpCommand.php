@@ -23,7 +23,7 @@ final class HelpCommand extends SymfonyHelpCommand
 Prompt Weaver CLI
 
 Usage:
-  bin/prompt-weaver init code [--product="..."] [--category="..."] [--format="..."] [--fixtures-root=tests/Fixtures]
+  bin/prompt-weaver init code [--category="..."] [--format="..."] [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver calibrate code [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver preview --fixture="path/to/fixture"
   bin/prompt-weaver preview --fixture="path/to/fixture" --output="path/to/preview.html"
@@ -31,9 +31,9 @@ Usage:
   bin/prompt-weaver brief code [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver config code [--fixtures-root=tests/Fixtures]
   bin/prompt-weaver image code [--fixtures-root=tests/Fixtures]
-  bin/prompt-weaver chain --product="..." --category="..." --format="..." --brief="..." --color-direction="..." --font-mood="..." [--concept-name="..."] --config-file=path/to/config.json
+  bin/prompt-weaver chain --category="..." --format="..." --brief="..." --color-direction="..." --font-mood="..." [--concept-name="..."] --config-file=path/to/config.json
   bin/prompt-weaver pipe code [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free] [--color=...]
-  bin/prompt-weaver pipe --product="..." --category="..." --format="..." [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free]
+  bin/prompt-weaver pipe --category="..." --format="..." [--provider=openrouter] [--api-key=sk-or-...] [--model=google/gemma-4-26b-a4b-it:free]
 
 Available categories:
   {$categories}

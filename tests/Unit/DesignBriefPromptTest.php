@@ -11,9 +11,8 @@ function set_private_property(object $object, string $property, array $value): v
     $reflection->setValue($object, $value);
 }
 
-it('builds a design brief prompt using the provided product, category, and format', function () {
+it('builds a Wi-Fi signage design brief prompt using the category and format', function () {
     $promptBuilder = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
@@ -41,7 +40,6 @@ it('builds a design brief prompt using the provided product, category, and forma
 
 it('uses the configured color in rule one', function () {
     $blackAndWhitePrompt = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::OTHER,
         format: Format::A45_POSTER,
     );
@@ -49,7 +47,6 @@ it('uses the configured color in rule one', function () {
     $blackAndWhiteText = $blackAndWhitePrompt->prompt();
 
     $colorPrompt = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::OTHER,
         format: Format::A45_POSTER,
         color: 'ocean blue and coral',
@@ -68,7 +65,6 @@ it('uses the configured color in rule one', function () {
 
 it('does not immediately repeat a random seed within a pool', function () {
     $promptBuilder = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::OTHER,
         format: Format::A45_POSTER,
     );

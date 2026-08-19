@@ -17,7 +17,6 @@ final class InitCommand extends PromptWeaverCommand
     {
         $this->setName('init')->setDescription('Create a fixture manifest.');
         $this->addArgument('fixture', InputArgument::REQUIRED, 'Template code.');
-        $this->addOption('product', null, InputOption::VALUE_REQUIRED);
         $this->addOption('category', null, InputOption::VALUE_REQUIRED);
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
@@ -43,7 +42,6 @@ final class InitCommand extends PromptWeaverCommand
 
         $manifest = [
             'code' => $code,
-            'product' => $input->getOption('product') ?? self::DEFAULT_PRODUCT,
             'category' => $category,
             'format' => $format,
         ];

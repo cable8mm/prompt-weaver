@@ -112,7 +112,6 @@ it('generates a design brief prompt from fixture and saves to brief.prompt', fun
 it('generates a design brief prompt from direct options', function () {
     $result = run_prompt_weaver_cmd([
         'brief',
-        '--product=a Wi-Fi signage template',
         '--category=Cafe/Restaurant',
         '--format=A4/A5 Poster',
     ]);
@@ -233,7 +232,6 @@ it('runs the chain command with all required options', function () {
 
     $result = run_prompt_weaver_cmd([
         'chain',
-        '--product=a Wi-Fi signage template',
         '--category=Cafe/Restaurant',
         '--format=A4/A5 Poster',
         '--brief=A warm and inviting cafe poster featuring elegant Art Deco geometry',
@@ -252,7 +250,6 @@ it('runs the chain command with all required options', function () {
 it('fails chain command when required options are missing', function () {
     $result = run_prompt_weaver_cmd([
         'chain',
-        '--product=a Wi-Fi signage template',
     ]);
 
     expect($result['exitCode'])->not->toBe(0);

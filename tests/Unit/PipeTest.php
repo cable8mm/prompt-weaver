@@ -90,7 +90,6 @@ it('runs the full three-step pipeline and returns all prompts', function () {
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
@@ -156,7 +155,6 @@ it('strips markdown code fences from model responses', function () {
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
@@ -179,7 +177,6 @@ it('throws when the design brief response is missing the design_brief field', fu
     $pipe = new Pipe($client);
 
     $pipe->run(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
@@ -219,7 +216,6 @@ it('passes the color option to DesignBriefPrompt', function () {
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
         color: 'ocean blue and coral',
