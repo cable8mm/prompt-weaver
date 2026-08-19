@@ -4,6 +4,8 @@ namespace Cable8mm\PromptWeaver;
 
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
+use Cable8mm\PromptWeaver\Enums\Format;
 use RuntimeException;
 
 class ConfigPrompt implements PromptInterface
@@ -13,31 +15,37 @@ class ConfigPrompt implements PromptInterface
     private mixed $response = null;
 
     /**
-     * @param  string  $designBrief  User-provided design brief describing the visual theme, background style, and mood
+     * @param  string  $description  Template description describing the visual theme, background style, and mood
      * @param  string  $colorDirection  Primary color palette description (e.g., "warm brown and cream tones with soft gold accents")
      * @param  string  $fontMood  Typography feel description (e.g., "rounded handwritten-style Korean font")
-     * @param  string|null  $conceptName  Optional short concept label (e.g., "벚꽃 아르데코"), used only as a reference tag, not a content source
+     * @param  Format  $format  Template output format
+     * @param  ColorMode  $colorMode  Color output mode
+     * @param  string|null  $name  Optional template name (e.g., "벚꽃 아르데코"), used only as a reference tag, not a content source
      */
     public function __construct(
-        private string $designBrief,
+        private string $description,
         private string $colorDirection,
         private string $fontMood,
-        private ?string $conceptName = null,
+        private Format $format,
+        private ?string $name = null,
+        private ColorMode $colorMode = ColorMode::MONO,
     ) {}
 
     public function build(): void
     {
-        $conceptLine = $this->conceptName !== null
-            ? "- Concept Name: {$this->conceptName}\n"
+        $nameLine = $this->name !== null
+            ? "- Name: {$this->name}\n"
             : '';
 
         $template = file_get_contents(__DIR__.'/../stubs/config.prompt');
 
         $this->promptString = strtr($template, [
-            '{{ concept_name_line }}' => $conceptLine,
-            '{{ design_brief }}' => $this->designBrief,
+            '{{ name_line }}' => $nameLine,
+            '{{ description }}' => $this->description,
             '{{ color_direction }}' => $this->colorDirection,
             '{{ font_mood }}' => $this->fontMood,
+            '{{ aspect_ratio }}' => $this->format->ratio(),
+            '{{ color_mode }}' => $this->colorMode->value,
         ]);
     }
 

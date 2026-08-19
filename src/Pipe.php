@@ -4,6 +4,7 @@ namespace Cable8mm\PromptWeaver;
 
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 
 /**
@@ -26,38 +27,40 @@ final class Pipe
      * 2. Builds a config prompt from that brief and sends it to the model → receives a config JSON.
      * 3. Builds the final image-generation prompt from the parsed config.
      *
-     * @param  string  $product  e.g. "a Wi-Fi signage template"
      * @param  Category  $category  The category enum
      * @param  Format  $format  The format enum
+     * @param  ColorMode  $colorMode  Color output mode
      * @param  string|null  $color  Optional color direction passed to DesignBriefPrompt.
      * @return PipeResult Contains all three prompts plus the parsed intermediate JSON.
      */
-    public function run(string $product, Category $category, Format $format, ?string $color = null): PipeResult
+    public function run(Category $category, Format $format, ?string $color = null, ColorMode $colorMode = ColorMode::MONO): PipeResult
     {
         // Step 1 — design brief
         $briefPrompt = new DesignBriefPrompt(
-            product: $product,
             category: $category,
             format: $format,
+            colorMode: $colorMode,
             color: $color ?? 'black-and-white',
         );
         $briefPrompt->build();
         $briefJson = $briefPrompt->execute($this->client);
 
-        $designBrief = $briefJson['design_brief']
-            ?? throw new \RuntimeException('Design brief response missing "design_brief" field.');
+        $description = $briefJson['description']
+            ?? throw new \RuntimeException('Design brief response missing "description" field.');
         $colorDirection = $briefJson['color_direction']
             ?? throw new \RuntimeException('Design brief response missing "color_direction" field.');
         $fontMood = $briefJson['font_mood']
             ?? throw new \RuntimeException('Design brief response missing "font_mood" field.');
-        $conceptName = $briefJson['concept_name'] ?? null;
+        $name = $briefJson['name'] ?? null;
 
         // Step 2 — config JSON
         $configPrompt = new ConfigPrompt(
-            designBrief: $designBrief,
+            description: $description,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
-            conceptName: $conceptName,
+            format: $format,
+            colorMode: $colorMode,
+            name: $name,
         );
         $configPrompt->build();
         $config = $configPrompt->execute($this->client);

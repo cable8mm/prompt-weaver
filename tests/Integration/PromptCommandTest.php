@@ -112,7 +112,6 @@ it('generates a design brief prompt from fixture and saves to brief.prompt', fun
 it('generates a design brief prompt from direct options', function () {
     $result = run_prompt_weaver_cmd([
         'brief',
-        '--product=a Wi-Fi signage template',
         '--category=Cafe/Restaurant',
         '--format=A4/A5 Poster',
     ]);
@@ -160,9 +159,10 @@ it('generates a config prompt from fixture and saves to config.prompt', function
 it('generates a config prompt from direct options', function () {
     $result = run_prompt_weaver_cmd([
         'config',
-        '--brief=A warm and inviting cafe poster',
+        '--description=A warm and inviting cafe poster',
         '--color-direction=charcoal, ivory, and warm gray',
         '--font-mood=elegant rounded sans-serif',
+        '--format=A4/A5 Poster',
     ]);
 
     expect($result['exitCode'])->toBe(0);
@@ -233,10 +233,9 @@ it('runs the chain command with all required options', function () {
 
     $result = run_prompt_weaver_cmd([
         'chain',
-        '--product=a Wi-Fi signage template',
         '--category=Cafe/Restaurant',
         '--format=A4/A5 Poster',
-        '--brief=A warm and inviting cafe poster featuring elegant Art Deco geometry',
+        '--description=A warm and inviting cafe poster featuring elegant Art Deco geometry',
         '--color-direction=charcoal, ivory, and warm gray with optional muted blush accents',
         '--font-mood=elegant rounded sans-serif with subtle Art Deco influence',
         '--config-file='.$configPath,
@@ -252,7 +251,6 @@ it('runs the chain command with all required options', function () {
 it('fails chain command when required options are missing', function () {
     $result = run_prompt_weaver_cmd([
         'chain',
-        '--product=a Wi-Fi signage template',
     ]);
 
     expect($result['exitCode'])->not->toBe(0);

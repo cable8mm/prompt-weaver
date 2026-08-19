@@ -47,7 +47,6 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
         color: 'warm brown and cream',
@@ -63,7 +62,6 @@ it('runs the full pipeline with real OpenRouter API', function () {
     // Save manifest.json
     $manifest = [
         'code' => 'google-gemma-4-26b-a4b-it-free',
-        'product' => 'a Wi-Fi signage template',
         'category' => 'Cafe/Restaurant',
         'format' => 'A4/A5 Poster',
     ];
@@ -98,8 +96,8 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     // Verify design brief response
     expect($result->briefJson)
-        ->toHaveKey('design_brief')
-        ->and($result->briefJson['design_brief'])
+        ->toHaveKey('description')
+        ->and($result->briefJson['description'])
         ->not->toBeEmpty();
 
     // Verify config response structure
@@ -117,7 +115,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
     expect($result->config['style'])
         ->toHaveKey('theme')
         ->toHaveKey('background')
-        ->toHaveKey('print_target');
+        ->toHaveKey('color_mode');
 
     // Verify content structure
     expect($result->config['content'])

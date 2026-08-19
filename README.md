@@ -46,8 +46,8 @@ The library contains three prompt builders:
 
 They work together like this:
 
-1. `DesignBriefPrompt` takes a product, category, and format in the constructor, then `build()` generates the prompt and `prompt()` returns it.
-2. `ConfigPrompt` takes the design brief text, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
+1. `DesignBriefPrompt` takes a category and format in the constructor, then `build()` generates a Wi-Fi signage design brief prompt and `prompt()` returns it.
+2. `ConfigPrompt` takes the template description, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
 
@@ -64,9 +64,9 @@ Input:
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 
 $briefPrompt = new DesignBriefPrompt(
-    product: 'a Wi-Fi signage template',
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
 );
@@ -94,13 +94,15 @@ That returned text is not the final design brief yet. It is the prompt you send 
 use Cable8mm\PromptWeaver\ConfigPrompt;
 
 // This would usually be the model's response to Step 1.
-$designBrief = 'A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones.';
+$description = 'A cozy cafe-style Wi-Fi sign with warm cream and coffee-brown tones.';
 
 $configPrompt = new ConfigPrompt(
-    designBrief: $designBrief,
+    description: $description,
     colorDirection: 'warm brown and cream tones with soft gold accents',
     fontMood: 'rounded handwritten-style Korean font',
-    conceptName: '카페 시그니처', // optional
+    format: Format::A45_POSTER,
+    colorMode: ColorMode::MONO,
+    name: '카페 시그니처', // optional
 );
 $configPrompt->build();
 $promptText = $configPrompt->prompt();
@@ -125,12 +127,12 @@ use Cable8mm\PromptWeaver\ImagePrompt;
 // This would usually be the parsed JSON response from Step 2.
 $config = [
     'canvas' => [
-        'aspect_ratio' => '3:4',
+        'aspect_ratio' => Format::A45_POSTER->ratio(),
     ],
     'style' => [
         'theme' => 'Warm cafe vibe with a soft analog feel',
         'background' => 'cream paper texture with subtle grain',
-        'print_target' => 'black-and-white laser printer safe',
+        'color_mode' => ColorMode::MONO->value,
     ],
     'content' => [
         'title' => [
@@ -214,13 +216,13 @@ All commands below operate on the same fixture folder:
 ./weaver init cafe-restaurant
 ```
 
-You can also specify the product, category, and format when creating a fixture:
+You can also specify the category and format when creating a fixture:
 
 ```bash
-./weaver init cafe-restaurant --category="Office/Coworking" --format="Business Card"
+./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
 ```
 
-When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `L-Stand/Table Tent`, `Sticker`, and `Business Card`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
+When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `A6/A7 Poster`, and `Mini Square`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
 
 The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
 
@@ -240,17 +242,17 @@ The commands use the files created or saved in that folder:
 ./weaver preview cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
 
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
-2. `config` prints the JSON-generation prompt you send after you have a design brief result.
+2. `config` prints the JSON-generation prompt you send after you have a template description.
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
-7. `init` creates a new fixture manifest folder with default values for `product`, `category`, and `format`, or with the values you pass via `--product`, `--category`, and `--format`.
+7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
@@ -261,9 +263,9 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 ### Manual workflow
 
-1. Create a `DesignBriefPrompt` with product, category, and format, call `build()`, then retrieve the prompt via `prompt()`.
-2. Send that prompt to a model and capture the brief text.
-3. Create a `ConfigPrompt` with the design brief, color direction, font mood, and optional concept name, call `build()`, then retrieve the prompt via `prompt()`.
+1. Create a `DesignBriefPrompt` with category and format, call `build()`, then retrieve the prompt via `prompt()`.
+2. Send that prompt to a model and capture the description.
+3. Create a `ConfigPrompt` with the description, color direction, font mood, and optional template name, call `build()`, then retrieve the prompt via `prompt()`.
 4. Send that prompt to a model and parse the returned JSON.
 5. Create an `ImagePrompt` with the parsed config, call `build()`, then retrieve the prompt via `prompt()`.
 6. Send the final text to your image model or image generator.
@@ -277,6 +279,7 @@ The `Pipe` class automates the entire three-step pipeline by sending each prompt
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Pipe;
 
 $client = new Client(
@@ -287,10 +290,10 @@ $client = new Client(
 
 $pipe = new Pipe($client);
 $result = $pipe->run(
-    product: 'a Wi-Fi signage template',
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
     color: 'warm brown and cream', // optional
+    colorMode: ColorMode::MONO,
 );
 
 // Access all prompts and responses
@@ -320,10 +323,10 @@ The easiest way to test this package is to create one fixture and keep all gener
 ./weaver init cafe-restaurant
 ```
 
-This creates `tests/Fixtures/cafe-restaurant/manifest.json` with the template `code` and default values for `product`, `category`, and `format`. You can also pass `--product`, `--category`, and `--format` to customize the manifest:
+This creates `tests/Fixtures/cafe-restaurant/manifest.json` with the template `code` and default values for `category` and `format`. You can also pass `--category` and `--format` to customize the manifest:
 
 ```bash
-./weaver init cafe-restaurant --category="Office/Coworking" --format="Business Card"
+./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
 ```
 
 When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. Run `./weaver --help` to see the available categories and formats.
@@ -342,7 +345,7 @@ The prompt is also saved automatically as `tests/Fixtures/cafe-restaurant/brief.
 ./weaver config cafe-restaurant
 ```
 
-The command reads `design-brief.json`, takes its `design_brief` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/cafe-restaurant/config.json`.
+The command reads `design-brief.json`, takes its `description` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/cafe-restaurant/config.json`.
 
 ### 4) Generate the final image prompt
 
@@ -396,9 +399,9 @@ Or with explicit options:
 
 ```bash
 ./weaver pipe \
-  --product="a Wi-Fi signage template" \
   --category="Cafe/Restaurant" \
   --format="A4/A5 Poster" \
+  --color-mode=mono \
   --provider=openrouter \
   --api-key=sk-or-v1-... \
   --model=google/gemma-4-26b-a4b-it:free \

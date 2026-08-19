@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
+use Cable8mm\PromptWeaver\Enums\Format;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,10 +18,12 @@ final class ConfigCommand extends PromptWeaverCommand
     {
         $this->setName('config')->setDescription('Generate a config prompt.');
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
-        $this->addOption('brief', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('description', null, InputOption::VALUE_REQUIRED);
         $this->addOption('color-direction', null, InputOption::VALUE_REQUIRED);
         $this->addOption('font-mood', null, InputOption::VALUE_REQUIRED);
-        $this->addOption('concept-name', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('format', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('color-mode', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('name', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }
 
@@ -29,24 +33,35 @@ final class ConfigCommand extends PromptWeaverCommand
 
         if (is_string($fixtureReference) && $fixtureReference !== '') {
             $designBriefJson = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/design-brief.json');
-            $designBrief = $designBriefJson['design_brief'] ?? null;
+            $description = $designBriefJson['description'] ?? null;
             $colorDirection = $designBriefJson['color_direction'] ?? null;
             $fontMood = $designBriefJson['font_mood'] ?? null;
-            $conceptName = $designBriefJson['concept_name'] ?? null;
+            $name = $designBriefJson['name'] ?? null;
+            $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
+            $format = isset($manifest['format']) ? Format::fromCliInput($manifest['format']) : null;
+            $colorMode = ColorMode::fromCliInput($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE);
         } else {
-            $designBrief = $input->getOption('brief');
+            $description = $input->getOption('description');
             $colorDirection = $input->getOption('color-direction');
             $fontMood = $input->getOption('font-mood');
-            $conceptName = $input->getOption('concept-name');
+            $name = $input->getOption('name');
+            $format = $input->getOption('format');
+            $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
         }
 
-        $this->requireValues($designBrief, $colorDirection, $fontMood);
+        $this->requireValues($description, $colorDirection, $fontMood);
+        if (! $format instanceof Format) {
+            $this->requireValues($format);
+            $format = Format::fromCliInput($format);
+        }
 
         $prompt = new ConfigPrompt(
-            designBrief: $designBrief,
+            description: $description,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
-            conceptName: $conceptName,
+            format: $format,
+            colorMode: $colorMode instanceof ColorMode ? $colorMode : ColorMode::fromCliInput($colorMode),
+            name: $name,
         );
         $prompt->build();
         $promptText = $prompt->prompt();

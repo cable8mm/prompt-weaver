@@ -11,9 +11,8 @@ function set_private_property(object $object, string $property, array $value): v
     $reflection->setValue($object, $value);
 }
 
-it('builds a design brief prompt using the provided product, category, and format', function () {
+it('builds a Wi-Fi signage design brief prompt using the category and format', function () {
     $promptBuilder = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
@@ -31,17 +30,16 @@ it('builds a design brief prompt using the provided product, category, and forma
         ->toContain('Category: Cafe/Restaurant')
         ->toContain('Format: A4/A5 Poster')
         ->toContain('minimal Scandinavian, winter frost and pine mood, subtle grid pattern')
-        ->toContain('"concept_name": "<short catchy concept name, 2-6 words>"')
-        ->toContain('"design_brief": "<1-3 concise sentences')
+        ->toContain('"name": "<short template name, 2-6 words>"')
+        ->toContain('"description": "<1-3 concise sentences')
         ->toContain('"color_direction": "<primary color palette description')
         ->toContain('"font_mood": "<short description of what typography feel fits')
-        ->toContain('"design_brief" must be written in English')
+        ->toContain('"description" must be written in English')
         ->toContain('Output ONLY a valid JSON object');
 });
 
 it('uses the configured color in rule one', function () {
     $blackAndWhitePrompt = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::OTHER,
         format: Format::A45_POSTER,
     );
@@ -49,7 +47,6 @@ it('uses the configured color in rule one', function () {
     $blackAndWhiteText = $blackAndWhitePrompt->prompt();
 
     $colorPrompt = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::OTHER,
         format: Format::A45_POSTER,
         color: 'ocean blue and coral',
@@ -68,7 +65,6 @@ it('uses the configured color in rule one', function () {
 
 it('does not immediately repeat a random seed within a pool', function () {
     $promptBuilder = new DesignBriefPrompt(
-        product: 'a Wi-Fi signage template',
         category: Category::OTHER,
         format: Format::A45_POSTER,
     );

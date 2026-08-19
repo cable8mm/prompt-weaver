@@ -7,6 +7,7 @@ namespace Cable8mm\PromptWeaver\Console\Commands;
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\DesignBriefPrompt;
 use Cable8mm\PromptWeaver\Enums\Category;
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\ImagePrompt;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,13 +20,13 @@ final class ChainCommand extends PromptWeaverCommand
     {
         $this->setName('chain')->setDescription('Generate all three prompts in one run.');
         foreach ([
-            'product',
             'category',
             'format',
-            'brief',
+            'color-mode',
+            'description',
             'color-direction',
             'font-mood',
-            'concept-name',
+            'name',
             'config-file',
         ] as $option) {
             $this->addOption($option, null, InputOption::VALUE_REQUIRED);
@@ -34,25 +35,27 @@ final class ChainCommand extends PromptWeaverCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $product = $input->getOption('product');
         $category = $input->getOption('category');
         $format = $input->getOption('format');
-        $brief = $input->getOption('brief');
+        $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
+        $description = $input->getOption('description');
         $colorDirection = $input->getOption('color-direction');
         $fontMood = $input->getOption('font-mood');
-        $conceptName = $input->getOption('concept-name');
+        $name = $input->getOption('name');
         $configFile = $input->getOption('config-file');
 
-        $this->requireValues($product, $category, $format, $brief, $colorDirection, $fontMood, $configFile);
+        $this->requireValues($category, $format, $description, $colorDirection, $fontMood, $configFile);
 
         if (! is_file($configFile)) {
             throw new \RuntimeException("Config file not found: {$configFile}");
         }
 
-        $briefPrompt = new DesignBriefPrompt($product, Category::fromCliInput($category), Format::fromCliInput($format));
+        $format = Format::fromCliInput($format);
+        $colorMode = ColorMode::fromCliInput($colorMode);
+        $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), $format, colorMode: $colorMode);
         $briefPrompt->build();
 
-        $configPrompt = new ConfigPrompt($brief, $colorDirection, $fontMood, $conceptName);
+        $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, $format, name: $name, colorMode: $colorMode);
         $configPrompt->build();
 
         $imagePrompt = new ImagePrompt($this->readJsonFile($configFile));

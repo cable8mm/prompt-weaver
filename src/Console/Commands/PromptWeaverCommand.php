@@ -17,11 +17,11 @@ abstract class PromptWeaverCommand extends Command
 {
     protected const DEFAULT_FIXTURES_ROOT = 'tests/Fixtures';
 
-    protected const DEFAULT_PRODUCT = 'a Wi-Fi signage template';
-
     protected const DEFAULT_CATEGORY = 'Cafe/Restaurant';
 
     protected const DEFAULT_FORMAT = 'A4/A5 Poster';
+
+    protected const DEFAULT_COLOR_MODE = 'mono';
 
     protected function fixturesRoot(InputInterface $input): string
     {

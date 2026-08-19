@@ -2,12 +2,12 @@
     "canvas": {
         "width_pc": 100,
         "height_pc": 100,
-        "aspect_ratio": "3:4"
+        "aspect_ratio": "5:7"
     },
     "style": {
         "theme": "Sophisticated industrial cafe aesthetic with a cozy winter atmosphere.",
         "background": "Textured light gray concrete with a subtle geometric grid pattern and delicate frost and pine silhouettes in the corners.",
-        "print_target": "black-and-white laser printer safe"
+        "color_mode": "mono"
     },
     "content": {
         "title": {
