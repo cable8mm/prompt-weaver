@@ -48,14 +48,14 @@ final class Pipe
             ?? throw new \RuntimeException('Design brief response missing "color_direction" field.');
         $fontMood = $briefJson['font_mood']
             ?? throw new \RuntimeException('Design brief response missing "font_mood" field.');
-        $conceptName = $briefJson['concept_name'] ?? null;
+        $name = $briefJson['name'] ?? null;
 
         // Step 2 — config JSON
         $configPrompt = new ConfigPrompt(
             designBrief: $designBrief,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
-            conceptName: $conceptName,
+            name: $name,
         );
         $configPrompt->build();
         $config = $configPrompt->execute($this->client);

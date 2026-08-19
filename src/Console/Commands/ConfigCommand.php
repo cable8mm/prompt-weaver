@@ -19,7 +19,7 @@ final class ConfigCommand extends PromptWeaverCommand
         $this->addOption('brief', null, InputOption::VALUE_REQUIRED);
         $this->addOption('color-direction', null, InputOption::VALUE_REQUIRED);
         $this->addOption('font-mood', null, InputOption::VALUE_REQUIRED);
-        $this->addOption('concept-name', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('name', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }
 
@@ -32,12 +32,12 @@ final class ConfigCommand extends PromptWeaverCommand
             $designBrief = $designBriefJson['design_brief'] ?? null;
             $colorDirection = $designBriefJson['color_direction'] ?? null;
             $fontMood = $designBriefJson['font_mood'] ?? null;
-            $conceptName = $designBriefJson['concept_name'] ?? null;
+            $name = $designBriefJson['name'] ?? null;
         } else {
             $designBrief = $input->getOption('brief');
             $colorDirection = $input->getOption('color-direction');
             $fontMood = $input->getOption('font-mood');
-            $conceptName = $input->getOption('concept-name');
+            $name = $input->getOption('name');
         }
 
         $this->requireValues($designBrief, $colorDirection, $fontMood);
@@ -46,7 +46,7 @@ final class ConfigCommand extends PromptWeaverCommand
             designBrief: $designBrief,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
-            conceptName: $conceptName,
+            name: $name,
         );
         $prompt->build();
         $promptText = $prompt->prompt();

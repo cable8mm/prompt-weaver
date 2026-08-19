@@ -41,20 +41,19 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 [Rules]
 1. "canvas.aspect_ratio" is always fixed at "3:4". Never change it.
 2. "ssid", "password", and "qr" MUST keep the fixed vertical rhythm above (ssid ~40%, password ~52%, qr ~80%) — these positions are required for downstream automated overlay and must not shift.
-3. "title", "wifi_icon", "message", "footer" positions are flexible — vary their placement, size, and composition to match the mood of the Design Brief and Concept Name, as long as they don't overlap the ssid/password/qr zones (see rule 2). Avoid defaulting to the same layout every time.
+3. "title", "wifi_icon", "message", "footer" positions are flexible — vary their placement, size, and composition to match the mood of the Design Brief and Name, as long as they don't overlap the ssid/password/qr zones (see rule 2). Avoid defaulting to the same layout every time.
 4. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
 5. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".
 6. Text content fields ("title.text", "message.text", "footer.text") stay in Korean as shown, unless the user's brief explicitly provides different copy.
 7. "style", "theme", "background", and other free-text description fields should reflect the user's design brief in 1-2 concise sentences each, written in English (since these fields feed directly into an image-generation prompt).
 8. For "style.background" specifically, treat "Color Direction" below as the authoritative source for palette — if "Design Brief" and "Color Direction" seem to imply slightly different colors, "Color Direction" wins.
 9. For "content.title.style" and any other typography-related description, treat "Font Mood" below as the authoritative source — do not invent a different font feel from the Design Brief text alone.
-10. "Concept Name" (if provided) is a reference label only — do not copy it verbatim into any output field; use it only to keep the overall mood consistent.
+10. "Name" (if provided) is a reference label only — do not copy it verbatim into any output field; use it only to keep the overall mood consistent.
 11. Do not add extra top-level fields. Do not remove any field from the schema, even if a value is just inherited from the default above.
 12. Output must be valid, parseable JSON — no comments, no trailing commas, no markdown fences.
 
 [Inputs]
-- Concept Name: 벚꽃 아르데코
+- Name: 벚꽃 아르데코
 - Design Brief: A warm and inviting cafe poster featuring elegant Art Deco geometry softened with subtle cherry blossom-inspired accents and refined geometric line-art patterns. Use a clean, high-contrast composition with generous whitespace, crisp borders, and understated decorative elements that remain printable in monochrome while conveying a fresh spring atmosphere.
 - Color Direction: charcoal, ivory, and warm gray with optional muted blush accents that remain effective in grayscale
 - Font Mood: elegant rounded sans-serif with subtle Art Deco influence
-

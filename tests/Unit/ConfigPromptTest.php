@@ -6,13 +6,13 @@ it('injects the design brief, color direction, and font mood into the config pro
     $designBrief = 'A cozy cafe Wi-Fi sign with warm brown and cream tones.';
     $colorDirection = 'warm brown and cream tones with soft gold accents';
     $fontMood = 'rounded handwritten-style Korean font';
-    $conceptName = '카페 시그니처';
+    $name = '카페 시그니처';
 
     $configPrompt = new ConfigPrompt(
         designBrief: $designBrief,
         colorDirection: $colorDirection,
         fontMood: $fontMood,
-        conceptName: $conceptName,
+        name: $name,
     );
     $configPrompt->build();
     $prompt = $configPrompt->prompt();
@@ -23,7 +23,7 @@ it('injects the design brief, color direction, and font mood into the config pro
         ->toContain($designBrief)
         ->toContain($colorDirection)
         ->toContain($fontMood)
-        ->toContain($conceptName)
+        ->toContain($name)
         ->toContain('"canvas"')
         ->toContain('"content"')
         ->toContain('"placeholders"')

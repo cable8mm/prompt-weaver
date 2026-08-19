@@ -99,7 +99,7 @@ $configPrompt = new ConfigPrompt(
     designBrief: $designBrief,
     colorDirection: 'warm brown and cream tones with soft gold accents',
     fontMood: 'rounded handwritten-style Korean font',
-    conceptName: '카페 시그니처', // optional
+    name: '카페 시그니처', // optional
 );
 $configPrompt->build();
 $promptText = $configPrompt->prompt();
@@ -262,7 +262,7 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 1. Create a `DesignBriefPrompt` with category and format, call `build()`, then retrieve the prompt via `prompt()`.
 2. Send that prompt to a model and capture the brief text.
-3. Create a `ConfigPrompt` with the design brief, color direction, font mood, and optional concept name, call `build()`, then retrieve the prompt via `prompt()`.
+3. Create a `ConfigPrompt` with the design brief, color direction, font mood, and optional template name, call `build()`, then retrieve the prompt via `prompt()`.
 4. Send that prompt to a model and parse the returned JSON.
 5. Create an `ImagePrompt` with the parsed config, call `build()`, then retrieve the prompt via `prompt()`.
 6. Send the final text to your image model or image generator.

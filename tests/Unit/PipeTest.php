@@ -44,7 +44,7 @@ final class FakeHttpClient implements HttpClientInterface
 
 it('runs the full three-step pipeline and returns all prompts', function () {
     $briefJson = json_encode([
-        'concept_name' => '따뜻한 카페',
+        'name' => '따뜻한 카페',
         'design_brief' => 'A warm cafe Wi-Fi sign with cream and brown tones.',
         'color_direction' => 'warm brown and cream',
         'font_mood' => 'rounded sans-serif',
@@ -123,7 +123,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
 
 it('strips markdown code fences from model responses', function () {
     $briefJson = "```json\n".json_encode([
-        'concept_name' => '테스트',
+        'name' => '테스트',
         'design_brief' => 'A test design brief.',
         'color_direction' => 'test colors',
         'font_mood' => 'test font',
@@ -164,7 +164,7 @@ it('strips markdown code fences from model responses', function () {
 });
 
 it('throws when the design brief response is missing the design_brief field', function () {
-    $briefJson = json_encode(['concept_name' => 'test']); // missing design_brief
+    $briefJson = json_encode(['name' => 'test']); // missing design_brief
 
     $httpClient = new FakeHttpClient([$briefJson]);
 
@@ -184,7 +184,7 @@ it('throws when the design brief response is missing the design_brief field', fu
 
 it('passes the color option to DesignBriefPrompt', function () {
     $briefJson = json_encode([
-        'concept_name' => '색칠',
+        'name' => '색칠',
         'design_brief' => 'A colorful design brief.',
         'color_direction' => 'vibrant colors',
         'font_mood' => 'bold font',

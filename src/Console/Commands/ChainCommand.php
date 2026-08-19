@@ -24,7 +24,7 @@ final class ChainCommand extends PromptWeaverCommand
             'brief',
             'color-direction',
             'font-mood',
-            'concept-name',
+            'name',
             'config-file',
         ] as $option) {
             $this->addOption($option, null, InputOption::VALUE_REQUIRED);
@@ -38,7 +38,7 @@ final class ChainCommand extends PromptWeaverCommand
         $brief = $input->getOption('brief');
         $colorDirection = $input->getOption('color-direction');
         $fontMood = $input->getOption('font-mood');
-        $conceptName = $input->getOption('concept-name');
+        $name = $input->getOption('name');
         $configFile = $input->getOption('config-file');
 
         $this->requireValues($category, $format, $brief, $colorDirection, $fontMood, $configFile);
@@ -50,7 +50,7 @@ final class ChainCommand extends PromptWeaverCommand
         $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), Format::fromCliInput($format));
         $briefPrompt->build();
 
-        $configPrompt = new ConfigPrompt($brief, $colorDirection, $fontMood, $conceptName);
+        $configPrompt = new ConfigPrompt($brief, $colorDirection, $fontMood, $name);
         $configPrompt->build();
 
         $imagePrompt = new ImagePrompt($this->readJsonFile($configFile));
