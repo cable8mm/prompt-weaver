@@ -99,6 +99,7 @@ $configPrompt = new ConfigPrompt(
     description: $description,
     colorDirection: 'warm brown and cream tones with soft gold accents',
     fontMood: 'rounded handwritten-style Korean font',
+    format: Format::A45_POSTER,
     name: '카페 시그니처', // optional
 );
 $configPrompt->build();
@@ -124,7 +125,7 @@ use Cable8mm\PromptWeaver\ImagePrompt;
 // This would usually be the parsed JSON response from Step 2.
 $config = [
     'canvas' => [
-        'aspect_ratio' => '3:4',
+        'aspect_ratio' => Format::A45_POSTER->ratio(),
     ],
     'style' => [
         'theme' => 'Warm cafe vibe with a soft analog feel',

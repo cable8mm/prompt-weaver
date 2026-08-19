@@ -4,6 +4,7 @@ namespace Cable8mm\PromptWeaver;
 
 use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
+use Cable8mm\PromptWeaver\Enums\Format;
 use RuntimeException;
 
 class ConfigPrompt implements PromptInterface
@@ -16,12 +17,14 @@ class ConfigPrompt implements PromptInterface
      * @param  string  $description  Template description describing the visual theme, background style, and mood
      * @param  string  $colorDirection  Primary color palette description (e.g., "warm brown and cream tones with soft gold accents")
      * @param  string  $fontMood  Typography feel description (e.g., "rounded handwritten-style Korean font")
+     * @param  Format  $format  Template output format
      * @param  string|null  $name  Optional template name (e.g., "벚꽃 아르데코"), used only as a reference tag, not a content source
      */
     public function __construct(
         private string $description,
         private string $colorDirection,
         private string $fontMood,
+        private Format $format,
         private ?string $name = null,
     ) {}
 
@@ -38,6 +41,7 @@ class ConfigPrompt implements PromptInterface
             '{{ description }}' => $this->description,
             '{{ color_direction }}' => $this->colorDirection,
             '{{ font_mood }}' => $this->fontMood,
+            '{{ aspect_ratio }}' => $this->format->ratio(),
         ]);
     }
 

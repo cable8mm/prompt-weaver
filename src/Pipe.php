@@ -55,6 +55,7 @@ final class Pipe
             description: $description,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
+            format: $format,
             name: $name,
         );
         $configPrompt->build();

@@ -34,4 +34,13 @@ enum Format: string
             self::MINI_SQUARE => ['mini-square'],
         };
     }
+
+    public function ratio(): string
+    {
+        return match ($this) {
+            self::A45_POSTER => '5:7',
+            self::A67_POSTER => '5:7',
+            self::MINI_SQUARE => '1:1'
+        };
+    }
 }

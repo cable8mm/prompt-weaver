@@ -4,7 +4,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 
 [Fixed schema — always follow this exact structure]
 {
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "3:4" },
+  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "5:7" },
   "style": {
     "theme": "<one-sentence visual theme description>",
     "background": "<background description: colors, patterns, textures>",
@@ -37,7 +37,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 }
 
 [Rules]
-1. "canvas.aspect_ratio" is always fixed at "3:4". Never change it.
+1. "canvas.aspect_ratio" must be "5:7". Never change it.
 2. All x_pc/y_pc/width_pc/height_pc values are percentages (0-100) relative to canvas. Keep the same vertical rhythm as the schema above (title near top ~10%, icon ~20%, ssid box ~40%, password box ~52%, message ~62%, qr ~80%, footer ~96%) unless the user's brief explicitly asks for a different layout — layout changes should be deliberate, not incidental.
 3. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
 4. "color" fields (text/QR color once overlaid later) must have strong contrast against "box_fill".

@@ -4,7 +4,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 
 [Fixed schema — always follow this exact structure]
 {
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "5:7" },
+  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "{{ aspect_ratio }}" },
   "style": {
     "theme": "<one-sentence visual theme description>",
     "background": "<background description: colors, patterns, textures>",
@@ -39,7 +39,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 }
 
 [Rules]
-1. "canvas.aspect_ratio" is always fixed at "3:4". Never change it.
+1. "canvas.aspect_ratio" must be "{{ aspect_ratio }}". Never change it.
 2. "ssid", "password", and "qr" MUST keep the fixed vertical rhythm above (ssid ~40%, password ~52%, qr ~80%) — these positions are required for downstream automated overlay and must not shift.
 3. "title", "wifi_icon", "message", "footer" positions are flexible — vary their placement, size, and composition to match the mood of the Design Brief and Name, as long as they don't overlap the ssid/password/qr zones (see rule 2). Avoid defaulting to the same layout every time.
 4. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.

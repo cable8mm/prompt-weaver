@@ -50,7 +50,7 @@ final class ChainCommand extends PromptWeaverCommand
         $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), Format::fromCliInput($format));
         $briefPrompt->build();
 
-        $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, $name);
+        $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, Format::fromCliInput($format), $name);
         $configPrompt->build();
 
         $imagePrompt = new ImagePrompt($this->readJsonFile($configFile));

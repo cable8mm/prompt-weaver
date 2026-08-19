@@ -162,6 +162,7 @@ it('generates a config prompt from direct options', function () {
         '--description=A warm and inviting cafe poster',
         '--color-direction=charcoal, ivory, and warm gray',
         '--font-mood=elegant rounded sans-serif',
+        '--format=A4/A5 Poster',
     ]);
 
     expect($result['exitCode'])->toBe(0);

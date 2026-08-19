@@ -1,6 +1,7 @@
 <?php
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
+use Cable8mm\PromptWeaver\Enums\Format;
 
 it('injects the design brief, color direction, and font mood into the config prompt', function () {
     $description = 'A cozy cafe Wi-Fi sign with warm brown and cream tones.';
@@ -12,6 +13,7 @@ it('injects the design brief, color direction, and font mood into the config pro
         description: $description,
         colorDirection: $colorDirection,
         fontMood: $fontMood,
+        format: Format::A45_POSTER,
         name: $name,
     );
     $configPrompt->build();
@@ -25,6 +27,7 @@ it('injects the design brief, color direction, and font mood into the config pro
         ->toContain($fontMood)
         ->toContain($name)
         ->toContain('"canvas"')
+        ->toContain('"aspect_ratio": "5:7"')
         ->toContain('"content"')
         ->toContain('"placeholders"')
         ->not->toContain('{$description}');

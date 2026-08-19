@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
 use Cable8mm\PromptWeaver\ConfigPrompt;
+use Cable8mm\PromptWeaver\Enums\Format;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -19,6 +20,7 @@ final class ConfigCommand extends PromptWeaverCommand
         $this->addOption('description', null, InputOption::VALUE_REQUIRED);
         $this->addOption('color-direction', null, InputOption::VALUE_REQUIRED);
         $this->addOption('font-mood', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('format', null, InputOption::VALUE_REQUIRED);
         $this->addOption('name', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }
@@ -33,19 +35,27 @@ final class ConfigCommand extends PromptWeaverCommand
             $colorDirection = $designBriefJson['color_direction'] ?? null;
             $fontMood = $designBriefJson['font_mood'] ?? null;
             $name = $designBriefJson['name'] ?? null;
+            $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
+            $format = isset($manifest['format']) ? Format::fromCliInput($manifest['format']) : null;
         } else {
             $description = $input->getOption('description');
             $colorDirection = $input->getOption('color-direction');
             $fontMood = $input->getOption('font-mood');
             $name = $input->getOption('name');
+            $format = $input->getOption('format');
         }
 
         $this->requireValues($description, $colorDirection, $fontMood);
+        if (! $format instanceof Format) {
+            $this->requireValues($format);
+            $format = Format::fromCliInput($format);
+        }
 
         $prompt = new ConfigPrompt(
             description: $description,
             colorDirection: $colorDirection,
             fontMood: $fontMood,
+            format: $format,
             name: $name,
         );
         $prompt->build();
