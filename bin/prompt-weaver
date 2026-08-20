@@ -6,6 +6,9 @@ declare(strict_types=1);
 require dirname(__DIR__).'/vendor/autoload.php';
 
 use Cable8mm\PromptWeaver\Console\Application;
+use Cable8mm\PromptWeaver\Support\Environment;
+
+Environment::load(dirname(__DIR__).'/.env');
 
 $application = new Application;
 
