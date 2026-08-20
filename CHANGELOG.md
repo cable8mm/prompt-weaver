@@ -1,5 +1,23 @@
 # Release Notes
 
+## v0.4.0 - 2026-08-20
+
+### What's Changed
+
+* feat: add cafe-restaurant fixture with design brief, config, and image prompts by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/21
+* refactor: make simple codes by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/22
+* feat: add export command to package generated images and fixture config for Laravel import by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/23
+* feat: enhance export command to include metadata by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/24
+* feat: update design brief and config prompts to use Korean for description, color direction, and font mood by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/25
+* feat: update default working directory and refactor config handling by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/26
+* fix: improve QR code rendering by adding padding and centering logic by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/27
+* feat: solve export issues by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/28
+* feat: add environment variable loading and enhance pipe command by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/29
+* feat: add layout options to init command and refine image prompt instructions by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/30
+* feat: add layout-specific prompts and config-stub command by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/31
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.3.3...v0.4.0
+
 ## v0.3.3 - 2026-08-19
 
 ### What's Changed
