@@ -4,6 +4,7 @@ use Cable8mm\NanoAI\Client;
 use Cable8mm\NanoAI\Http\HttpClientInterface;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\Pipe;
 
 /**
@@ -92,6 +93,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
     $result = $pipe->run(
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
+        layout: Layout::QR_FOCUS,
     );
 
     // Should have made exactly 2 API calls (brief + config)
@@ -108,7 +110,9 @@ it('runs the full three-step pipeline and returns all prompts', function () {
     // Config prompt should contain the design brief
     expect($result->configPrompt)
         ->toContain('[Role]')
-        ->toContain('A warm cafe Wi-Fi sign with cream and brown tones.');
+        ->toContain('A warm cafe Wi-Fi sign with cream and brown tones.')
+        ->toContain('Make the QR code the primary visual anchor')
+        ->not->toContain('Use a balanced centered composition');
 
     // Config should be the parsed JSON
     expect($result->config['style']['theme'])->toBe('warm cafe');

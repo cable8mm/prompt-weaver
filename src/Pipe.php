@@ -6,6 +6,7 @@ use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\Layout;
 
 /**
  * Orchestrates the three-step text prompt chain (design brief → config → image prompt)
@@ -30,6 +31,7 @@ final class Pipe
      * @param  Category  $category  The category enum
      * @param  Format  $format  The format enum
      * @param  ColorMode  $colorMode  Color output mode
+     * @param  Layout  $layout  The config layout
      * @param  string|null  $color  Optional color direction passed to DesignBriefPrompt.
      * @return PipeResult Contains all three prompts plus the parsed intermediate JSON.
      */
@@ -38,6 +40,7 @@ final class Pipe
         Format $format,
         ?string $color = null,
         ColorMode $colorMode = ColorMode::MONO,
+        Layout $layout = Layout::CENTERED,
         ?callable $onProgress = null,
     ): PipeResult {
         // Step 1 — design brief
@@ -75,6 +78,7 @@ final class Pipe
             format: $format,
             colorMode: $colorMode,
             name: $name,
+            layout: $layout,
         );
         $configPrompt->build();
         $config = $configPrompt->execute($this->client);

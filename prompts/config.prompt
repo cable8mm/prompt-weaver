@@ -1,0 +1,69 @@
+[Role]
+You are maintaining a layout-specific config-generation prompt for Prompt Weaver.
+
+Use stubs/config.centered.prompt as the canonical source template.
+Create or revise exactly one stubs/config.{layout}.prompt file by making the smallest possible change from that canonical file.
+
+Output only the complete prompt file contents. Do not output the generated config JSON, markdown fences, explanations, or a diff.
+
+[Canonical template]
+Treat stubs/config.centered.prompt as authoritative for:
+
+- [Role] wording and output restrictions
+- the complete [Schema] structure
+- all field names, field nesting, field types, and fixed Korean content
+- placeholder labels, fill rules, font defaults, and overlay-anchor rules
+- [Rules] wording and runtime template variables
+- [Inputs] structure and template variables
+
+Do not redesign or reconstruct the schema from memory.
+
+[Allowed changes]
+Only these changes are allowed in the new layout prompt:
+
+1. Rewrite the [Layout] section to describe the requested layout's visual hierarchy and composition.
+2. Change numeric coordinate and dimension values inside the [Schema] to fit that layout.
+
+Keep every other line and field identical to stubs/config.centered.prompt unless a minimal change is strictly required to describe the layout.
+
+In particular, do not change:
+
+- top-level keys: canvas, style, content, placeholders
+- content and placeholder object structure
+- fixed Korean text
+- placeholder labels and overlay semantics
+- template variables: {{ aspect_ratio }}, {{ color_mode }}, {{ name_line }}, {{ description }}, {{ color_direction }}, {{ font_mood }}
+- JSON-only output rules
+
+Do not add layout_name, layout_goal, required_composition, forbidden_composition, schema_version, metadata, or any other new runtime fields.
+
+[Coordinate rules]
+Coordinates are percentage-based overlay anchors for a portrait canvas.
+
+- x_pc and y_pc are element center points.
+- box_x_pc and box_y_pc are SSID/password box center points.
+- box_width_pc and box_height_pc are box dimensions.
+- qr.x_pc and qr.y_pc are the QR square center point.
+- qr.width_pc is the QR square width; the QR area remains square.
+- Keep all values between 0 and 100.
+- Keep SSID, password, and QR areas separate and non-overlapping.
+- Leave enough whitespace for readable overlay text, QR insertion, printing, and calibration.
+
+[Validation]
+Before returning the file, compare it line-by-line with stubs/config.centered.prompt and verify:
+
+1. Only [Layout] prose and intended numeric coordinates/dimensions changed.
+2. The schema remains compatible with src/ImagePrompt.php.
+3. Every field accessed by ImagePrompt is still present.
+4. The six runtime template variables are preserved exactly.
+5. The output is a complete executable prompt file, not a JSON response.
+
+[Layout request]
+Create or revise this layout prompt:
+
+- Layout file: stubs/config.{{ layout }}.prompt
+- Layout name: {{ layout_name }}
+- Layout goal: {{ layout_goal }}
+- Desired coordinate changes: {{ coordinate_changes }}
+
+Resolve all layout-request variables while authoring the file. Do not leave their mustache expressions in the generated stubs/config.{layout}.prompt file.

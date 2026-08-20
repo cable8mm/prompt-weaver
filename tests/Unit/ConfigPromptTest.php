@@ -50,5 +50,5 @@ it('loads the selected layout preset into the config prompt', function () {
 
     expect($configPrompt->prompt())
         ->toContain('Make the QR code the primary visual anchor')
-        ->toContain('"box_y_pc": 29');
+        ->toContain('"box_y_pc": 68');
 });

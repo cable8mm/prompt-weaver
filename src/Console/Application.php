@@ -8,6 +8,7 @@ use Cable8mm\PromptWeaver\Console\Commands\BriefCommand;
 use Cable8mm\PromptWeaver\Console\Commands\CalibrateCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ChainCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ConfigCommand;
+use Cable8mm\PromptWeaver\Console\Commands\ConfigStubCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ExportCommand;
 use Cable8mm\PromptWeaver\Console\Commands\HelpCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ImageCommand;
@@ -29,6 +30,7 @@ final class Application extends SymfonyApplication
             new InitCommand,
             new BriefCommand,
             new ConfigCommand,
+            new ConfigStubCommand,
             new ExportCommand,
             new ImageCommand,
             new ChainCommand,

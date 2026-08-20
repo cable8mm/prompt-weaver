@@ -194,6 +194,50 @@ $imagePrompt->build();
 $promptText = $imagePrompt->prompt();
 ```
 
+### Iterative prompt-template workflow
+
+The repository also includes editable prompt templates for working directly with a
+chat-based AI. The shared image-preview instructions live in
+[`prompts/preview.prompt`](prompts/preview.prompt), while layout-specific config
+instructions live in [`stubs/`](stubs/).
+
+To create or revise a layout config template:
+
+1. Open [`prompts/config.prompt`](prompts/config.prompt) in a chat-based AI.
+2. Include [`stubs/config.centered.prompt`](stubs/config.centered.prompt) as the
+   canonical reference and ask the AI to create or revise exactly one
+   `stubs/config.<layout>.prompt` file.
+3. Save the result under `stubs/`, keeping the existing schema and changing only
+   the layout-specific composition values.
+
+For example, save an editorial layout as:
+
+```text
+stubs/config.editorial.prompt
+```
+
+To test that layout with an image-capable chat AI, run:
+
+```bash
+./weaver config-stub editorial
+```
+
+This inserts the complete `stubs/config.editorial.prompt` into the
+`CONFIG PROMPT` section of [`prompts/preview.prompt`](prompts/preview.prompt) and
+copies the assembled image prompt to the macOS clipboard. Paste it into the
+interactive AI, inspect the generated image, then revise the stub and run the
+command again.
+
+To inspect or pipe the assembled prompt without using the clipboard, run:
+
+```bash
+./weaver config-stub editorial --print
+```
+
+The currently registered layout names are `centered`, `editorial`, `split`, and
+`qr-focus`. A new layout name must also be registered in the CLI before it can be
+used with `./weaver config-stub <layout>`.
+
 ## CLI Workflow
 
 The repository includes the `./weaver` wrapper, which invokes `bin/prompt-weaver`:
@@ -225,7 +269,7 @@ You can also specify the category and format when creating a fixture:
 
 When run from a terminal, `init` interactively prompts you to select a category, format, and layout if you omit the corresponding options. Available layouts are `centered`, `editorial`, `split`, and `qr-focus`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. You can select one explicitly with `--layout=editorial`.
 
-The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
+The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `config-stub` accepts a registered layout name and assembles an image prompt from `prompts/preview.prompt` and `stubs/config.<layout>.prompt`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
 
 This creates:
 
@@ -245,7 +289,7 @@ The commands use the files created or saved in that folder:
 ./weaver preview cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension. `config-stub` assembles the interactive image prompt described above.
 
 What each command outputs:
 
@@ -253,11 +297,12 @@ What each command outputs:
 2. `config` prints the JSON-generation prompt you send after you have a template description.
 3. `image` prints the final image-generation prompt you can paste into your image model.
 4. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
-5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using the final `config.json` when available.
+5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 9. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
+10. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
