@@ -211,7 +211,7 @@ php bin/prompt-weaver --help
 
 The CLI uses one template code to identify a fixture. The checked-in example uses `cafe-restaurant`. The provider and model are runtime options used by `pipe`, not part of the template code.
 
-All commands below operate on the same fixture folder:
+All commands below operate on the same working folder under `.weaver`:
 
 ```bash
 ./weaver init cafe-restaurant
@@ -230,8 +230,10 @@ The fixture reference is positional for commands such as `brief`, `config`, `ima
 This creates:
 
 ```text
-tests/Fixtures/cafe-restaurant/manifest.json
+.weaver/cafe-restaurant/manifest.json
 ```
+
+`tests/Fixtures` contains checked-in reference data for the test suite. The CLI does not use it by default, so normal runs do not modify test fixtures.
 
 The commands use the files created or saved in that folder:
 
@@ -243,19 +245,19 @@ The commands use the files created or saved in that folder:
 ./weaver preview cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. `image` reads `config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes calibrated coordinates to `calibrate.config.json` without changing `config.json`. `preview` uses `calibrate.config.json` when it exists, otherwise it uses `config.json`; its output format is selected by the output filename extension.
+`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension.
 
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
 2. `config` prints the JSON-generation prompt you send after you have a template description.
 3. `image` prints the final image-generation prompt you can paste into your image model.
-4. `calibrate` writes `calibrate.config.json` to match the actual text-box and QR-frame positions in `image.png`.
-5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using `calibrate.config.json` when available.
+4. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
+5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` on top of the fixture background using the final `config.json` when available.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
 8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
-9. `export` packages a manually generated PNG and the fixture config into a Laravel-ready `dist/<code>` directory.
+9. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
@@ -317,7 +319,7 @@ The `PipeResult` object contains all three prompts plus the parsed intermediate 
 
 ## Testing
 
-The easiest way to test this package is to create one fixture and keep all generated files in its folder, then run Pest.
+The easiest way to test this package is to copy a checked-in fixture into a working directory, generate files there, then run Pest. The repository's reference fixtures remain unchanged.
 
 ### 1) Create a fixture folder
 
@@ -325,7 +327,7 @@ The easiest way to test this package is to create one fixture and keep all gener
 ./weaver init cafe-restaurant
 ```
 
-This creates `tests/Fixtures/cafe-restaurant/manifest.json` with the template `code` and default values for `category` and `format`. You can also pass `--category` and `--format` to customize the manifest:
+This creates `.weaver/cafe-restaurant/manifest.json` with the template `code` and default values for `category` and `format`. You can also pass `--category` and `--format` to customize the manifest:
 
 ```bash
 ./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
@@ -339,7 +341,7 @@ When run from a terminal, `init` interactively prompts you to select a category 
 ./weaver brief cafe-restaurant
 ```
 
-The prompt is also saved automatically as `tests/Fixtures/cafe-restaurant/brief.prompt`. Send it to a model and save its JSON response as `tests/Fixtures/cafe-restaurant/design-brief.json`.
+The prompt is also saved automatically as `.weaver/cafe-restaurant/brief.prompt`. Send it to a model and save its JSON response as `.weaver/cafe-restaurant/design-brief.json`.
 
 ### 3) Generate the config prompt
 
@@ -347,7 +349,7 @@ The prompt is also saved automatically as `tests/Fixtures/cafe-restaurant/brief.
 ./weaver config cafe-restaurant
 ```
 
-The command reads `design-brief.json`, takes its `description` value, prints the JSON-generation prompt, and saves it as `tests/Fixtures/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `tests/Fixtures/cafe-restaurant/config.json`.
+The command reads `design-brief.json`, takes its `description` value, prints the JSON-generation prompt, and saves it as `.weaver/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `.weaver/cafe-restaurant/raw.config.json`.
 
 ### 4) Generate the final image prompt
 
@@ -355,7 +357,7 @@ The command reads `design-brief.json`, takes its `description` value, prints the
 ./weaver image cafe-restaurant
 ```
 
-The command reads `config.json`, prints the final image-generation prompt, and saves it as `tests/Fixtures/cafe-restaurant/image.prompt`.
+The command reads `raw.config.json`, prints the final image-generation prompt, and saves it as `.weaver/cafe-restaurant/image.prompt`.
 
 ### 5) Calibrate the config to the generated image
 
@@ -363,7 +365,7 @@ The command reads `config.json`, prints the final image-generation prompt, and s
 ./weaver calibrate cafe-restaurant
 ```
 
-This detects the actual white text boxes and QR frame in `image.png`. It writes the calibrated SSID/password `box_y_pc` values and QR `x_pc`, `y_pc`, and `width_pc` values to `calibrate.config.json`, leaving the original `config.json` unchanged.
+This detects the actual white text boxes and QR frame in `image.png`. It writes the calibrated SSID/password `box_y_pc` values and QR `x_pc`, `y_pc`, and `width_pc` values to `config.json`, leaving the original `raw.config.json` unchanged.
 
 ### 6) Generate a preview image
 
@@ -371,7 +373,7 @@ This detects the actual white text boxes and QR frame in `image.png`. It writes 
 ./weaver preview cafe-restaurant
 ```
 
-This creates `tests/Fixtures/cafe-restaurant/preview.png` using `calibrate.config.json` when present, so you can inspect the SSID, password, and QR placement by eye. If `config.json` changes, run `calibrate` again to regenerate the calibrated config.
+This creates `.weaver/cafe-restaurant/preview.png` using the final `config.json` when present, so you can inspect the SSID, password, and QR placement by eye. If `raw.config.json` or `image.png` changes, run `calibrate` again to regenerate the final config.
 
 ### 7) Generate a browser preview
 
@@ -379,15 +381,15 @@ This creates `tests/Fixtures/cafe-restaurant/preview.png` using `calibrate.confi
 ./weaver preview cafe-restaurant --output=html
 ```
 
-This creates `tests/Fixtures/cafe-restaurant/preview.html` using `image.png`, `calibrate.config.json`, and `fonts/AtkinsonHyperlegible-Regular.woff2` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required. Keep the generated HTML in its fixture directory so its relative asset paths remain valid.
+This creates `.weaver/cafe-restaurant/preview.html` using `image.png`, `config.json`, and `fonts/AtkinsonHyperlegible-Regular.woff2` as external files. The HTML reads the SSID and password values from the JSON and renders the QR code in the calibrated position. The QR image is embedded in the HTML, so no additional JavaScript QR library is required. Keep the generated HTML in its working directory so its relative asset paths remain valid.
 
 Because browsers commonly block `fetch()` from local `file://` pages, serve the fixture directory through a local web server before opening the HTML:
 
 ```bash
-php -S localhost:8000 -t tests/Fixtures/cafe-restaurant
+php -S localhost:8000 -t .weaver/cafe-restaurant
 ```
 
-Then open <http://localhost:8000/preview.html>. If `config.json` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
+Then open <http://localhost:8000/preview.html>. If `raw.config.json`, `config.json`, or `image.png` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
 
 ### 8) Export the externally generated image
 
@@ -399,7 +401,7 @@ The package does not call an image-generation API. Generate the image with your 
   --output-dir=dist/cafe-restaurant
 ```
 
-If `--image` is omitted, the command uses `tests/Fixtures/cafe-restaurant/image.png`. If `calibrate.config.json` exists, it is used as the exported `config.json`; otherwise the command uses `config.json`.
+If `--image` is omitted, the command uses `.weaver/cafe-restaurant/image.png`. The command uses the final `.weaver/cafe-restaurant/config.json`; run `calibrate` first if it does not exist.
 
 The export command validates that the manifest, design brief, and config exist, the image is a PNG, and its aspect ratio matches `canvas.aspect_ratio`. The resulting directory contains:
 
@@ -471,6 +473,7 @@ The repo already includes one complete example:
 
 - `tests/Fixtures/cafe-restaurant/manifest.json`
 - `tests/Fixtures/cafe-restaurant/design-brief.json`
+- `tests/Fixtures/cafe-restaurant/raw.config.json`
 - `tests/Fixtures/cafe-restaurant/config.json`
 - `tests/Fixtures/cafe-restaurant/image.prompt`
 
@@ -481,16 +484,11 @@ The integration test reads those files and checks that:
 3. The image prompt matches the saved `image.prompt` fixture.
 4. The preview image can be generated from the fixture background without errors, with credential text and the QR code rendered in the calibrated area.
 
-### 9.5) E2E test fixtures
+### 9.5) E2E test output
 
-The repo also includes fixtures generated from real OpenRouter API calls:
+The E2E test writes files generated from real OpenRouter API calls to the ignored `.weaver` working directory:
 
-- `tests/Fixtures/google-gemma-4-26b-a4b-it-free/manifest.json`
-- `tests/Fixtures/google-gemma-4-26b-a4b-it-free/brief.prompt`
-- `tests/Fixtures/google-gemma-4-26b-a4b-it-free/design-brief.json`
-- `tests/Fixtures/google-gemma-4-26b-a4b-it-free/config.prompt`
-- `tests/Fixtures/google-gemma-4-26b-a4b-it-free/config.json`
-- `tests/Fixtures/google-gemma-4-26b-a4b-it-free/image.prompt`
+- `.weaver/google-gemma-4-26b-a4b-it-free/`
 
 These fixtures are generated automatically when you run the E2E test:
 
@@ -498,7 +496,7 @@ These fixtures are generated automatically when you run the E2E test:
 composer test:e2e
 ```
 
-The E2E test uses the OpenRouter API with the `google/gemma-4-26b-a4b-it:free` model and saves all prompts and responses to the fixtures directory for inspection and debugging.
+The E2E test uses the OpenRouter API with the `google/gemma-4-26b-a4b-it:free` model and saves all prompts and responses to the working directory for inspection and debugging.
 
 ### 10) Run the tests
 
@@ -506,7 +504,7 @@ The E2E test uses the OpenRouter API with the `google/gemma-4-26b-a4b-it:free` m
 composer test
 ```
 
-If you change prompt wording, update the fixture files first, then run the tests again.
+If you change prompt wording, update the checked-in reference fixtures first, then run the tests again.
 
 ## Development
 

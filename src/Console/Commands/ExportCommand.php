@@ -27,9 +27,7 @@ final class ExportCommand extends PromptWeaverCommand
         $fixtureDirectory = $this->fixtureDirectoryFromReference($code, $this->fixturesRoot($input));
         $manifestPath = $fixtureDirectory.'/manifest.json';
         $designBriefPath = $fixtureDirectory.'/design-brief.json';
-        $configPath = is_file($fixtureDirectory.'/calibrate.config.json')
-            ? $fixtureDirectory.'/calibrate.config.json'
-            : $fixtureDirectory.'/config.json';
+        $configPath = $fixtureDirectory.'/config.json';
         $imagePath = $input->getOption('image') ?? $fixtureDirectory.'/image.png';
         $outputDirectory = $input->getOption('output-dir')
             ?? 'dist/'.$this->validatePathSegment($code, 'code');

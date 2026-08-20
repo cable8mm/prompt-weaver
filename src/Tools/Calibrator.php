@@ -12,7 +12,7 @@ final class Calibrator
      * Detect the actual white placeholder boxes and QR frame in the image,
      * then return the config array with updated coordinates.
      *
-     * @param  array<string, mixed>  $config  Parsed config.json
+     * @param  array<string, mixed>  $config  Parsed raw.config.json
      * @return array<string, mixed> Updated config with calibrated coordinates
      */
     public function calibrate(array $config, GdImage $image): array

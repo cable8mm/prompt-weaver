@@ -52,8 +52,8 @@ it('runs the full pipeline with real OpenRouter API', function () {
         color: 'warm brown and cream',
     );
 
-    // Save fixtures
-    $fixtureDir = __DIR__.'/../Fixtures/google-gemma-4-26b-a4b-it-free';
+    // Save generated working files outside the checked-in test fixtures.
+    $fixtureDir = dirname(__DIR__, 2).'/.weaver/google-gemma-4-26b-a4b-it-free';
 
     if (! is_dir($fixtureDir)) {
         mkdir($fixtureDir, 0777, true);
@@ -74,7 +74,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     // Save JSON responses
     file_put_contents($fixtureDir.'/design-brief.json', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
-    file_put_contents($fixtureDir.'/config.json', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+    file_put_contents($fixtureDir.'/raw.config.json', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
 
     echo "Fixtures saved to: {$fixtureDir}\n\n";
 

@@ -7,15 +7,15 @@ use RuntimeException;
 
 final class PreviewImage
 {
-    private const CONFIG_FILENAME = 'config.json';
+    private const RAW_CONFIG_FILENAME = 'raw.config.json';
 
-    private const CALIBRATED_CONFIG_FILENAME = 'calibrate.config.json';
+    private const CONFIG_FILENAME = 'config.json';
 
     private string $fixtureDirectory;
 
     private string $configPath;
 
-    private string $calibratedConfigPath;
+    private string $rawConfigPath;
 
     private string $backgroundPath;
 
@@ -23,20 +23,20 @@ final class PreviewImage
     {
         $this->fixtureDirectory = rtrim($fixtureDirectory, '/');
         $this->configPath = $this->fixtureDirectory.'/'.self::CONFIG_FILENAME;
-        $this->calibratedConfigPath = $this->fixtureDirectory.'/'.self::CALIBRATED_CONFIG_FILENAME;
+        $this->rawConfigPath = $this->fixtureDirectory.'/'.self::RAW_CONFIG_FILENAME;
         $this->backgroundPath = $this->fixtureDirectory.'/image.png';
     }
 
     /**
      * Detect the actual white placeholder boxes in image.png and write the
-     * corresponding coordinates to calibrate.config.json.
+     * corresponding coordinates to config.json.
      *
      * @return array<string, float> Updated coordinates keyed by placeholder.
      */
     public function calibrate(): array
     {
-        if (! is_file($this->configPath)) {
-            throw new RuntimeException("Config file not found: {$this->configPath}");
+        if (! is_file($this->rawConfigPath)) {
+            throw new RuntimeException("Raw config file not found: {$this->rawConfigPath}");
         }
 
         if (! is_file($this->backgroundPath)) {
@@ -44,7 +44,7 @@ final class PreviewImage
         }
 
         /** @var array<string, mixed> $config */
-        $config = json_decode((string) file_get_contents($this->configPath), true, 512, JSON_THROW_ON_ERROR);
+        $config = json_decode((string) file_get_contents($this->rawConfigPath), true, 512, JSON_THROW_ON_ERROR);
         $image = imagecreatefromstring((string) file_get_contents($this->backgroundPath));
 
         if (! $image instanceof GdImage) {
@@ -70,8 +70,8 @@ final class PreviewImage
 
         $json = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL;
 
-        if (file_put_contents($this->calibratedConfigPath, $json) === false) {
-            throw new RuntimeException("Unable to write calibrated config: {$this->calibratedConfigPath}");
+        if (file_put_contents($this->configPath, $json) === false) {
+            throw new RuntimeException("Unable to write config: {$this->configPath}");
         }
 
         return $updated;
@@ -82,9 +82,10 @@ final class PreviewImage
      */
     public function render(string $outputPath, array $options = []): string
     {
-        $configPath = is_file($this->calibratedConfigPath)
-            ? $this->calibratedConfigPath
-            : $this->configPath;
+        $configPath = $this->configPath;
+        if (! is_file($configPath)) {
+            $configPath = $this->rawConfigPath;
+        }
 
         if (! is_file($configPath)) {
             throw new RuntimeException("Config file not found: {$configPath}");
@@ -101,9 +102,10 @@ final class PreviewImage
      */
     public function renderHtml(string $outputPath, array $options = []): string
     {
-        $configPath = is_file($this->calibratedConfigPath)
-            ? $this->calibratedConfigPath
-            : $this->configPath;
+        $configPath = $this->configPath;
+        if (! is_file($configPath)) {
+            $configPath = $this->rawConfigPath;
+        }
 
         if (! is_file($configPath)) {
             throw new RuntimeException("Config file not found: {$configPath}");

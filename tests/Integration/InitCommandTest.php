@@ -4,7 +4,7 @@ function run_prompt_weaver(array $args, ?string $cwd = null): array
 {
     $cwd ??= dirname(__DIR__, 2);
 
-    $command = implode(' ', array_map('escapeshellarg', array_merge(['php', 'bin/prompt-weaver'], $args)));
+    $command = implode(' ', array_map('escapeshellarg', array_merge(['php', dirname(__DIR__, 2).'/bin/prompt-weaver'], $args)));
 
     $descriptors = [
         0 => ['pipe', 'r'],
@@ -85,6 +85,29 @@ it('creates a new fixture manifest with default values', function () {
             ->not->toContain('\\/');
     } finally {
         remove_directory($fixturesRoot);
+    }
+});
+
+it('uses .weaver as the default working directory', function () {
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-default-root-'.bin2hex(random_bytes(4));
+    mkdir($workingRoot, 0777, true);
+
+    try {
+        $result = run_prompt_weaver([
+            'init',
+            'default-working-fixture',
+            '--category=Cafe/Restaurant',
+            '--format=A4/A5 Poster',
+        ], $workingRoot);
+
+        $manifestPath = $workingRoot.'/.weaver/default-working-fixture/manifest.json';
+
+        expect($result['exitCode'])->toBe(0);
+        expect($result['stdout'])->toContain('Created .weaver/default-working-fixture/manifest.json');
+        expect(is_file($manifestPath))->toBeTrue();
+        expect(is_file($workingRoot.'/tests/Fixtures/default-working-fixture/manifest.json'))->toBeFalse();
+    } finally {
+        remove_directory($workingRoot);
     }
 });
 
