@@ -408,8 +408,11 @@ The export command validates that the manifest, design brief, and config exist, 
 ```text
 dist/cafe-restaurant/
 ├── config.json
-└── image.png
+├── image.png
+└── preview.png
 ```
+
+If the fixture has a `preview.png`, it is copied as a thumbnail alongside the exported image.
 
 The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields:
 
