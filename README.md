@@ -452,6 +452,22 @@ These two files are intended to be imported by the Laravel service. The command 
 
 If you have an OpenRouter API key, you can run the automated brief/config/image-prompt pipeline. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
 
+The standalone `weaver` command automatically loads `.env` from the project root. Copy `.env.example` to `.env` and add your key once:
+
+```bash
+cp .env.example .env
+# edit .env and set OPENROUTER_API_KEY
+./weaver pipe cafe-restaurant
+```
+
+The `.env` file is ignored by Git. Existing shell environment variables take precedence over values in `.env`. Laravel applications can continue using Laravel's own `.env` loading; the package does not load `.env` from its service provider.
+
+While `pipe` is running, it displays progress for the design brief, config JSON, and image prompt stages. Use `--no-progress` when running it from a script or when you only want the completion message:
+
+```bash
+./weaver pipe cafe-restaurant --no-progress
+```
+
 ```bash
 ./weaver pipe cafe-restaurant --api-key=sk-or-v1-...
 ```
@@ -475,6 +491,20 @@ To use OpenAI instead, pass `--provider=openai` and an OpenAI API key:
 ./weaver pipe cafe-restaurant --provider=openai --api-key=sk-... --model=gpt-4o-mini
 ```
 
+By default, the command displays progress and saves the generated files into the fixture directory without printing the full prompts or JSON responses. Use `--show-output` to print them as well:
+
+```bash
+./weaver pipe cafe-restaurant --show-output
+```
+
+The generated files are:
+
+- `brief.prompt`
+- `design-brief.json`
+- `config.prompt`
+- `raw.config.json`
+- `image.prompt`
+
 This command:
 
 1. Generates the design-brief prompt and sends it to the model
@@ -482,7 +512,7 @@ This command:
 3. Generates the config prompt and sends it to the model
 4. Parses the config JSON response
 5. Generates the final image prompt
-6. Prints all prompts and intermediate JSON responses
+6. Saves the generated prompts and intermediate JSON responses to the fixture directory
 
 ### 9) Compare against fixtures
 

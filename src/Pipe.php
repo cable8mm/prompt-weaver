@@ -33,9 +33,17 @@ final class Pipe
      * @param  string|null  $color  Optional color direction passed to DesignBriefPrompt.
      * @return PipeResult Contains all three prompts plus the parsed intermediate JSON.
      */
-    public function run(Category $category, Format $format, ?string $color = null, ColorMode $colorMode = ColorMode::MONO): PipeResult
-    {
+    public function run(
+        Category $category,
+        Format $format,
+        ?string $color = null,
+        ColorMode $colorMode = ColorMode::MONO,
+        ?callable $onProgress = null,
+    ): PipeResult {
         // Step 1 — design brief
+        if ($onProgress !== null) {
+            $onProgress('brief', 'Generating design brief...');
+        }
         $briefPrompt = new DesignBriefPrompt(
             category: $category,
             format: $format,
@@ -44,6 +52,9 @@ final class Pipe
         );
         $briefPrompt->build();
         $briefJson = $briefPrompt->execute($this->client);
+        if ($onProgress !== null) {
+            $onProgress('brief.complete', 'Design brief received.');
+        }
 
         $description = $briefJson['description']
             ?? throw new \RuntimeException('Design brief response missing "description" field.');
@@ -54,6 +65,9 @@ final class Pipe
         $name = $briefJson['name'] ?? null;
 
         // Step 2 — config JSON
+        if ($onProgress !== null) {
+            $onProgress('config', 'Generating config JSON...');
+        }
         $configPrompt = new ConfigPrompt(
             description: $description,
             colorDirection: $colorDirection,
@@ -64,10 +78,19 @@ final class Pipe
         );
         $configPrompt->build();
         $config = $configPrompt->execute($this->client);
+        if ($onProgress !== null) {
+            $onProgress('config.complete', 'Config JSON received.');
+        }
 
         // Step 3 — final image prompt (build only, execution is left to the caller)
+        if ($onProgress !== null) {
+            $onProgress('image', 'Building image prompt...');
+        }
         $imagePrompt = new ImagePrompt($config);
         $imagePrompt->build();
+        if ($onProgress !== null) {
+            $onProgress('image.complete', 'Pipeline complete.');
+        }
 
         return new PipeResult(
             briefPrompt: $briefPrompt->prompt() ?? '',
