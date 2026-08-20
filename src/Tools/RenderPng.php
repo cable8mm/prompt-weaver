@@ -120,7 +120,9 @@ final class RenderPng
     private function drawQr(GdImage $image, array $placeholder, string $payload): void
     {
         $box = $this->qrPlaceholderBox($image, $placeholder);
-        $qrSize = min($box['width'], $box['height']);
+        $boxSize = min($box['width'], $box['height']);
+        $padding = max(10, (int) round($boxSize * 0.1));
+        $qrSize = max(64, $boxSize - ($padding * 2));
         $qrBinary = $this->qrBinary($placeholder, $payload, imagesx($image), imagesy($image));
         $qrImage = imagecreatefromstring($qrBinary);
 
@@ -128,8 +130,8 @@ final class RenderPng
             throw new RuntimeException('Unable to render QR image.');
         }
 
-        $qrLeft = (int) round($box['center_x'] - ($qrSize / 2));
-        $qrTop = (int) round($box['center_y'] - ($qrSize / 2));
+        $qrLeft = (int) round($box['center_x'] - ($boxSize / 2) + $padding);
+        $qrTop = (int) round($box['center_y'] - ($boxSize / 2) + $padding);
 
         imagecopy($image, $qrImage, $qrLeft, $qrTop, 0, 0, $qrSize, $qrSize);
     }

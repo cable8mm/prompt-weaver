@@ -74,6 +74,73 @@ it('renders a png with qr dark pixels in the configured area', function () {
     imagedestroy($preview);
 });
 
+it('centers the qr image inside its placeholder box', function () {
+    $backgroundPath = sys_get_temp_dir().'/prompt-weaver-qr-background-'.bin2hex(random_bytes(4)).'.png';
+    $background = imagecreatetruecolor(1000, 1000);
+    $white = imagecolorallocate($background, 255, 255, 255);
+    imagefill($background, 0, 0, $white);
+    imagepng($background, $backgroundPath);
+    imagedestroy($background);
+
+    $config = [
+        'placeholders' => [
+            'ssid' => [
+                'box_x_pc' => 50,
+                'box_y_pc' => 20,
+                'box_width_pc' => 40,
+                'box_height_pc' => 10,
+                'font_size_px' => 20,
+            ],
+            'password' => [
+                'box_x_pc' => 50,
+                'box_y_pc' => 35,
+                'box_width_pc' => 40,
+                'box_height_pc' => 10,
+                'font_size_px' => 20,
+            ],
+            'qr' => [
+                'x_pc' => 50,
+                'y_pc' => 70,
+                'width_pc' => 40,
+            ],
+        ],
+    ];
+
+    try {
+        (new RenderPng)->render($config, $backgroundPath, $this->outputPath, [
+            'qr-payload' => 'WIFI:T:WPA;S:TEST;P:TEST;;',
+        ]);
+
+        $preview = imagecreatefrompng($this->outputPath);
+        expect($preview)->toBeInstanceOf(GdImage::class);
+
+        $darkPixels = [];
+        for ($y = 400; $y < 1000; $y++) {
+            for ($x = 200; $x < 800; $x++) {
+                if ((imagecolorat($preview, $x, $y) & 0xFFFFFF) < 0x333333) {
+                    $darkPixels[] = [$x, $y];
+                }
+            }
+        }
+
+        $minX = min(array_column($darkPixels, 0));
+        $maxX = max(array_column($darkPixels, 0));
+        $minY = min(array_column($darkPixels, 1));
+        $maxY = max(array_column($darkPixels, 1));
+
+        expect(($minX + $maxX) / 2)->toBeBetween(490.0, 510.0);
+        expect(($minY + $maxY) / 2)->toBeBetween(690.0, 710.0);
+        expect($maxX - $minX)->toBeGreaterThan(250);
+        expect($maxY - $minY)->toBeGreaterThan(250);
+
+        imagedestroy($preview);
+    } finally {
+        if (is_file($backgroundPath)) {
+            unlink($backgroundPath);
+        }
+    }
+});
+
 it('renders a png with custom ssid and password options', function () {
     $renderer = new RenderPng;
 
