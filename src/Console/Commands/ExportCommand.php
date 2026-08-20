@@ -52,8 +52,11 @@ final class ExportCommand extends PromptWeaverCommand
         $manifest = $this->readJsonFile($manifestPath);
         $designBrief = $this->readJsonFile($designBriefPath);
         $config = $this->readJsonFile($configPath);
-        $config['schema_version'] = 1;
-        $config['metadata'] = $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath);
+        unset($config['schema_version'], $config['metadata']);
+        $config = [
+            'schema_version' => 1,
+            'metadata' => $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath),
+        ] + $config;
         $this->validateConfig($config, $configPath);
         $this->validateImage($imagePath, $config);
 

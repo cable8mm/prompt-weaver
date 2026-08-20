@@ -281,7 +281,10 @@ it('exports a generated png and config for Laravel import', function () {
         expect(is_file($outputDirectory.'/image.png'))->toBeTrue();
         expect(is_file($outputDirectory.'/preview.png'))->toBeTrue();
         expect(is_file($outputDirectory.'/manifest.json'))->toBeFalse();
-        expect(json_decode((string) file_get_contents($outputDirectory.'/config.json'), true, 512, JSON_THROW_ON_ERROR))
+        $exportedConfig = json_decode((string) file_get_contents($outputDirectory.'/config.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        expect(array_slice(array_keys($exportedConfig), 0, 2))->toBe(['schema_version', 'metadata']);
+        expect($exportedConfig)
             ->toMatchArray([
                 'schema_version' => 1,
                 'metadata' => [
