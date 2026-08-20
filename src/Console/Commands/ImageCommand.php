@@ -24,7 +24,7 @@ final class ImageCommand extends PromptWeaverCommand
     {
         $fixtureReference = $input->getArgument('fixture');
         $configPath = is_string($fixtureReference) && $fixtureReference !== ''
-            ? $this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/config.json'
+            ? $this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/raw.config.json'
             : $input->getOption('config-file');
 
         $this->requireValues($configPath);

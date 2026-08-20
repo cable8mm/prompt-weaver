@@ -4,7 +4,7 @@ use Cable8mm\PromptWeaver\Tools\Calibrator;
 
 beforeEach(function () {
     $fixtureDir = dirname(__DIR__).'/Fixtures/cafe-restaurant';
-    $configPath = $fixtureDir.'/config.json';
+    $configPath = $fixtureDir.'/raw.config.json';
     $imagePath = $fixtureDir.'/image.png';
 
     if (! is_file($configPath) || ! is_file($imagePath)) {

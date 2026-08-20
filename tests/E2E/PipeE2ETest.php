@@ -74,7 +74,7 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     // Save JSON responses
     file_put_contents($fixtureDir.'/design-brief.json', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
-    file_put_contents($fixtureDir.'/config.json', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+    file_put_contents($fixtureDir.'/raw.config.json', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
 
     echo "Fixtures saved to: {$fixtureDir}\n\n";
 

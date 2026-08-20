@@ -147,7 +147,7 @@ it('calibrates placeholder coordinates in config from the generated image', func
 
     try {
         copy_directory_preview($sourceFixture, $workingFixture);
-        $configPath = $workingFixture.'/config.json';
+        $configPath = $workingFixture.'/raw.config.json';
         $configBeforeCalibration = file_get_contents($configPath);
 
         $result = run_prompt_weaver_preview([
@@ -157,9 +157,9 @@ it('calibrates placeholder coordinates in config from the generated image', func
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->toContain('Updated '.$workingFixture.'/calibrate.config.json');
+        expect($result['stdout'])->toContain('Updated '.$workingFixture.'/config.json');
 
-        $calibratedConfig = json_decode((string) file_get_contents($workingFixture.'/calibrate.config.json'), true, 512, JSON_THROW_ON_ERROR);
+        $calibratedConfig = json_decode((string) file_get_contents($workingFixture.'/config.json'), true, 512, JSON_THROW_ON_ERROR);
 
         expect(file_get_contents($configPath))->toBe($configBeforeCalibration);
         expect($calibratedConfig['placeholders']['ssid'])->toHaveKey('box_y_pc');
@@ -176,7 +176,7 @@ it('calibrates the qr position and width from the generated image', function () 
     try {
         copy_directory_preview($sourceFixture, $workingFixture);
 
-        $configPath = $workingFixture.'/config.json';
+        $configPath = $workingFixture.'/raw.config.json';
         $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
         $config['placeholders']['qr']['x_pc'] = 10;
         $config['placeholders']['qr']['y_pc'] = 80;
@@ -190,13 +190,13 @@ it('calibrates the qr position and width from the generated image', function () 
 
         expect($result['exitCode'])->toBe(0);
 
-        $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
-        $calibratedConfigPath = $workingFixture.'/calibrate.config.json';
+        $rawConfig = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+        $calibratedConfigPath = $workingFixture.'/config.json';
         $calibratedConfig = json_decode((string) file_get_contents($calibratedConfigPath), true, 512, JSON_THROW_ON_ERROR);
 
-        expect($config['placeholders']['qr']['x_pc'])->toBe(10);
-        expect($config['placeholders']['qr']['y_pc'])->toBe(80);
-        expect($config['placeholders']['qr']['width_pc'])->toBe(10);
+        expect($rawConfig['placeholders']['qr']['x_pc'])->toBe(10);
+        expect($rawConfig['placeholders']['qr']['y_pc'])->toBe(80);
+        expect($rawConfig['placeholders']['qr']['width_pc'])->toBe(10);
         expect($calibratedConfig['placeholders']['qr']['x_pc'])->toBeGreaterThan(45.0);
         expect($calibratedConfig['placeholders']['qr']['y_pc'])->toBeBetween(75.0, 82.0);
         expect($calibratedConfig['placeholders']['qr']['width_pc'])->toBeGreaterThan(25.0);

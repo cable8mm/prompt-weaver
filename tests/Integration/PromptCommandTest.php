@@ -206,7 +206,7 @@ it('generates an image prompt from fixture and saves to image.prompt', function 
 });
 
 it('generates an image prompt from a config file', function () {
-    $configPath = dirname(__DIR__).'/Fixtures/cafe-restaurant/config.json';
+    $configPath = dirname(__DIR__).'/Fixtures/cafe-restaurant/raw.config.json';
 
     $result = run_prompt_weaver_cmd([
         'image',
@@ -229,7 +229,7 @@ it('fails image command when config file is missing', function () {
 });
 
 it('runs the chain command with all required options', function () {
-    $configPath = dirname(__DIR__).'/Fixtures/cafe-restaurant/config.json';
+    $configPath = dirname(__DIR__).'/Fixtures/cafe-restaurant/raw.config.json';
 
     $result = run_prompt_weaver_cmd([
         'chain',

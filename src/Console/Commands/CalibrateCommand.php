@@ -25,7 +25,7 @@ final class CalibrateCommand extends PromptWeaverCommand
         $fixtureDirectory = $this->fixtureDirectory($input);
         (new PreviewImage($fixtureDirectory))->calibrate();
 
-        $this->displayUpdated(rtrim($fixtureDirectory, '/').'/calibrate.config.json');
+        $this->displayUpdated(rtrim($fixtureDirectory, '/').'/config.json');
 
         return self::SUCCESS;
     }
