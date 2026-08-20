@@ -6,6 +6,7 @@ namespace Cable8mm\PromptWeaver\Console\Commands;
 
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\Layout;
 use Symfony\Component\Console\Command\HelpCommand as SymfonyHelpCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,18 +19,19 @@ final class HelpCommand extends SymfonyHelpCommand
     {
         $categories = implode(', ', Category::keys());
         $formats = implode(', ', Format::keys());
+        $layouts = implode(', ', Layout::keys());
 
         note(<<<TEXT
 Prompt Weaver CLI
 
 Usage:
-  bin/prompt-weaver init code [--category="..."] [--format="..."] [--color-mode=color|mono] [--fixtures-root=.weaver]
+  bin/prompt-weaver init code [--category="..."] [--format="..."] [--color-mode=color|mono] [--layout="..."] [--fixtures-root=.weaver]
   bin/prompt-weaver calibrate code [--fixtures-root=.weaver]
   bin/prompt-weaver preview --fixture="path/to/fixture"
   bin/prompt-weaver preview --fixture="path/to/fixture" --output="path/to/preview.html"
   bin/prompt-weaver preview --code="..." [--fixtures-root=.weaver]
   bin/prompt-weaver brief code [--color-mode=color|mono] [--fixtures-root=.weaver]
-  bin/prompt-weaver config code [--color-mode=color|mono] [--fixtures-root=.weaver]
+  bin/prompt-weaver config code [--color-mode=color|mono] [--layout="..."] [--fixtures-root=.weaver]
   bin/prompt-weaver image code [--fixtures-root=.weaver]
   bin/prompt-weaver export code [--image=path/to/generated.png] [--output-dir=dist/code] [--fixtures-root=.weaver]
   bin/prompt-weaver chain --category="..." --format="..." --description="..." --color-direction="..." --font-mood="..." [--name="..."] --config-file=path/to/config.json
@@ -41,6 +43,9 @@ Available categories:
 
 Available formats:
   {$formats}
+
+Available layouts:
+  {$layouts}
 TEXT);
 
         return self::SUCCESS;

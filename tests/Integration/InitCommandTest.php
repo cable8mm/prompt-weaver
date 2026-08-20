@@ -78,6 +78,7 @@ it('creates a new fixture manifest with default values', function () {
             'category' => 'Cafe/Restaurant',
             'format' => 'A4/A5 Poster',
             'color_mode' => 'mono',
+            'layout' => 'centered',
         ]);
         expect($manifestJson)
             ->toContain('"category": "Cafe/Restaurant"')
@@ -137,6 +138,7 @@ it('creates a new fixture manifest with custom category and format', function ()
             'category' => 'Office/Coworking',
             'format' => 'A6/A7 Poster',
             'color_mode' => 'color',
+            'layout' => 'centered',
         ]);
     } finally {
         remove_directory($fixturesRoot);
@@ -153,7 +155,28 @@ it('shows available categories and formats in help output', function () {
         ->toContain('Available categories')
         ->toContain('Cafe/Restaurant, Office/Coworking, Stay/Hotel, Event/Exhibition, Other')
         ->toContain('Available formats')
-        ->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square');
+        ->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square')
+        ->toContain('Available layouts')
+        ->toContain('centered, editorial, split, qr-focus');
+});
+
+it('stores the selected layout in the manifest', function () {
+    $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-fixtures-'.bin2hex(random_bytes(4));
+
+    try {
+        $result = run_prompt_weaver([
+            'init',
+            'editorial-fixture',
+            '--layout=editorial',
+            '--fixtures-root='.$fixturesRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        $manifest = json_decode((string) file_get_contents($fixturesRoot.'/editorial-fixture/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        expect($manifest['layout'])->toBe('editorial');
+    } finally {
+        remove_directory($fixturesRoot);
+    }
 });
 
 it('shows valid categories in error message for an unknown category', function () {

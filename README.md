@@ -223,7 +223,7 @@ You can also specify the category and format when creating a fixture:
 ./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
 ```
 
-When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. The available categories are `Cafe/Restaurant`, `Office/Coworking`, `Stay/Hotel`, `Event/Exhibition`, and `Other`; the available formats are `A4/A5 Poster`, `A6/A7 Poster`, and `Mini Square`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically.
+When run from a terminal, `init` interactively prompts you to select a category, format, and layout if you omit the corresponding options. Available layouts are `centered`, `editorial`, `split`, and `qr-focus`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. You can select one explicitly with `--layout=editorial`.
 
 The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
 
@@ -327,10 +327,16 @@ The easiest way to test this package is to copy a checked-in fixture into a work
 ./weaver init cafe-restaurant
 ```
 
-This creates `.weaver/cafe-restaurant/manifest.json` with the template `code` and default values for `category` and `format`. You can also pass `--category` and `--format` to customize the manifest:
+This creates `.weaver/cafe-restaurant/manifest.json` with the template `code` and default values for `category`, `format`, and `layout`. You can also pass `--category`, `--format`, and `--layout` to customize the manifest:
 
 ```bash
 ./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
+```
+
+For example, select the editorial config layout with:
+
+```bash
+./weaver init cafe-restaurant --layout=editorial
 ```
 
 When run from a terminal, `init` interactively prompts you to select a category and format if you omit `--category` / `--format`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. Run `./weaver --help` to see the available categories and formats.

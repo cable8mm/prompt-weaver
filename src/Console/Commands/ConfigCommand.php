@@ -7,6 +7,7 @@ namespace Cable8mm\PromptWeaver\Console\Commands;
 use Cable8mm\PromptWeaver\ConfigPrompt;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\Layout;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,6 +25,7 @@ final class ConfigCommand extends PromptWeaverCommand
         $this->addOption('format', null, InputOption::VALUE_REQUIRED);
         $this->addOption('color-mode', null, InputOption::VALUE_REQUIRED);
         $this->addOption('name', null, InputOption::VALUE_REQUIRED);
+        $this->addOption('layout', null, InputOption::VALUE_REQUIRED);
         $this->addFixturesRootOption();
     }
 
@@ -40,6 +42,7 @@ final class ConfigCommand extends PromptWeaverCommand
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
             $format = isset($manifest['format']) ? Format::fromCliInput($manifest['format']) : null;
             $colorMode = ColorMode::fromCliInput($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE);
+            $layout = Layout::fromCliInput($manifest['layout'] ?? Layout::CENTERED->value);
         } else {
             $description = $input->getOption('description');
             $colorDirection = $input->getOption('color-direction');
@@ -47,6 +50,7 @@ final class ConfigCommand extends PromptWeaverCommand
             $name = $input->getOption('name');
             $format = $input->getOption('format');
             $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
+            $layout = Layout::fromCliInput($input->getOption('layout') ?? Layout::CENTERED->value);
         }
 
         $this->requireValues($description, $colorDirection, $fontMood);
@@ -62,6 +66,7 @@ final class ConfigCommand extends PromptWeaverCommand
             format: $format,
             colorMode: $colorMode instanceof ColorMode ? $colorMode : ColorMode::fromCliInput($colorMode),
             name: $name,
+            layout: $layout,
         );
         $prompt->build();
         $promptText = $prompt->prompt();
