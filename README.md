@@ -462,6 +462,12 @@ cp .env.example .env
 
 The `.env` file is ignored by Git. Existing shell environment variables take precedence over values in `.env`. Laravel applications can continue using Laravel's own `.env` loading; the package does not load `.env` from its service provider.
 
+While `pipe` is running, it displays progress for the design brief, config JSON, and image prompt stages. Use `--no-progress` when running it from a script or when only the generated output should be printed:
+
+```bash
+./weaver pipe cafe-restaurant --no-progress
+```
+
 ```bash
 ./weaver pipe cafe-restaurant --api-key=sk-or-v1-...
 ```
