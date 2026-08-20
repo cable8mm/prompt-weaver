@@ -6,18 +6,82 @@ Make the QR code the primary visual anchor with strong whitespace and a clear fr
 
 [Schema]
 {
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "{{ aspect_ratio }}" },
-  "style": { "theme": "<visual theme>", "background": "<colors, patterns, textures>", "color_mode": "{{ color_mode }}" },
+  "canvas": {
+    "width_pc": 100,
+    "height_pc": 100,
+    "aspect_ratio": "3:4"
+  },
+  "style": {
+    "theme": "Modern Tech Gradient",
+    "background": "Soft cyan and mint green smooth gradient with subtle geometric overlay and tech lines",
+    "color_mode": "RGB"
+  },
   "content": {
-    "title": { "text": "와이파이 연결", "x_pc": 50, "y_pc": 9, "align": "center", "style": "<typography>" },
-    "wifi_icon": { "x_pc": 50, "y_pc": 16, "width_pc": 10, "style": "<icon style>" },
-    "message": { "text": "스캔하여 연결하세요.", "x_pc": 50, "y_pc": 57, "align": "center" },
-    "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 96, "align": "center" }
+    "title": {
+      "text": "와이파이 연결",
+      "x_pc": 50,
+      "y_pc": 8,
+      "align": "center",
+      "style": "Bold sans-serif typography in dark navy-blue (#0D3B52)"
+    },
+    "wifi_icon": {
+      "x_pc": 50,
+      "y_pc": 15,
+      "width_pc": 10,
+      "style": "Glowing white Wi-Fi signal icon with subtle outer aura"
+    },
+    "message": {
+      "text": "스캔하여 연결하세요.",
+      "x_pc": 50,
+      "y_pc": 58,
+      "align": "center"
+    },
+    "footer": {
+      "text": "제작: WIFI NOTE",
+      "x_pc": 50,
+      "y_pc": 95,
+      "align": "center"
+    }
   },
   "placeholders": {
-    "ssid": { "box_x_pc": 50, "box_y_pc": 29, "box_width_pc": 68, "box_height_pc": 7, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Pretendard", "font_size_px": 32, "font_weight": "bold", "color": "#111111" },
-    "password": { "box_x_pc": 50, "box_y_pc": 40, "box_width_pc": 68, "box_height_pc": 7, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Pretendard", "font_size_px": 32, "font_weight": "bold", "color": "#111111" },
-    "qr": { "x_pc": 50, "y_pc": 75, "width_pc": 34, "style": "<QR frame style>", "box_fill": "#FFFFFF", "box_fill_note": "solid white square with quiet zone" }
+    "qr": {
+      "x_pc": 50,
+      "y_pc": 36,
+      "width_pc": 52,
+      "style": "Large solid white square centered with a circular tech accent frame in background",
+      "box_fill": "#FFFFFF",
+      "box_fill_note": "solid white square with quiet zone"
+    },
+    "ssid": {
+      "box_x_pc": 50,
+      "box_y_pc": 68,
+      "box_width_pc": 68,
+      "box_height_pc": 7,
+      "label": "SSID:",
+      "label_position": "outside_above",
+      "box_fill": "#FFFFFF",
+      "box_fill_note": "solid white cutout",
+      "align": "center",
+      "font_family": "Pretendard",
+      "font_size_px": 32,
+      "font_weight": "bold",
+      "color": "#111111"
+    },
+    "password": {
+      "box_x_pc": 50,
+      "box_y_pc": 80,
+      "box_width_pc": 68,
+      "box_height_pc": 7,
+      "label": "PASSWORD:",
+      "label_position": "outside_above",
+      "box_fill": "#FFFFFF",
+      "box_fill_note": "solid white cutout",
+      "align": "center",
+      "font_family": "Pretendard",
+      "font_size_px": 32,
+      "font_weight": "bold",
+      "color": "#111111"
+    }
   }
 }
 
