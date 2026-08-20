@@ -6,6 +6,7 @@ use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
+use Cable8mm\PromptWeaver\Enums\Layout;
 use RuntimeException;
 
 class ConfigPrompt implements PromptInterface
@@ -29,6 +30,7 @@ class ConfigPrompt implements PromptInterface
         private Format $format,
         private ?string $name = null,
         private ColorMode $colorMode = ColorMode::MONO,
+        private Layout $layout = Layout::CENTERED,
     ) {}
 
     public function build(): void
@@ -37,7 +39,7 @@ class ConfigPrompt implements PromptInterface
             ? "- Name: {$this->name}\n"
             : '';
 
-        $template = file_get_contents(__DIR__.'/../stubs/config.prompt');
+        $template = file_get_contents(__DIR__.'/../stubs/config.'.$this->layout->value.'.prompt');
 
         $this->promptString = strtr($template, [
             '{{ name_line }}' => $nameLine,

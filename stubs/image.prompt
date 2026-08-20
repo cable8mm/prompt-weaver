@@ -2,15 +2,18 @@
 
 [Canvas]
 - Portrait canvas, aspect ratio {{ aspect_ratio }}.
-- Treat the canvas as a 0-100% grid on both axes (0% = top/left, 100% = bottom/right).
+- Use the following measurements only as invisible placement metadata: 0% means top/left and 100% means bottom/right. These measurements are instructions for composition, never visible design content.
 
 [Style]
 {{ style }}
 
-[Layout — place elements at these exact grid positions]
+[Layout — place elements at these exact positions; do not print or draw the measurements]
 {{ layout_items }}
 
 [Strict rules]
+- All x/y coordinates, percentages, dimensions, step numbers, JSON-like terms, and placeholder names are invisible production metadata. Never render them as text, labels, captions, annotations, rulers, guides, tick marks, watermarks, or decorative symbols.
+- The finished artwork must contain only the requested visible Korean labels/messages and the requested SSID/PASSWORD labels. It must contain no coordinate notation such as "x=50%", "y=40%", "50%", "70%", or any similar numeric placement text.
+- Do not turn the layout instructions into a diagram, wireframe, blueprint, measurement overlay, or UI mockup. Render a polished finished poster.
 - The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the surrounding background, not a stylized box with a white border.
 - Do not let the background pattern show through or bleed into these three white areas.
 - Do not render any text or QR code inside these three areas — leave them blank.
