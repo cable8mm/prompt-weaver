@@ -408,8 +408,11 @@ The export command validates that the manifest, design brief, and config exist, 
 ```text
 dist/cafe-restaurant/
 ├── config.json
-└── image.png
+├── image.png
+└── preview.png
 ```
+
+If the fixture has a `preview.png`, it is copied as a thumbnail alongside the exported image.
 
 The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields:
 
@@ -428,6 +431,20 @@ The exported `config.json` contains a `metadata` object with flattened manifest 
   }
 }
 ```
+
+#### Export config contract
+
+The machine-readable contract for exported `config.json` files is available at
+[`schemas/config.schema.json`](schemas/config.schema.json). It defines the required
+top-level fields, metadata fields, layout structures, and value types.
+
+The current contract uses `schema_version: 1`. Consumers should inspect this value
+before deserializing the file. Incompatible structural changes increment the schema
+version; optional fields may be added without changing the version.
+
+Laravel applications can validate the JSON against this schema and then map it to a
+consumer-owned DTO, such as a `spatie/laravel-data` class. The exported JSON remains
+the integration boundary so consumers are not coupled to this package's PHP types.
 
 These two files are intended to be imported by the Laravel service. The command does not delete existing files in the output directory, but it overwrites `config.json` and `image.png`.
 

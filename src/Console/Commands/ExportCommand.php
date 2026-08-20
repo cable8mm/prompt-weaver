@@ -28,6 +28,7 @@ final class ExportCommand extends PromptWeaverCommand
         $manifestPath = $fixtureDirectory.'/manifest.json';
         $designBriefPath = $fixtureDirectory.'/design-brief.json';
         $configPath = $fixtureDirectory.'/config.json';
+        $previewPath = $fixtureDirectory.'/preview.png';
         $imagePath = $input->getOption('image') ?? $fixtureDirectory.'/image.png';
         $outputDirectory = $input->getOption('output-dir')
             ?? 'dist/'.$this->validatePathSegment($code, 'code');
@@ -51,8 +52,11 @@ final class ExportCommand extends PromptWeaverCommand
         $manifest = $this->readJsonFile($manifestPath);
         $designBrief = $this->readJsonFile($designBriefPath);
         $config = $this->readJsonFile($configPath);
-        $config['schema_version'] = 1;
-        $config['metadata'] = $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath);
+        unset($config['schema_version'], $config['metadata']);
+        $config = [
+            'schema_version' => 1,
+            'metadata' => $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath),
+        ] + $config;
         $this->validateConfig($config, $configPath);
         $this->validateImage($imagePath, $config);
 
@@ -64,6 +68,10 @@ final class ExportCommand extends PromptWeaverCommand
 
         if (! copy($imagePath, $outputDirectory.'/image.png')) {
             throw new RuntimeException("Unable to copy image to: {$outputDirectory}/image.png");
+        }
+
+        if (is_file($previewPath) && ! copy($previewPath, $outputDirectory.'/preview.png')) {
+            throw new RuntimeException("Unable to copy preview to: {$outputDirectory}/preview.png");
         }
 
         $this->displayCreated($outputDirectory);
