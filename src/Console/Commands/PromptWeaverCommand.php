@@ -15,7 +15,12 @@ use function Laravel\Prompts\select;
 
 abstract class PromptWeaverCommand extends Command
 {
-    protected const DEFAULT_FIXTURES_ROOT = 'tests/Fixtures';
+    /**
+     * Working files are kept outside the checked-in test fixtures by default.
+     * The option name is retained for backwards compatibility and because the
+     * working directory still contains fixture-shaped input files.
+     */
+    protected const DEFAULT_FIXTURES_ROOT = '.weaver';
 
     protected const DEFAULT_CATEGORY = 'Cafe/Restaurant';
 
