@@ -53,9 +53,10 @@ final class BriefCommand extends PromptWeaverCommand
         if (is_string($fixtureReference) && $fixtureReference !== '') {
             $promptPath = $this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/brief.prompt';
             $this->writeFile($promptPath, $promptText.PHP_EOL);
+            $this->displayCreated($promptPath);
+        } else {
+            echo $promptText.PHP_EOL;
         }
-
-        echo $promptText.PHP_EOL;
 
         return self::SUCCESS;
     }

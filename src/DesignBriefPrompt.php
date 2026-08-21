@@ -2,12 +2,10 @@
 
 namespace Cable8mm\PromptWeaver;
 
-use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
-use RuntimeException;
 
 class DesignBriefPrompt implements PromptInterface
 {
@@ -53,8 +51,6 @@ class DesignBriefPrompt implements PromptInterface
 
     private ?string $promptString = null;
 
-    private mixed $response = null;
-
     /**
      * @param  Category  $category  design brief category
      * @param  Format  $format  design brief format
@@ -95,27 +91,6 @@ class DesignBriefPrompt implements PromptInterface
     public function prompt(): ?string
     {
         return $this->promptString;
-    }
-
-    public function execute(Client $client): mixed
-    {
-        $rawResponse = $client->generate($this->promptString ?? throw new RuntimeException('build() must be called before execute()'));
-
-        // Strip markdown code fences if the model wrapped the JSON in them.
-        $cleaned = preg_replace('/^```(?:json|php)?\s*\n(.*?)\n```\s*$/s', '$1', trim($rawResponse));
-
-        $this->response = json_decode($cleaned, true, 512, JSON_THROW_ON_ERROR);
-
-        if (! is_array($this->response)) {
-            throw new RuntimeException('Design brief response was not a JSON object.');
-        }
-
-        return $this->response;
-    }
-
-    public function response(): mixed
-    {
-        return $this->response;
     }
 
     private function pickRandom(array $pool, ?string &$lastPicked): string

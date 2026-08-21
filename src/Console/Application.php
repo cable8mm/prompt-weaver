@@ -10,6 +10,7 @@ use Cable8mm\PromptWeaver\Console\Commands\ChainCommand;
 use Cable8mm\PromptWeaver\Console\Commands\CodeCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ConfigCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ConfigStubCommand;
+use Cable8mm\PromptWeaver\Console\Commands\ExportAllCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ExportCommand;
 use Cable8mm\PromptWeaver\Console\Commands\HelpCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ImageCommand;
@@ -33,6 +34,7 @@ final class Application extends SymfonyApplication
             new ConfigCommand,
             new ConfigStubCommand,
             new ExportCommand,
+            new ExportAllCommand,
             new ImageCommand,
             new ChainCommand,
             new CodeCommand,

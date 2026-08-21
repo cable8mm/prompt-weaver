@@ -2,10 +2,16 @@
 
 namespace Cable8mm\PromptWeaver\Laravel;
 
+use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Illuminate\Support\ServiceProvider;
 
 class PromptWeaverServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->singleton(AiClient::class, LaravelAiClient::class);
+    }
+
     public function boot(): void
     {
         $this->loadJsonTranslationsFrom(__DIR__.'/../../lang');

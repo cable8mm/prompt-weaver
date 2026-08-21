@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
-use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
@@ -27,7 +27,14 @@ final class PipeCommand extends PromptWeaverCommand
         $this->setName('pipe')->setDescription('Run the AI text-prompt pipeline.');
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         foreach (['category', 'format', 'color-mode', 'layout', 'provider', 'api-key', 'model', 'color', 'fixtures-root'] as $option) {
-            $this->addOption($option, null, InputOption::VALUE_REQUIRED, default: $option === 'provider' ? 'openrouter' : ($option === 'model' ? 'google/gemma-4-26b-a4b-it:free' : ($option === 'fixtures-root' ? self::DEFAULT_FIXTURES_ROOT : null)));
+            $default = match ($option) {
+                'provider' => getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter',
+                'model' => getenv('PROMPT_WEAVER_MODEL') ?: 'google/gemma-4-26b-a4b-it:free',
+                'fixtures-root' => self::DEFAULT_FIXTURES_ROOT,
+                default => null,
+            };
+
+            $this->addOption($option, null, InputOption::VALUE_REQUIRED, default: $default);
         }
         $this->addOption('no-progress', null, InputOption::VALUE_NONE, 'Hide pipeline progress output.');
         $this->addOption('show-output', null, InputOption::VALUE_NONE, 'Print generated prompts and JSON responses.');
@@ -38,7 +45,12 @@ final class PipeCommand extends PromptWeaverCommand
         $provider = (string) $input->getOption('provider');
         $apiKey = $input->getOption('api-key');
         $model = (string) $input->getOption('model');
-        $client = new Client(provider: $provider, apiKey: $apiKey, model: $model);
+
+        if (is_string($apiKey) && $apiKey !== '' && function_exists('config')) {
+            config(["ai.providers.{$provider}.key" => $apiKey]);
+        }
+
+        $client = $this->aiClient();
 
         $fixtureReference = $input->getArgument('fixture');
         if (is_string($fixtureReference) && $fixtureReference !== '') {
@@ -79,6 +91,8 @@ final class PipeCommand extends PromptWeaverCommand
                     $progressBar->advance();
                 }
             },
+            $provider,
+            $model,
         );
 
         if ($progressBar instanceof Progress) {
@@ -104,6 +118,15 @@ final class PipeCommand extends PromptWeaverCommand
         }
 
         return self::SUCCESS;
+    }
+
+    private function aiClient(): AiClient
+    {
+        if (! function_exists('app')) {
+            throw new \RuntimeException('The pipe command requires a Laravel application.');
+        }
+
+        return app(AiClient::class);
     }
 
     private function writePipelineFiles(string $directory, PipeResult $result): void

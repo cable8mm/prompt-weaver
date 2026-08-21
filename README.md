@@ -50,7 +50,7 @@ They work together like this:
 1. `DesignBriefPrompt` takes a category and format in the constructor, then `build()` generates a Wi-Fi signage design brief prompt and `prompt()` returns it.
 2. `ConfigPrompt` takes the template description, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
-4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
+4. The prompt classes implement `PromptInterface` and only build prompt text. AI execution is handled by `Pipe` through Laravel AI.
 
 The final prompt text is also stored in the fixture example at
 [`tests/Fixtures/cafe-restaurant/image.prompt`](tests/Fixtures/cafe-restaurant/image.prompt).
@@ -289,7 +289,7 @@ The commands use the files created or saved in that folder:
 ./weaver preview cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension. `config-stub` assembles the interactive image prompt described above.
+`brief` reads `manifest.json` and saves the generated prompt as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, and saves the generated prompt as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json` and saves the generated prompt as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension. `config-stub` assembles the interactive image prompt described above.
 
 After the design has been generated, assign its final code from `config.json`'s `style.theme`:
 
@@ -301,15 +301,15 @@ The command converts the theme to kebab-case, keeps at most the first four words
 
 What each command outputs:
 
-1. `brief` prints the design-brief prompt you send to a model.
-2. `config` prints the JSON-generation prompt you send after you have a template description.
-3. `image` prints the final image-generation prompt you can paste into your image model.
+1. `brief` saves the design-brief prompt you send to a model.
+2. `config` saves the JSON-generation prompt you send after you have a template description.
+3. `image` saves the final image-generation prompt you can paste into your image model.
 4. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
 8. `code` renames a fixture from its current code to a kebab-case code derived from `config.json`'s `style.theme`. It updates the fixture folder, `manifest.json`, and any matching `dist/<code>` export.
-9. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+9. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 10. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
 11. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
 
@@ -327,26 +327,20 @@ This package is intended to be used as part of a multi-step generation pipeline:
 4. Send that prompt to a model and parse the returned JSON.
 5. Create an `ImagePrompt` with the parsed config, call `build()`, then retrieve the prompt via `prompt()`.
 6. Send the final text to your image model or image generator.
-7. (Optional) Call `execute(Client $client)` on any prompt class to send the prompt to an AI model, then `response()` to get the result.
+7. Use the Laravel AI integration or `Pipe` to send generated prompts to an AI model.
 
 ### Automated workflow with `pipe`
 
-The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `cable8mm/nano-ai`. It returns the final image-generation prompt; the image itself is generated externally and imported through the export workflow:
+The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `laravel/ai`. It returns the final image-generation prompt. The `image` command can also send that prompt to a Laravel AI image provider with `--generate`:
 
 ```php
-use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Pipe;
+use Cable8mm\PromptWeaver\Laravel\LaravelAiClient;
 
-$client = new Client(
-    provider: 'openai',
-    apiKey: 'sk-your-api-key',
-    model: 'gpt-4o-mini',
-);
-
-$pipe = new Pipe($client);
+$pipe = new Pipe(new LaravelAiClient);
 $result = $pipe->run(
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
@@ -409,7 +403,7 @@ The prompt is also saved automatically as `.weaver/cafe-restaurant/brief.prompt`
 ./weaver config cafe-restaurant
 ```
 
-The command reads `design-brief.json`, takes its `description` value, prints the JSON-generation prompt, and saves it as `.weaver/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `.weaver/cafe-restaurant/raw.config.json`.
+The command reads `design-brief.json`, takes its `description` value, and saves the JSON-generation prompt as `.weaver/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `.weaver/cafe-restaurant/raw.config.json`.
 
 ### 4) Generate the final image prompt
 
@@ -417,7 +411,7 @@ The command reads `design-brief.json`, takes its `description` value, prints the
 ./weaver image cafe-restaurant
 ```
 
-The command reads `raw.config.json`, prints the final image-generation prompt, and saves it as `.weaver/cafe-restaurant/image.prompt`.
+The command reads `raw.config.json` and saves the final image-generation prompt as `.weaver/cafe-restaurant/image.prompt`.
 
 ### 5) Calibrate the config to the generated image
 
@@ -474,6 +468,19 @@ dist/cafe-restaurant/
 
 If the fixture has a `preview.png`, it is copied as a thumbnail alongside the exported image.
 
+To export every fixture under `.weaver`, use `export-all`. Each fixture's own
+`image.png` is used and the output is written to `dist/<code>`:
+
+```bash
+./weaver export-all
+```
+
+Use `--fixtures-root` and `--output-dir` to change the input and output roots:
+
+```bash
+./weaver export-all --fixtures-root=.weaver --output-dir=dist
+```
+
 The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields:
 
 ```json
@@ -510,15 +517,19 @@ These two files are intended to be imported by the Laravel service. The command 
 
 ### 9) Run the automated text pipeline
 
-If you have an OpenRouter API key, you can run the automated brief/config/image-prompt pipeline. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
+If you have an OpenRouter API key, you can run the automated brief/config/image-prompt pipeline. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model. You can change both defaults in `.env`:
 
 The standalone `weaver` command automatically loads `.env` from the project root. Copy `.env.example` to `.env` and add your key once:
 
 ```bash
 cp .env.example .env
 # edit .env and set OPENROUTER_API_KEY
+# PROMPT_WEAVER_PROVIDER=openrouter
+# PROMPT_WEAVER_MODEL=@preset/openrouter-free-presets
 ./weaver pipe cafe-restaurant
 ```
+
+The `--provider` and `--model` options override the corresponding `.env` values for a single run. OpenRouter model IDs and presets are passed through unchanged.
 
 The `.env` file is ignored by Git. Existing shell environment variables take precedence over values in `.env`. Laravel applications can continue using Laravel's own `.env` loading; the package does not load `.env` from its service provider.
 
@@ -567,8 +578,8 @@ The generated files are:
 
 This command:
 
-1. Generates the design-brief prompt and sends it to the model
-2. Parses the design-brief JSON response
+1. Generates the design-brief prompt and sends it to the configured Laravel AI provider
+2. Receives the design-brief response as structured output
 3. Generates the config prompt and sends it to the model
 4. Parses the config JSON response
 5. Generates the final image prompt

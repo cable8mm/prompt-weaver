@@ -99,9 +99,9 @@ it('generates a design brief prompt from fixture and saves to brief.prompt', fun
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->not->toBeEmpty()->and($result['stdout'])->toContain('design brief');
 
         $promptPath = $fixtureDir.'/brief.prompt';
+        expect($result['stdout'])->toContain('Created '.$promptPath);
         expect(is_file($promptPath))->toBeTrue();
         expect(file_get_contents($promptPath))->not->toBeEmpty();
     } finally {
@@ -146,9 +146,9 @@ it('generates a config prompt from fixture and saves to config.prompt', function
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->not->toBeEmpty();
 
         $promptPath = $fixtureDir.'/config.prompt';
+        expect($result['stdout'])->toContain('Created '.$promptPath);
         expect(is_file($promptPath))->toBeTrue();
         expect(file_get_contents($promptPath))->not->toBeEmpty();
     } finally {
@@ -195,9 +195,9 @@ it('generates an image prompt from fixture and saves to image.prompt', function 
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->not->toBeEmpty();
 
         $promptPath = $fixtureDir.'/image.prompt';
+        expect($result['stdout'])->toContain('Created '.$promptPath);
         expect(is_file($promptPath))->toBeTrue();
         expect(file_get_contents($promptPath))->not->toBeEmpty();
     } finally {
@@ -300,6 +300,47 @@ it('exports a generated png and config for Laravel import', function () {
             ]);
         expect(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($fixtureDirectory.'/image.png'));
         expect(md5_file($outputDirectory.'/preview.png'))->toBe(md5_file($fixtureDirectory.'/preview.png'));
+    } finally {
+        remove_directory_cmd($workingRoot);
+    }
+});
+
+it('exports every fixture with export-all', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-export-all-'.bin2hex(random_bytes(4));
+    $fixturesRoot = $workingRoot.'/fixtures';
+    $outputRoot = $workingRoot.'/dist';
+
+    try {
+        copy_directory_cmd($sourceFixture, $fixturesRoot.'/cafe-restaurant');
+        copy_directory_cmd($sourceFixture, $fixturesRoot.'/office-coworking');
+
+        $officeManifest = json_decode(
+            (string) file_get_contents($fixturesRoot.'/office-coworking/manifest.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+        $officeManifest['code'] = 'office-coworking';
+        file_put_contents(
+            $fixturesRoot.'/office-coworking/manifest.json',
+            json_encode($officeManifest, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR).PHP_EOL,
+        );
+
+        $result = run_prompt_weaver_cmd([
+            'export-all',
+            '--fixtures-root='.$fixturesRoot,
+            '--output-dir='.$outputRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        expect($result['stderr'])->toBe('');
+        expect($result['stdout'])->toContain('Created '.$outputRoot.'/cafe-restaurant');
+        expect($result['stdout'])->toContain('Created '.$outputRoot.'/office-coworking');
+        expect(is_file($outputRoot.'/cafe-restaurant/config.json'))->toBeTrue();
+        expect(is_file($outputRoot.'/cafe-restaurant/image.png'))->toBeTrue();
+        expect(is_file($outputRoot.'/office-coworking/config.json'))->toBeTrue();
+        expect(is_file($outputRoot.'/office-coworking/image.png'))->toBeTrue();
     } finally {
         remove_directory_cmd($workingRoot);
     }

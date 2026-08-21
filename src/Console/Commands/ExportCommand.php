@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class ExportCommand extends PromptWeaverCommand
+class ExportCommand extends PromptWeaverCommand
 {
     protected function configure(): void
     {
@@ -24,14 +24,24 @@ final class ExportCommand extends PromptWeaverCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $code = (string) $input->getArgument('fixture');
-        $fixtureDirectory = $this->fixtureDirectoryFromReference($code, $this->fixturesRoot($input));
+        $fixturesRoot = $this->fixturesRoot($input);
+        $outputDirectory = $input->getOption('output-dir')
+            ?? 'dist/'.$this->validatePathSegment($code, 'code');
+        $imagePath = $input->getOption('image');
+
+        $this->exportFixture($code, $fixturesRoot, is_string($imagePath) ? $imagePath : null, $outputDirectory);
+
+        return self::SUCCESS;
+    }
+
+    protected function exportFixture(string $code, string $fixturesRoot, ?string $imagePath, string $outputDirectory): void
+    {
+        $fixtureDirectory = $this->fixtureDirectoryFromReference($code, $fixturesRoot);
         $manifestPath = $fixtureDirectory.'/manifest.json';
         $designBriefPath = $fixtureDirectory.'/design-brief.json';
         $configPath = $fixtureDirectory.'/config.json';
         $previewPath = $fixtureDirectory.'/preview.png';
-        $imagePath = $input->getOption('image') ?? $fixtureDirectory.'/image.png';
-        $outputDirectory = $input->getOption('output-dir')
-            ?? 'dist/'.$this->validatePathSegment($code, 'code');
+        $imagePath ??= $fixtureDirectory.'/image.png';
 
         if (! is_file($manifestPath)) {
             throw new RuntimeException("Manifest file not found: {$manifestPath}");
@@ -75,8 +85,6 @@ final class ExportCommand extends PromptWeaverCommand
         }
 
         $this->displayCreated($outputDirectory);
-
-        return self::SUCCESS;
     }
 
     /** @param array<string, mixed> $manifest @param array<string, mixed> $designBrief @return array<string, string> */
