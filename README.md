@@ -285,6 +285,7 @@ The commands use the files created or saved in that folder:
 ./weaver brief cafe-restaurant
 ./weaver config cafe-restaurant
 ./weaver image cafe-restaurant
+./weaver imagegen cafe-restaurant
 ./weaver calibrate cafe-restaurant
 ./weaver preview cafe-restaurant
 ```
@@ -304,14 +305,15 @@ What each command outputs:
 1. `brief` saves the design-brief prompt you send to a model.
 2. `config` saves the JSON-generation prompt you send after you have a template description.
 3. `image` saves the final image-generation prompt you can paste into your image model.
-4. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
-5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
-6. `chain` prints all three prompts in one run for quick inspection.
-7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
-8. `code` renames a fixture from its current code to a kebab-case code derived from `config.json`'s `style.theme`. It updates the fixture folder, `manifest.json`, and any matching `dist/<code>` export.
-9. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
-10. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
-11. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
+4. `imagegen` reads `image.prompt` and saves the generated image as `image.png`.
+5. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
+6. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
+7. `chain` prints all three prompts in one run for quick inspection.
+8. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
+9. `code` renames a fixture from its current code to a kebab-case code derived from `config.json`'s `style.theme`. It updates the fixture folder, `manifest.json`, and any matching `dist/<code>` export.
+10. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+11. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
+12. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
@@ -331,7 +333,7 @@ This package is intended to be used as part of a multi-step generation pipeline:
 
 ### Automated workflow with `pipe`
 
-The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `laravel/ai`. It returns the final image-generation prompt. The `image` command can also send that prompt to a Laravel AI image provider with `--generate`:
+The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `laravel/ai`. It returns the final image-generation prompt. The `imagegen` command sends the saved `image.prompt` to a Laravel AI image provider:
 
 ```php
 use Cable8mm\PromptWeaver\Enums\Category;
@@ -445,9 +447,24 @@ php -S localhost:8000 -t .weaver/cafe-restaurant
 
 Then open <http://localhost:8000/preview.html>. If `raw.config.json`, `config.json`, or `image.png` changes, run `calibrate` and regenerate `preview.html` so the calibrated coordinates and QR payload are refreshed.
 
-### 8) Export the externally generated image
+### 8) Generate the image
 
-The package does not call an image-generation API. Generate the image with your preferred chat-based image tool, then package it together with the fixture config:
+Use the saved image prompt to generate `image.png` through the configured Laravel AI image provider:
+
+```bash
+./weaver imagegen cafe-restaurant
+```
+
+You can override the provider, model, or output path:
+
+```bash
+./weaver imagegen cafe-restaurant \
+  --provider=openai \
+  --model=gpt-image-1 \
+  --output=/path/to/generated-image.png
+```
+
+### 9) Export the generated image
 
 ```bash
 ./weaver export cafe-restaurant \

@@ -36,6 +36,7 @@ Usage:
   bin/prompt-weaver brief code [--color-mode=color|mono] [--fixtures-root=.weaver]
   bin/prompt-weaver config code [--color-mode=color|mono] [--layout="..."] [--fixtures-root=.weaver]
   bin/prompt-weaver image code [--fixtures-root=.weaver]
+  bin/prompt-weaver imagegen code [--provider=openai] [--model=...] [--output=path/to/image.png] [--fixtures-root=.weaver]
   bin/prompt-weaver export code [--image=path/to/generated.png] [--output-dir=dist/code] [--fixtures-root=.weaver]
   bin/prompt-weaver export-all [--output-dir=dist] [--fixtures-root=.weaver]
   bin/prompt-weaver chain --category="..." --format="..." --description="..." --color-direction="..." --font-mood="..." [--name="..."] --config-file=path/to/config.json
