@@ -99,9 +99,9 @@ it('generates a design brief prompt from fixture and saves to brief.prompt', fun
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->not->toBeEmpty()->and($result['stdout'])->toContain('design brief');
 
         $promptPath = $fixtureDir.'/brief.prompt';
+        expect($result['stdout'])->toContain('Created '.$promptPath);
         expect(is_file($promptPath))->toBeTrue();
         expect(file_get_contents($promptPath))->not->toBeEmpty();
     } finally {
@@ -146,9 +146,9 @@ it('generates a config prompt from fixture and saves to config.prompt', function
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->not->toBeEmpty();
 
         $promptPath = $fixtureDir.'/config.prompt';
+        expect($result['stdout'])->toContain('Created '.$promptPath);
         expect(is_file($promptPath))->toBeTrue();
         expect(file_get_contents($promptPath))->not->toBeEmpty();
     } finally {
@@ -195,9 +195,9 @@ it('generates an image prompt from fixture and saves to image.prompt', function 
 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
-        expect($result['stdout'])->not->toBeEmpty();
 
         $promptPath = $fixtureDir.'/image.prompt';
+        expect($result['stdout'])->toContain('Created '.$promptPath);
         expect(is_file($promptPath))->toBeTrue();
         expect(file_get_contents($promptPath))->not->toBeEmpty();
     } finally {

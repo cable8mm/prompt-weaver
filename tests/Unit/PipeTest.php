@@ -1,40 +1,45 @@
 <?php
 
-use Cable8mm\NanoAI\Client;
-use Cable8mm\NanoAI\Http\HttpClientInterface;
+use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\Pipe;
 
 /**
- * Fake HTTP client that returns canned responses for each call.
+ * Fake Laravel AI client that returns canned structured responses for each call.
  */
-final class FakeHttpClient implements HttpClientInterface
+final class FakeAiClient implements AiClient
 {
-    /** @var array<int, string> */
+    /** @var array<int, array<string, mixed>> */
     private array $responses;
 
     private int $callIndex = 0;
 
     /**
-     * @param  array<int, string>  $responses
+     * @param  array<int, array<string, mixed>>  $responses
      */
     public function __construct(array $responses)
     {
         $this->responses = $responses;
     }
 
-    public function post(string $url, array $headers, array $payload): array
+    public function structured(string $prompt, Closure $schema, ?string $provider = null, ?string $model = null): array
     {
-        $response = $this->responses[$this->callIndex] ?? '{}';
+        $response = $this->responses[$this->callIndex] ?? [];
         $this->callIndex++;
 
-        return [200, json_encode([
-            'choices' => [
-                ['message' => ['content' => $response]],
-            ],
-        ])];
+        return $response;
+    }
+
+    public function text(string $prompt, ?string $provider = null, ?string $model = null): string
+    {
+        return '';
+    }
+
+    public function image(string $prompt, ?string $provider = null, ?string $model = null, ?string $size = null): string
+    {
+        return '';
     }
 
     public function callCount(): int
@@ -44,14 +49,14 @@ final class FakeHttpClient implements HttpClientInterface
 }
 
 it('runs the full three-step pipeline and returns all prompts', function () {
-    $briefJson = json_encode([
+    $briefJson = [
         'name' => '따뜻한 카페',
         'description' => 'A warm cafe Wi-Fi sign with cream and brown tones.',
         'color_direction' => 'warm brown and cream',
         'font_mood' => 'rounded sans-serif',
-    ]);
+    ];
 
-    $configJson = json_encode([
+    $configJson = [
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
         'style' => [
             'theme' => 'warm cafe',
@@ -79,15 +84,9 @@ it('runs the full three-step pipeline and returns all prompts', function () {
             ],
             'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean square'],
         ],
-    ]);
+    ];
 
-    $httpClient = new FakeHttpClient([$briefJson, $configJson]);
-
-    $client = new Client(
-        provider: 'openai',
-        apiKey: 'sk-test',
-        httpClient: $httpClient,
-    );
+    $client = new FakeAiClient([$briefJson, $configJson]);
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
@@ -97,7 +96,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
     );
 
     // Should have made exactly 2 API calls (brief + config)
-    expect($httpClient->callCount())->toBe(2);
+    expect($client->callCount())->toBe(2);
 
     // Brief prompt should contain expected markers
     expect($result->briefPrompt)
@@ -125,15 +124,15 @@ it('runs the full three-step pipeline and returns all prompts', function () {
         ->toContain('PASSWORD:');
 });
 
-it('strips markdown code fences from model responses', function () {
-    $briefJson = "```json\n".json_encode([
+it('accepts structured responses from the AI client', function () {
+    $briefJson = [
         'name' => '테스트',
         'description' => 'A test design brief.',
         'color_direction' => 'test colors',
         'font_mood' => 'test font',
-    ])."\n```";
+    ];
 
-    $configJson = "```json\n".json_encode([
+    $configJson = [
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
         'style' => ['theme' => 'test', 'background' => 'test bg', 'color_mode' => 'mono'],
         'content' => [
@@ -147,15 +146,9 @@ it('strips markdown code fences from model responses', function () {
             'password' => ['box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'PASSWORD:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111'],
             'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean'],
         ],
-    ])."\n```";
+    ];
 
-    $httpClient = new FakeHttpClient([$briefJson, $configJson]);
-
-    $client = new Client(
-        provider: 'openai',
-        apiKey: 'sk-test',
-        httpClient: $httpClient,
-    );
+    $client = new FakeAiClient([$briefJson, $configJson]);
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
@@ -168,15 +161,8 @@ it('strips markdown code fences from model responses', function () {
 });
 
 it('throws when the design brief response is missing the description field', function () {
-    $briefJson = json_encode(['name' => 'test']); // missing description
-
-    $httpClient = new FakeHttpClient([$briefJson]);
-
-    $client = new Client(
-        provider: 'openai',
-        apiKey: 'sk-test',
-        httpClient: $httpClient,
-    );
+    $briefJson = ['name' => 'test']; // missing description
+    $client = new FakeAiClient([$briefJson]);
 
     $pipe = new Pipe($client);
 
@@ -187,14 +173,14 @@ it('throws when the design brief response is missing the description field', fun
 })->throws(RuntimeException::class, 'Design brief response missing "description" field.');
 
 it('passes the color option to DesignBriefPrompt', function () {
-    $briefJson = json_encode([
+    $briefJson = [
         'name' => '색칠',
         'description' => 'A colorful design brief.',
         'color_direction' => 'vibrant colors',
         'font_mood' => 'bold font',
-    ]);
+    ];
 
-    $configJson = json_encode([
+    $configJson = [
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
         'style' => ['theme' => 'colorful', 'background' => 'rainbow', 'color_mode' => 'mono'],
         'content' => [
@@ -208,15 +194,9 @@ it('passes the color option to DesignBriefPrompt', function () {
             'password' => ['box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'PASSWORD:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111'],
             'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean'],
         ],
-    ]);
+    ];
 
-    $httpClient = new FakeHttpClient([$briefJson, $configJson]);
-
-    $client = new Client(
-        provider: 'openai',
-        apiKey: 'sk-test',
-        httpClient: $httpClient,
-    );
+    $client = new FakeAiClient([$briefJson, $configJson]);
 
     $pipe = new Pipe($client);
     $result = $pipe->run(

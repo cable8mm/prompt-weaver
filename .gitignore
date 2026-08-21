@@ -199,9 +199,6 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/git,macos,windows,composer,phpstorm,visualstudiocode
 
-# E2E Test Configuration
-tests/config.json
-
 # Doctum
 /cache
 # /doctum.php
