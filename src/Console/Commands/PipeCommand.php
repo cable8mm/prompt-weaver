@@ -27,7 +27,14 @@ final class PipeCommand extends PromptWeaverCommand
         $this->setName('pipe')->setDescription('Run the AI text-prompt pipeline.');
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         foreach (['category', 'format', 'color-mode', 'layout', 'provider', 'api-key', 'model', 'color', 'fixtures-root'] as $option) {
-            $this->addOption($option, null, InputOption::VALUE_REQUIRED, default: $option === 'provider' ? 'openrouter' : ($option === 'model' ? 'google/gemma-4-26b-a4b-it:free' : ($option === 'fixtures-root' ? self::DEFAULT_FIXTURES_ROOT : null)));
+            $default = match ($option) {
+                'provider' => getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter',
+                'model' => getenv('PROMPT_WEAVER_MODEL') ?: 'google/gemma-4-26b-a4b-it:free',
+                'fixtures-root' => self::DEFAULT_FIXTURES_ROOT,
+                default => null,
+            };
+
+            $this->addOption($option, null, InputOption::VALUE_REQUIRED, default: $default);
         }
         $this->addOption('no-progress', null, InputOption::VALUE_NONE, 'Hide pipeline progress output.');
         $this->addOption('show-output', null, InputOption::VALUE_NONE, 'Print generated prompts and JSON responses.');

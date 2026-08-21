@@ -145,12 +145,23 @@ final class Pipe
             'y_pc' => $schema->number()->required(),
         ];
 
-        $contentElement = $schema->object([
+        $title = $schema->object([
             ...$coordinates(),
-            'text' => $schema->string(),
-            'align' => $schema->string(),
-            'style' => $schema->string(),
-            'width_pc' => $schema->number(),
+            'text' => $schema->string()->required(),
+            'style' => $schema->string()->required(),
+        ])->required();
+        $wifiIcon = $schema->object([
+            ...$coordinates(),
+            'width_pc' => $schema->number()->required(),
+            'style' => $schema->string()->required(),
+        ])->required();
+        $message = $schema->object([
+            ...$coordinates(),
+            'text' => $schema->string()->required(),
+        ])->required();
+        $footer = $schema->object([
+            ...$coordinates(),
+            'text' => $schema->string()->required(),
         ])->required();
         $placeholder = $schema->object([
             'box_x_pc' => $schema->number()->required(),
@@ -180,10 +191,10 @@ final class Pipe
                 'color_mode' => $schema->string()->required(),
             ])->required(),
             'content' => $schema->object([
-                'title' => $contentElement,
-                'wifi_icon' => $contentElement,
-                'message' => $contentElement,
-                'footer' => $contentElement,
+                'title' => $title,
+                'wifi_icon' => $wifiIcon,
+                'message' => $message,
+                'footer' => $footer,
             ])->required(),
             'placeholders' => $schema->object([
                 'ssid' => $placeholder,

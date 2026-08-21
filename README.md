@@ -508,15 +508,19 @@ These two files are intended to be imported by the Laravel service. The command 
 
 ### 9) Run the automated text pipeline
 
-If you have an OpenRouter API key, you can run the automated brief/config/image-prompt pipeline. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model:
+If you have an OpenRouter API key, you can run the automated brief/config/image-prompt pipeline. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model. You can change both defaults in `.env`:
 
 The standalone `weaver` command automatically loads `.env` from the project root. Copy `.env.example` to `.env` and add your key once:
 
 ```bash
 cp .env.example .env
 # edit .env and set OPENROUTER_API_KEY
+# PROMPT_WEAVER_PROVIDER=openrouter
+# PROMPT_WEAVER_MODEL=@preset/openrouter-free-presets
 ./weaver pipe cafe-restaurant
 ```
+
+The `--provider` and `--model` options override the corresponding `.env` values for a single run. OpenRouter model IDs and presets are passed through unchanged.
 
 The `.env` file is ignored by Git. Existing shell environment variables take precedence over values in `.env`. Laravel applications can continue using Laravel's own `.env` loading; the package does not load `.env` from its service provider.
 

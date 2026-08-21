@@ -6,6 +6,7 @@ use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Pipe;
+use Cable8mm\PromptWeaver\Support\Environment;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,7 +14,7 @@ use Cable8mm\PromptWeaver\Pipe;
 |--------------------------------------------------------------------------
 | These tests make real API calls to OpenRouter and require:
 |   - RUN_E2E_TESTS=1 environment variable
-|   - tests/config.json with valid API keys (copy from tests/config.json.example)
+|   - .env with valid API keys and optional provider/model settings
 |
 | Run with:
 |   RUN_E2E_TESTS=1 composer test:e2e
@@ -22,21 +23,13 @@ use Cable8mm\PromptWeaver\Pipe;
 | and may incur costs.
 */
 
-// Load API keys from tests/config.json (gitignored) if it exists.
-$configFile = __DIR__.'/../config.json';
-if (file_exists($configFile)) {
-    $config = json_decode(file_get_contents($configFile), true);
-    if (is_array($config)) {
-        foreach ($config as $key => $value) {
-            putenv("{$key}={$value}");
-        }
-    }
-}
+// Load project-level environment settings, including API keys and model defaults.
+Environment::load(dirname(__DIR__, 2).'/.env');
 
 uses()->group('e2e');
 
 $skipE2E = ! getenv('RUN_E2E_TESTS');
-$skipMsg = 'Set RUN_E2E_TESTS=1 and create tests/config.json with API keys to run e2e tests.';
+$skipMsg = 'Set RUN_E2E_TESTS=1 and configure API keys in .env to run e2e tests.';
 
 it('runs the full pipeline with real OpenRouter API', function () {
     $client = app(AiClient::class);
@@ -46,8 +39,8 @@ it('runs the full pipeline with real OpenRouter API', function () {
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
         color: 'warm brown and cream',
-        provider: 'openrouter',
-        model: 'google/gemma-4-26b-a4b-it:free',
+        provider: getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter',
+        model: getenv('PROMPT_WEAVER_MODEL') ?: 'google/gemma-4-26b-a4b-it:free',
     );
 
     // Save generated working files outside the checked-in test fixtures.
