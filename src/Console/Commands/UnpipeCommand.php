@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
 use RuntimeException;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
+
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\note;
 
 final class UnpipeCommand extends PromptWeaverCommand
 {
@@ -54,7 +56,7 @@ final class UnpipeCommand extends PromptWeaverCommand
         ));
 
         if ($paths === []) {
-            $output->writeln('<info>No generated pipe files found.</info>');
+            note('No generated pipe files found.');
 
             return self::SUCCESS;
         }
@@ -64,14 +66,11 @@ final class UnpipeCommand extends PromptWeaverCommand
                 throw new RuntimeException('Unpipe requires confirmation. Use --force for non-interactive runs.');
             }
 
-            $question = new ConfirmationQuestion(
-                'Remove '.count($paths).' generated file(s) from '.$fixtureDirectory.'? [y/N] ',
-                false,
-            );
-            /** @var QuestionHelper $helper */
-            $helper = $this->getHelper('question');
-            if (! $helper->ask($input, $output, $question)) {
-                $output->writeln('<comment>Cancelled.</comment>');
+            if (! confirm(
+                label: 'Remove '.count($paths).' generated file(s) from '.$fixtureDirectory.'?',
+                default: false,
+            )) {
+                note('Cancelled.');
 
                 return self::SUCCESS;
             }
@@ -82,7 +81,7 @@ final class UnpipeCommand extends PromptWeaverCommand
                 throw new RuntimeException("Unable to remove generated file: {$path}");
             }
 
-            $output->writeln('<info>Removed '.$path.'</info>');
+            info("Removed {$path}");
         }
 
         return self::SUCCESS;
