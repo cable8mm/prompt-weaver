@@ -63,7 +63,7 @@ function remove_unpipe_fixture(string $directory): void
     rmdir($directory);
 }
 
-it('removes pipe files and preserves manifest and later artifacts', function () {
+it('removes all generated files and preserves only the manifest', function () {
     $root = sys_get_temp_dir().'/prompt-weaver-unpipe-'.bin2hex(random_bytes(4));
     $fixture = create_unpipe_fixture($root);
 
@@ -78,36 +78,11 @@ it('removes pipe files and preserves manifest and later artifacts', function () 
         expect($result['exitCode'])->toBe(0);
         expect($result['stderr'])->toBe('');
 
-        foreach (['brief.prompt', 'design-brief.json', 'config.prompt', 'raw.config.json', 'image.prompt'] as $filename) {
+        foreach (['brief.prompt', 'design-brief.json', 'config.prompt', 'raw.config.json', 'image.prompt', 'config.json', 'image.png', 'preview.png'] as $filename) {
             expect(is_file($fixture.'/'.$filename))->toBeFalse();
         }
 
-        foreach (['manifest.json', 'config.json', 'image.png', 'preview.png'] as $filename) {
-            expect(is_file($fixture.'/'.$filename))->toBeTrue();
-        }
-    } finally {
-        remove_unpipe_fixture($root);
-    }
-});
-
-it('removes later artifacts with the all option', function () {
-    $root = sys_get_temp_dir().'/prompt-weaver-unpipe-'.bin2hex(random_bytes(4));
-    $fixture = create_unpipe_fixture($root);
-
-    try {
-        $result = run_prompt_weaver_unpipe([
-            'unpipe',
-            'fixture',
-            '--fixtures-root='.$root,
-            '--all',
-            '--force',
-        ]);
-
-        expect($result['exitCode'])->toBe(0);
         expect(is_file($fixture.'/manifest.json'))->toBeTrue();
-        expect(is_file($fixture.'/config.json'))->toBeFalse();
-        expect(is_file($fixture.'/image.png'))->toBeFalse();
-        expect(is_file($fixture.'/preview.png'))->toBeFalse();
     } finally {
         remove_unpipe_fixture($root);
     }
