@@ -291,6 +291,14 @@ The commands use the files created or saved in that folder:
 
 `brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension. `config-stub` assembles the interactive image prompt described above.
 
+After the design has been generated, assign its final code from `config.json`'s `style.theme`:
+
+```bash
+./weaver code 202608202113
+```
+
+The command converts the theme to kebab-case, for example `Wabi-Sabi Minimalist` to `wabi-sabi-minimalist`. It renames the matching `.weaver/<code>` folder, updates `manifest.json`, and renames and updates `dist/<code>` when an export already exists. If the target code is already in use, the command stops without renaming anything.
+
 What each command outputs:
 
 1. `brief` prints the design-brief prompt you send to a model.
@@ -300,9 +308,10 @@ What each command outputs:
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
-8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
-9. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
-10. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
+8. `code` renames a fixture from its current code to a kebab-case code derived from `config.json`'s `style.theme`. It updates the fixture folder, `manifest.json`, and any matching `dist/<code>` export.
+9. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+10. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
+11. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
