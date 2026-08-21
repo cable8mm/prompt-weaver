@@ -18,6 +18,7 @@ use Cable8mm\PromptWeaver\Console\Commands\ImagegenCommand;
 use Cable8mm\PromptWeaver\Console\Commands\InitCommand;
 use Cable8mm\PromptWeaver\Console\Commands\PipeCommand;
 use Cable8mm\PromptWeaver\Console\Commands\PreviewCommand;
+use Cable8mm\PromptWeaver\Console\Commands\UnpipeCommand;
 use Symfony\Component\Console\Application as SymfonyApplication;
 
 final class Application extends SymfonyApplication
@@ -41,6 +42,7 @@ final class Application extends SymfonyApplication
             new ChainCommand,
             new CodeCommand,
             new PipeCommand,
+            new UnpipeCommand,
             new PreviewCommand,
             new CalibrateCommand,
         ]);
