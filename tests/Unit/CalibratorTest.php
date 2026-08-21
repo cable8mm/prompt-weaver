@@ -22,6 +22,7 @@ beforeEach(function () {
     $image = imagecreatefromstring((string) file_get_contents($imagePath));
     expect($image)->toBeInstanceOf(GdImage::class);
     test()->image = $image;
+    test()->imagePath = $imagePath;
 });
 
 afterEach(function () {
@@ -31,7 +32,7 @@ afterEach(function () {
 });
 
 it('updates ssid and password box_y_pc values after calibration', function () {
-    $calibrator = new Calibrator;
+    $calibrator = new Calibrator($this->imagePath);
 
     $result = $calibrator->calibrate($this->config, $this->image);
 
@@ -49,7 +50,7 @@ it('updates ssid and password box_y_pc values after calibration', function () {
 });
 
 it('updates qr position and width after calibration', function () {
-    $calibrator = new Calibrator;
+    $calibrator = new Calibrator($this->imagePath);
 
     $result = $calibrator->calibrate($this->config, $this->image);
 
@@ -67,7 +68,7 @@ it('updates qr position and width after calibration', function () {
 
 it('does not modify the original config array', function () {
     $originalConfig = $this->config;
-    $calibrator = new Calibrator;
+    $calibrator = new Calibrator($this->imagePath);
 
     $result = $calibrator->calibrate($this->config, $this->image);
 
@@ -90,7 +91,7 @@ it('handles config without ssid/password/qr placeholders gracefully', function (
 });
 
 it('returns calibrated values within valid percentage range', function () {
-    $calibrator = new Calibrator;
+    $calibrator = new Calibrator($this->imagePath);
 
     $result = $calibrator->calibrate($this->config, $this->image);
 

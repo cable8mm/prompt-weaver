@@ -26,15 +26,24 @@ class ImagePrompt implements PromptInterface
 
         $step = 1;
 
-        // Title
-        $title = $content['title'];
-        $layoutLines[] = "{$step}. Title \"{$title['text']}\": centered at x={$title['x_pc']}%, y={$title['y_pc']}%. {$title['style']}.";
-        $step++;
+        foreach ($content as $name => $element) {
+            if (! is_array($element) || ! isset($element['x_pc'], $element['y_pc'])) {
+                continue;
+            }
 
-        // Wi-Fi icon
-        $icon = $content['wifi_icon'];
-        $layoutLines[] = "{$step}. Wi-Fi icon: centered at x={$icon['x_pc']}%, y={$icon['y_pc']}%, width≈{$icon['width_pc']}% of canvas width. {$icon['style']}.";
-        $step++;
+            $label = match ($name) {
+                'wifi_icon' => 'Wi-Fi icon',
+                default => ucfirst(str_replace('_', ' ', $name)),
+            };
+            $text = isset($element['text']) ? ' "'.$element['text'].'"' : '';
+            $elementStyle = isset($element['style']) ? ' '.$element['style'].'.' : '';
+            $width = isset($element['width_pc'])
+                ? ", width≈{$element['width_pc']}% of canvas width"
+                : '';
+
+            $layoutLines[] = "{$step}. {$label}{$text}: centered at x={$element['x_pc']}%, y={$element['y_pc']}%{$width}.{$elementStyle}";
+            $step++;
+        }
 
         // placeholder boxes like SSID / PASSWORD
         foreach (['ssid', 'password'] as $key) {

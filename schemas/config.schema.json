@@ -46,7 +46,6 @@
     },
     "content": {
       "type": "object",
-      "required": ["title", "wifi_icon", "message", "footer"],
       "properties": {
         "title": { "$ref": "#/$defs/contentElement" },
         "wifi_icon": { "$ref": "#/$defs/contentElement" },

@@ -15,16 +15,12 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 final class UnpipeCommand extends PromptWeaverCommand
 {
     /** @var array<int, string> */
-    private const PIPE_FILES = [
+    private const GENERATED_FILES = [
         'brief.prompt',
         'design-brief.json',
         'config.prompt',
         'raw.config.json',
         'image.prompt',
-    ];
-
-    /** @var array<int, string> */
-    private const ALL_FILES = [
         'config.json',
         'image.png',
         'preview.png',
@@ -34,7 +30,6 @@ final class UnpipeCommand extends PromptWeaverCommand
     {
         $this->setName('unpipe')->setDescription('Remove generated pipe files from a fixture.');
         $this->addArgument('fixture', InputArgument::REQUIRED, 'Fixture code.');
-        $this->addOption('all', null, InputOption::VALUE_NONE, 'Also remove config.json, image.png, and preview.png.');
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Skip the confirmation prompt.');
         $this->addFixturesRootOption();
     }
@@ -50,15 +45,10 @@ final class UnpipeCommand extends PromptWeaverCommand
             throw new RuntimeException("Fixture directory not found: {$fixtureDirectory}");
         }
 
-        $filenames = self::PIPE_FILES;
-        if ($input->getOption('all')) {
-            $filenames = [...$filenames, ...self::ALL_FILES];
-        }
-
         $paths = array_values(array_filter(
             array_map(
                 fn (string $filename): string => $fixtureDirectory.'/'.$filename,
-                $filenames,
+                self::GENERATED_FILES,
             ),
             is_file(...),
         ));

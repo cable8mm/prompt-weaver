@@ -145,24 +145,12 @@ final class Pipe
             'y_pc' => $schema->number()->required(),
         ];
 
-        $title = $schema->object([
+        $contentElement = $schema->object([
             ...$coordinates(),
-            'text' => $schema->string()->required(),
-            'style' => $schema->string()->required(),
-        ])->required();
-        $wifiIcon = $schema->object([
-            ...$coordinates(),
-            'width_pc' => $schema->number()->required(),
-            'style' => $schema->string()->required(),
-        ])->required();
-        $message = $schema->object([
-            ...$coordinates(),
-            'text' => $schema->string()->required(),
-        ])->required();
-        $footer = $schema->object([
-            ...$coordinates(),
-            'text' => $schema->string()->required(),
-        ])->required();
+            'text' => $schema->string(),
+            'style' => $schema->string(),
+            'width_pc' => $schema->number(),
+        ]);
         $placeholder = $schema->object([
             'box_x_pc' => $schema->number()->required(),
             'box_y_pc' => $schema->number()->required(),
@@ -190,11 +178,14 @@ final class Pipe
                 'background' => $schema->string()->required(),
                 'color_mode' => $schema->string()->required(),
             ])->required(),
+            // Content elements are layout-dependent. Known elements remain
+            // schema-described, but none is mandatory; placeholders below
+            // are the fixed contract consumed by the renderer.
             'content' => $schema->object([
-                'title' => $title,
-                'wifi_icon' => $wifiIcon,
-                'message' => $message,
-                'footer' => $footer,
+                'title' => $contentElement,
+                'wifi_icon' => $contentElement,
+                'message' => $contentElement,
+                'footer' => $contentElement,
             ])->required(),
             'placeholders' => $schema->object([
                 'ssid' => $placeholder,

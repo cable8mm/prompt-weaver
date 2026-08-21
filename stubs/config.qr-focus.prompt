@@ -2,19 +2,19 @@
 You are a Wi-Fi signage config generator. Output ONLY one valid JSON object matching the schema below. Never output explanations or markdown.
 
 [Layout]
-Make the QR code the primary visual anchor with strong whitespace and a clear frame. Keep the credential fields compact above it and the title quiet.
+Make the QR code the primary visual anchor near the upper-middle area with strong whitespace and a clear frame. Keep the credential fields compact below it and the title quiet.
 
 [Schema]
 {
   "canvas": {
     "width_pc": 100,
     "height_pc": 100,
-    "aspect_ratio": "3:4"
+    "aspect_ratio": "{{ aspect_ratio }}"
   },
   "style": {
-    "theme": "Modern Tech Gradient",
-    "background": "Soft cyan and mint green smooth gradient with subtle geometric overlay and tech lines",
-    "color_mode": "RGB"
+    "theme": "<visual theme>",
+    "background": "<colors, patterns, textures>",
+    "color_mode": "{{ color_mode }}"
   },
   "content": {
     "title": {
@@ -22,18 +22,12 @@ Make the QR code the primary visual anchor with strong whitespace and a clear fr
       "x_pc": 50,
       "y_pc": 8,
       "align": "center",
-      "style": "Bold sans-serif typography in dark navy-blue (#0D3B52)"
-    },
-    "wifi_icon": {
-      "x_pc": 50,
-      "y_pc": 15,
-      "width_pc": 10,
-      "style": "Glowing white Wi-Fi signal icon with subtle outer aura"
+      "style": "<typography>"
     },
     "message": {
       "text": "스캔하여 연결하세요.",
       "x_pc": 50,
-      "y_pc": 58,
+      "y_pc": 50,
       "align": "center"
     },
     "footer": {
@@ -46,15 +40,15 @@ Make the QR code the primary visual anchor with strong whitespace and a clear fr
   "placeholders": {
     "qr": {
       "x_pc": 50,
-      "y_pc": 36,
+      "y_pc": 20,
       "width_pc": 52,
-      "style": "Large solid white square centered with a circular tech accent frame in background",
+      "style": "<QR frame style>",
       "box_fill": "#FFFFFF",
       "box_fill_note": "solid white square with quiet zone"
     },
     "ssid": {
       "box_x_pc": 50,
-      "box_y_pc": 68,
+      "box_y_pc": 62,
       "box_width_pc": 68,
       "box_height_pc": 7,
       "label": "SSID:",
@@ -63,13 +57,13 @@ Make the QR code the primary visual anchor with strong whitespace and a clear fr
       "box_fill_note": "solid white cutout",
       "align": "center",
       "font_family": "Pretendard",
-      "font_size_px": 32,
+      "font_size_px": 38,
       "font_weight": "bold",
       "color": "#111111"
     },
     "password": {
       "box_x_pc": 50,
-      "box_y_pc": 80,
+      "box_y_pc": 74,
       "box_width_pc": 68,
       "box_height_pc": 7,
       "label": "PASSWORD:",
@@ -78,7 +72,7 @@ Make the QR code the primary visual anchor with strong whitespace and a clear fr
       "box_fill_note": "solid white cutout",
       "align": "center",
       "font_family": "Pretendard",
-      "font_size_px": 32,
+      "font_size_px": 38,
       "font_weight": "bold",
       "color": "#111111"
     }
@@ -88,7 +82,7 @@ Make the QR code the primary visual anchor with strong whitespace and a clear fr
 [Rules]
 1. Keep all placeholder coordinates and dimensions exactly as defined. They are overlay anchors.
 2. Never render coordinates, percentages, JSON keys, or placeholder names as visible artwork.
-3. SSID, password, and QR areas must be separate, white, empty, readable, and printable. QR remains square and dominant.
+3. SSID, password, and QR areas must be separate, white, empty, readable, and printable. QR remains square.
 4. Keep Korean text content as shown. Write free-text style fields in concise English.
 5. Use Color Direction for palette and Font Mood for typography. Name is reference only.
 6. Do not add or remove fields. Output valid JSON only.

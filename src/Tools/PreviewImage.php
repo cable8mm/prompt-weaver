@@ -51,7 +51,7 @@ final class PreviewImage
             throw new RuntimeException("Unable to load background image: {$this->backgroundPath}");
         }
 
-        $calibrator = new Calibrator;
+        $calibrator = new Calibrator($this->backgroundPath);
         $config = $calibrator->calibrate($config, $image);
 
         $updated = [];
