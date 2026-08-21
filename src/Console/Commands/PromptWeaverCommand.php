@@ -132,7 +132,7 @@ abstract class PromptWeaverCommand extends Command
             default: $defaultIndex === false ? null : $defaultIndex,
         );
 
-        return $choices[(int) $selection] ?? $default;
+        return is_string($selection) && $selection !== '' ? $selection : $default;
     }
 
     protected function displaySection(string $title, ?string $content): void
