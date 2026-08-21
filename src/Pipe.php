@@ -2,23 +2,25 @@
 
 namespace Cable8mm\PromptWeaver;
 
-use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\Layout;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
 
 /**
  * Orchestrates the three-step text prompt chain (design brief → config → image prompt)
- * by sending each generated prompt to an AI model via the NanoAI Client.
+ * by sending each generated prompt to a Laravel AI client.
  */
 final class Pipe
 {
     /**
-     * @param  Client  $client  A configured NanoAI client used for all generate() calls.
+     * @param  AiClient  $client  A configured Laravel AI client.
      */
     public function __construct(
-        private readonly Client $client,
+        private readonly AiClient $client,
     ) {}
 
     /**
@@ -42,6 +44,8 @@ final class Pipe
         ColorMode $colorMode = ColorMode::MONO,
         Layout $layout = Layout::CENTERED,
         ?callable $onProgress = null,
+        ?string $provider = null,
+        ?string $model = null,
     ): PipeResult {
         // Step 1 — design brief
         if ($onProgress !== null) {
@@ -54,7 +58,12 @@ final class Pipe
             color: $color ?? 'black-and-white',
         );
         $briefPrompt->build();
-        $briefJson = $briefPrompt->execute($this->client);
+        $briefJson = $this->client->structured(
+            $briefPrompt->prompt() ?? throw new \RuntimeException('Unable to build design brief prompt.'),
+            self::briefSchema(...),
+            $provider,
+            $model,
+        );
         if ($onProgress !== null) {
             $onProgress('brief.complete', 'Design brief received.');
         }
@@ -81,7 +90,12 @@ final class Pipe
             layout: $layout,
         );
         $configPrompt->build();
-        $config = $configPrompt->execute($this->client);
+        $config = $this->client->structured(
+            $configPrompt->prompt() ?? throw new \RuntimeException('Unable to build config prompt.'),
+            self::configSchema(...),
+            $provider,
+            $model,
+        );
         if ($onProgress !== null) {
             $onProgress('config.complete', 'Config JSON received.');
         }
@@ -103,5 +117,86 @@ final class Pipe
             config: $config,
             imagePrompt: $imagePrompt->prompt() ?? '',
         );
+    }
+
+    /**
+     * @return array<string, Type>
+     */
+    private static function briefSchema(JsonSchema $schema): array
+    {
+        return [
+            'name' => $schema->string()->required(),
+            'description' => $schema->string()->required(),
+            'color_direction' => $schema->string()->required(),
+            'font_mood' => $schema->string()->required(),
+        ];
+    }
+
+    /**
+     * The config contract deliberately keeps nested content fields open-ended;
+     * the renderer only requires the coordinates and semantic fields below.
+     *
+     * @return array<string, Type>
+     */
+    private static function configSchema(JsonSchema $schema): array
+    {
+        $coordinates = fn () => [
+            'x_pc' => $schema->number()->required(),
+            'y_pc' => $schema->number()->required(),
+        ];
+
+        $contentElement = $schema->object([
+            ...$coordinates(),
+            'text' => $schema->string(),
+            'align' => $schema->string(),
+            'style' => $schema->string(),
+            'width_pc' => $schema->number(),
+        ])->required();
+        $placeholder = $schema->object([
+            'box_x_pc' => $schema->number()->required(),
+            'box_y_pc' => $schema->number()->required(),
+            'box_width_pc' => $schema->number()->required(),
+            'box_height_pc' => $schema->number()->required(),
+            'label' => $schema->string(),
+            'label_position' => $schema->string(),
+            'box_fill' => $schema->string(),
+            'box_fill_note' => $schema->string(),
+            'align' => $schema->string(),
+            'font_family' => $schema->string(),
+            'font_size_px' => $schema->number(),
+            'font_weight' => $schema->string(),
+            'color' => $schema->string(),
+        ])->required();
+
+        return [
+            'canvas' => $schema->object([
+                'width_pc' => $schema->number()->required(),
+                'height_pc' => $schema->number()->required(),
+                'aspect_ratio' => $schema->string()->required(),
+            ])->required(),
+            'style' => $schema->object([
+                'theme' => $schema->string()->required(),
+                'background' => $schema->string()->required(),
+                'color_mode' => $schema->string()->required(),
+            ])->required(),
+            'content' => $schema->object([
+                'title' => $contentElement,
+                'wifi_icon' => $contentElement,
+                'message' => $contentElement,
+                'footer' => $contentElement,
+            ])->required(),
+            'placeholders' => $schema->object([
+                'ssid' => $placeholder,
+                'password' => $placeholder,
+                'qr' => $schema->object([
+                    'x_pc' => $schema->number()->required(),
+                    'y_pc' => $schema->number()->required(),
+                    'width_pc' => $schema->number()->required(),
+                    'style' => $schema->string(),
+                    'box_fill' => $schema->string(),
+                    'box_fill_note' => $schema->string(),
+                ])->required(),
+            ])->required(),
+        ];
     }
 }

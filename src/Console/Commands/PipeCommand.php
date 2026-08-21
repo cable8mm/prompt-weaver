@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
-use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
@@ -38,7 +38,12 @@ final class PipeCommand extends PromptWeaverCommand
         $provider = (string) $input->getOption('provider');
         $apiKey = $input->getOption('api-key');
         $model = (string) $input->getOption('model');
-        $client = new Client(provider: $provider, apiKey: $apiKey, model: $model);
+
+        if (is_string($apiKey) && $apiKey !== '' && function_exists('config')) {
+            config(["ai.providers.{$provider}.key" => $apiKey]);
+        }
+
+        $client = $this->aiClient();
 
         $fixtureReference = $input->getArgument('fixture');
         if (is_string($fixtureReference) && $fixtureReference !== '') {
@@ -79,6 +84,8 @@ final class PipeCommand extends PromptWeaverCommand
                     $progressBar->advance();
                 }
             },
+            $provider,
+            $model,
         );
 
         if ($progressBar instanceof Progress) {
@@ -104,6 +111,15 @@ final class PipeCommand extends PromptWeaverCommand
         }
 
         return self::SUCCESS;
+    }
+
+    private function aiClient(): AiClient
+    {
+        if (! function_exists('app')) {
+            throw new \RuntimeException('The pipe command requires a Laravel application.');
+        }
+
+        return app(AiClient::class);
     }
 
     private function writePipelineFiles(string $directory, PipeResult $result): void

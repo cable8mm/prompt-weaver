@@ -2,15 +2,11 @@
 
 namespace Cable8mm\PromptWeaver;
 
-use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
-use RuntimeException;
 
 class ImagePrompt implements PromptInterface
 {
     private ?string $promptString = null;
-
-    private mixed $response = null;
 
     /**
      * @param  array  $config  wifi-note template config JSON (canvas, style, content, placeholders)
@@ -83,18 +79,6 @@ class ImagePrompt implements PromptInterface
     public function prompt(): ?string
     {
         return $this->promptString;
-    }
-
-    public function execute(Client $client): mixed
-    {
-        $this->response = $client->generate($this->promptString ?? throw new RuntimeException('build() must be called before execute()'));
-
-        return $this->response;
-    }
-
-    public function response(): mixed
-    {
-        return $this->response;
     }
 
     private function describeLabelPosition(string $position): string

@@ -50,7 +50,7 @@ They work together like this:
 1. `DesignBriefPrompt` takes a category and format in the constructor, then `build()` generates a Wi-Fi signage design brief prompt and `prompt()` returns it.
 2. `ConfigPrompt` takes the template description, color direction, and font mood in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
-4. All three implement `PromptInterface` with `execute(Client $client)` to send the prompt to an AI and `response()` to retrieve the result.
+4. The prompt classes implement `PromptInterface` and only build prompt text. AI execution is handled by `Pipe` through Laravel AI.
 
 The final prompt text is also stored in the fixture example at
 [`tests/Fixtures/cafe-restaurant/image.prompt`](tests/Fixtures/cafe-restaurant/image.prompt).
@@ -300,7 +300,7 @@ What each command outputs:
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
-8. `pipe` runs the full three-step pipeline end-to-end by sending each prompt to an AI model via `cable8mm/nano-ai` and printing all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+8. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and prints all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 9. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
 10. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
 
@@ -318,26 +318,20 @@ This package is intended to be used as part of a multi-step generation pipeline:
 4. Send that prompt to a model and parse the returned JSON.
 5. Create an `ImagePrompt` with the parsed config, call `build()`, then retrieve the prompt via `prompt()`.
 6. Send the final text to your image model or image generator.
-7. (Optional) Call `execute(Client $client)` on any prompt class to send the prompt to an AI model, then `response()` to get the result.
+7. Use the Laravel AI integration or `Pipe` to send generated prompts to an AI model.
 
 ### Automated workflow with `pipe`
 
-The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `cable8mm/nano-ai`. It returns the final image-generation prompt; the image itself is generated externally and imported through the export workflow:
+The `Pipe` class automates the text-prompt portion of the pipeline by sending the design-brief and config prompts to an AI model via `laravel/ai`. It returns the final image-generation prompt. The `image` command can also send that prompt to a Laravel AI image provider with `--generate`:
 
 ```php
-use Cable8mm\NanoAI\Client;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Pipe;
+use Cable8mm\PromptWeaver\Laravel\LaravelAiClient;
 
-$client = new Client(
-    provider: 'openai',
-    apiKey: 'sk-your-api-key',
-    model: 'gpt-4o-mini',
-);
-
-$pipe = new Pipe($client);
+$pipe = new Pipe(new LaravelAiClient);
 $result = $pipe->run(
     category: Category::CAFE_RESTAURANT,
     format: Format::A45_POSTER,
@@ -571,8 +565,8 @@ The generated files are:
 
 This command:
 
-1. Generates the design-brief prompt and sends it to the model
-2. Parses the design-brief JSON response
+1. Generates the design-brief prompt and sends it to the configured Laravel AI provider
+2. Receives the design-brief response as structured output
 3. Generates the config prompt and sends it to the model
 4. Parses the config JSON response
 5. Generates the final image prompt

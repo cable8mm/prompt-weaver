@@ -5,10 +5,26 @@ declare(strict_types=1);
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
+use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Config\Repository;
+use Illuminate\Events\EventServiceProvider;
+use Illuminate\Filesystem\FilesystemServiceProvider;
+use Illuminate\Translation\TranslationServiceProvider;
+use Laravel\Ai\AiServiceProvider;
 use Cable8mm\PromptWeaver\Console\Application;
+use Cable8mm\PromptWeaver\Laravel\PromptWeaverServiceProvider;
 use Cable8mm\PromptWeaver\Support\Environment;
 
 Environment::load(dirname(__DIR__).'/.env');
+
+$laravel = new LaravelApplication(dirname(__DIR__));
+$laravel->instance('config', new Repository);
+$laravel->register(FilesystemServiceProvider::class);
+$laravel->register(EventServiceProvider::class);
+$laravel->register(TranslationServiceProvider::class);
+$laravel->register(AiServiceProvider::class);
+$laravel->register(PromptWeaverServiceProvider::class);
+$laravel->boot();
 
 $application = new Application;
 

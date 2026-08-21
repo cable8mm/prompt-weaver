@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Cable8mm\NanoAI\Client;
+use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Pipe;
@@ -39,17 +39,15 @@ $skipE2E = ! getenv('RUN_E2E_TESTS');
 $skipMsg = 'Set RUN_E2E_TESTS=1 and create tests/config.json with API keys to run e2e tests.';
 
 it('runs the full pipeline with real OpenRouter API', function () {
-    $client = new Client(
-        provider: 'openrouter',
-        apiKey: getenv('OPENROUTER_API_KEY') ?: null,
-        model: 'google/gemma-4-26b-a4b-it:free',
-    );
+    $client = app(AiClient::class);
 
     $pipe = new Pipe($client);
     $result = $pipe->run(
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
         color: 'warm brown and cream',
+        provider: 'openrouter',
+        model: 'google/gemma-4-26b-a4b-it:free',
     );
 
     // Save generated working files outside the checked-in test fixtures.
