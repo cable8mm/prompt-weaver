@@ -18,6 +18,7 @@ final class Calibrator
     public function calibrate(array $config, GdImage $image): array
     {
         $updated = [];
+        $previousBox = null;
 
         foreach (['ssid', 'password'] as $key) {
             $placeholder = $config['placeholders'][$key] ?? null;
@@ -27,7 +28,10 @@ final class Calibrator
             }
 
             $box = $this->placeholderBox($image, $placeholder);
-            $centerY = $this->findWhiteAreaCenterY($image, $box);
+            $minimumCenterY = $previousBox === null
+                ? null
+                : $previousBox['center_y'] + (int) round($previousBox['height'] / 2);
+            $centerY = $this->findWhiteAreaCenterY($image, $box, $minimumCenterY);
 
             if ($centerY === null) {
                 continue;
@@ -36,6 +40,8 @@ final class Calibrator
             $coordinate = round(($centerY / imagesy($image)) * 100, 2);
             $config['placeholders'][$key]['box_y_pc'] = $coordinate;
             $updated[$key] = $coordinate;
+            $previousBox = $box;
+            $previousBox['center_y'] = $centerY;
         }
 
         $qr = $config['placeholders']['qr'] ?? null;
@@ -59,7 +65,7 @@ final class Calibrator
     /**
      * @param  array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}  $box
      */
-    private function findWhiteAreaCenterY(GdImage $image, array $box): ?int
+    private function findWhiteAreaCenterY(GdImage $image, array $box, ?int $minimumCenterY = null): ?int
     {
         $left = max(0, $box['left'] + 4);
         $right = min(imagesx($image) - 1, $box['left'] + $box['width'] - 5);
@@ -85,7 +91,12 @@ final class Calibrator
             if ((! $isWhiteRow || $y === $endY) && $runStart !== null) {
                 $runEnd = $isWhiteRow && $y === $endY ? $y : $y - 1;
 
-                if ($runEnd - $runStart + 1 >= max(12, (int) round($box['height'] * 0.5))) {
+                $runCenterY = ($runStart + $runEnd) / 2;
+
+                if (
+                    $runEnd - $runStart + 1 >= max(12, (int) round($box['height'] * 0.5))
+                    && ($minimumCenterY === null || $runCenterY > $minimumCenterY)
+                ) {
                     $runs[] = [$runStart, $runEnd];
                 }
 
