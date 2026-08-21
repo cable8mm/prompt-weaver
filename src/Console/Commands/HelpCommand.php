@@ -26,6 +26,7 @@ Prompt Weaver CLI
 
 Usage:
   bin/prompt-weaver init code [--category="..."] [--format="..."] [--color-mode=color|mono] [--layout="..."] [--fixtures-root=.weaver]
+  bin/prompt-weaver code code [--fixtures-root=.weaver] [--dist-root=dist]
   bin/prompt-weaver calibrate code [--fixtures-root=.weaver]
   bin/prompt-weaver config-stub editorial
   bin/prompt-weaver config-stub editorial --print
