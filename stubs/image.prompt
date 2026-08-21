@@ -1,5 +1,9 @@
 [Task] Generate a high-contrast Wi-Fi signage image ONLY. Do not output any text, explanation, or JSON — return the image only.
 
+[Non-negotiable production rule]
+- Never display, print, draw, or encode any layout metadata in the artwork. This includes coordinates, percentages, dimensions, measurements, grid values, step numbers, JSON-like values, placeholder names, guides, rulers, alignment marks, labels, captions, or annotations.
+- Treat every coordinate and percentage in this prompt as invisible machine instructions only. They must affect placement internally but must never appear visibly in any form, including as decorative typography or background texture.
+
 [Canvas]
 - Portrait canvas, aspect ratio {{ aspect_ratio }}.
 - Use the following measurements only as invisible placement metadata: 0% means top/left and 100% means bottom/right. These measurements are instructions for composition, never visible design content.
@@ -12,6 +16,9 @@
 
 [Strict rules]
 - All x/y coordinates, percentages, dimensions, step numbers, JSON-like terms, and placeholder names are invisible production metadata. Never render them as text, labels, captions, annotations, rulers, guides, tick marks, watermarks, or decorative symbols.
+- Absolutely no coordinate or percentage text may appear anywhere in the final image, even if the surrounding design is typographic, editorial, technical, geometric, or grid-based.
+- Do not visualize the layout instructions. Do not create a coordinate system, grid labels, measurement marks, blueprint notation, UI overlay, infographic annotation, or technical diagram.
+- Before returning the image, inspect the artwork and remove every visible number, percentage sign, coordinate, dimension, guide, or metadata-like mark that was not explicitly requested as visible content.
 - The finished artwork must contain only the requested visible Korean labels/messages and the requested SSID/PASSWORD labels. It must contain no coordinate notation such as "x=50%", "y=40%", "50%", "70%", or any similar numeric placement text.
 - Do not turn the layout instructions into a diagram, wireframe, blueprint, measurement overlay, or UI mockup. Render a polished finished poster.
 - The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the surrounding background, not a stylized box with a white border.

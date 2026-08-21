@@ -8,6 +8,8 @@ final class Calibrator
 {
     use Traits\PlaceholderGeometryTrait;
 
+    public function __construct(private readonly ?string $imagePath = null) {}
+
     /**
      * Detect the actual white placeholder boxes and QR frame in the image,
      * then return the config array with updated coordinates.
@@ -47,7 +49,15 @@ final class Calibrator
         $qr = $config['placeholders']['qr'] ?? null;
 
         if (is_array($qr)) {
-            $qrBox = $this->findQrBox($image, $qr);
+            if ($this->imagePath === null) {
+                throw new \RuntimeException('An image path is required for Python QR calibration.');
+            }
+
+            $qrBox = (new PythonQrDetector)->detect($this->imagePath, $qr);
+
+            if ($qrBox === null) {
+                throw new \RuntimeException('Unable to detect the QR frame with the Python/OpenCV detector. Install uv and run calibration again.');
+            }
 
             if ($qrBox !== null) {
                 $config['placeholders']['qr']['x_pc'] = round(($qrBox['center_x'] / imagesx($image)) * 100, 2);
@@ -113,113 +123,5 @@ final class Calibrator
         );
 
         return (int) round(($runs[0][0] + $runs[0][1]) / 2);
-    }
-
-    /**
-     * Find the large white QR frame in the configured vertical neighborhood.
-     *
-     * @param  array<string, mixed>  $placeholder
-     * @return array{left:int, top:int, width:int, height:int, center_x:int, center_y:int}|null
-     */
-    private function findQrBox(GdImage $image, array $placeholder): ?array
-    {
-        $expected = $this->qrPlaceholderBox($image, $placeholder);
-        $imageWidth = imagesx($image);
-        $imageHeight = imagesy($image);
-        // Keep the search in the QR section so the larger credential boxes
-        // above it cannot be mistaken for the QR frame.
-        $searchRadius = (int) round($imageHeight * 0.2);
-        $startY = max(0, $expected['center_y'] - $searchRadius);
-        $endY = min($imageHeight - 1, $expected['center_y'] + $searchRadius);
-        $minimumWidth = max(40, (int) round($expected['width'] * 0.5));
-        $best = null;
-        $bestScore = PHP_FLOAT_MAX;
-
-        for ($y = $startY; $y <= $endY; $y++) {
-            $runStart = null;
-
-            for ($x = 0; $x <= $imageWidth; $x++) {
-                $isWhite = $x < $imageWidth && $this->isWhitePixel($image, $x, $y);
-
-                if ($isWhite && $runStart === null) {
-                    $runStart = $x;
-                }
-
-                if ((! $isWhite || $x === $imageWidth) && $runStart !== null) {
-                    $runEnd = $x - 1;
-                    $width = $runEnd - $runStart + 1;
-
-                    if ($width >= $minimumWidth) {
-                        // A single long white scanline is not enough to identify
-                        // the QR frame: the generated artwork also contains wide
-                        // white/ivory background areas. Measure how far this same
-                        // run continues vertically and prefer square candidates.
-                        $top = $y;
-                        $bottom = $y;
-
-                        for ($candidateY = $y - 1; $candidateY >= $startY; $candidateY--) {
-                            if ($this->whitePixelRatio($image, $runStart, $runEnd, $candidateY) < 0.8) {
-                                break;
-                            }
-
-                            $top = $candidateY;
-                        }
-
-                        for ($candidateY = $y + 1; $candidateY <= $endY; $candidateY++) {
-                            if ($this->whitePixelRatio($image, $runStart, $runEnd, $candidateY) < 0.8) {
-                                break;
-                            }
-
-                            $bottom = $candidateY;
-                        }
-
-                        $height = $bottom - $top + 1;
-                        $aspectRatio = $width / max(1, $height);
-
-                        // The QR placeholder is square. Reject broad horizontal
-                        // background runs before scoring the remaining candidates.
-                        if ($height < $minimumWidth * 0.5 || $aspectRatio < 0.6 || $aspectRatio > 1.6) {
-                            $runStart = null;
-
-                            continue;
-                        }
-
-                        $centerX = ($runStart + $runEnd) / 2;
-                        $centerY = ($top + $bottom) / 2;
-                        $score = abs(log($aspectRatio))
-                            + (abs($centerY - $expected['center_y']) / $imageHeight) * 2
-                            + (abs($width - $expected['width']) / $imageWidth) * 0.25;
-
-                        if ($score < $bestScore) {
-                            $bestScore = $score;
-                            $best = [
-                                'left' => $runStart,
-                                'right' => $runEnd,
-                                'width' => $width,
-                                'top' => $top,
-                                'bottom' => $bottom,
-                                'center_x' => (int) round($centerX),
-                                'center_y' => (int) round($centerY),
-                            ];
-                        }
-                    }
-
-                    $runStart = null;
-                }
-            }
-        }
-
-        if ($best === null) {
-            return null;
-        }
-
-        return [
-            'left' => $best['left'],
-            'top' => $best['top'],
-            'width' => $best['width'],
-            'height' => $best['bottom'] - $best['top'] + 1,
-            'center_x' => $best['center_x'],
-            'center_y' => $best['center_y'],
-        ];
     }
 }

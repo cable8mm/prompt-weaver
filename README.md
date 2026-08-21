@@ -22,12 +22,35 @@ The package is centered around the **WiFi Note** signage flow, where a design br
 - PHP 8.3 or newer
 - Composer 2.x
 - GD extension (required by preview, calibration, and QR rendering)
+- `uv` (optional; required for OpenCV-based QR calibration)
 
 ## Installation
 
 ```bash
 composer require cable8mm/prompt-weaver
 ```
+
+For OpenCV-based QR calibration, install `uv` first. On macOS with Homebrew:
+
+```bash
+brew install uv
+```
+
+Or use the official installer on macOS/Linux:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+After Composer installation, initialize the Python environment from the package directory:
+
+```bash
+uv sync --project vendor/cable8mm/prompt-weaver
+```
+
+This installs the locked Python dependencies from the package's `pyproject.toml` and `uv.lock` (currently `opencv-python-headless`). The package does not ask Composer to run network-dependent Python installation commands. `requirements.txt` is provided as a compatibility file for users who prefer a requirements-based workflow; the package's `uv` runner uses the project files above.
+
+If `uv` is not installed, preview rendering still works, but calibration for fixtures with a QR placeholder requires `uv` and OpenCV.
 
 To work on this repository locally, install the development dependencies instead:
 
@@ -422,6 +445,14 @@ The command reads `raw.config.json` and saves the final image-generation prompt 
 ```
 
 This detects the actual white text boxes and QR frame in `image.png`. It writes the calibrated SSID/password `box_y_pc` values and QR `x_pc`, `y_pc`, and `width_pc` values to `config.json`, leaving the original `raw.config.json` unchanged.
+
+When available, QR frame calibration uses the optional Python/OpenCV detector for contour-based square detection. The detector is managed with `uv`:
+
+```bash
+uv run --project . scripts/calibrate_qr.py --help
+```
+
+The first `uv run` creates the cached environment from `pyproject.toml`; subsequent runs reuse it. QR calibration uses the Python detector exclusively. If `uv` or OpenCV is unavailable, `calibrate` reports an installation error instead of using a less accurate PHP detector. Set `PROMPT_WEAVER_UV` to select a different `uv` executable, or `PROMPT_WEAVER_PYTHON` to bypass `uv` and use a Python interpreter directly.
 
 ### 6) Generate a preview image
 
