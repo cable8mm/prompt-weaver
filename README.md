@@ -297,7 +297,7 @@ After the design has been generated, assign its final code from `config.json`'s 
 ./weaver code 202608202113
 ```
 
-The command converts the theme to kebab-case, for example `Wabi-Sabi Minimalist` to `wabi-sabi-minimalist`. It renames the matching `.weaver/<code>` folder, updates `manifest.json`, and renames and updates `dist/<code>` when an export already exists. If the target code is already in use, the command stops without renaming anything.
+The command converts the theme to kebab-case, keeps at most the first four words and 48 characters, and removes a partial trailing word when the length limit is reached. For example, `Wabi-Sabi Minimalist` becomes `wabi-sabi-minimalist`. It renames the matching `.weaver/<code>` folder, updates `manifest.json`, and renames and updates `dist/<code>` when an export already exists. If the target code is already in use, the command stops without renaming anything.
 
 What each command outputs:
 

@@ -12,6 +12,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class CodeCommand extends PromptWeaverCommand
 {
+    private const MAX_CODE_WORDS = 4;
+
+    private const MAX_CODE_LENGTH = 48;
+
     protected function configure(): void
     {
         $this->setName('code')->setDescription('Rename a fixture using config.json style.theme.');
@@ -93,8 +97,16 @@ final class CodeCommand extends PromptWeaverCommand
 
     private function slugify(string $value): string
     {
-        $value = strtolower(trim($value));
+        $words = preg_split('/\s+/', trim($value), self::MAX_CODE_WORDS + 1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $value = strtolower(implode(' ', array_slice($words, 0, self::MAX_CODE_WORDS)));
         $value = preg_replace('/[^a-z0-9]+/i', '-', $value) ?? '';
+        $value = trim($value, '-');
+
+        if (strlen($value) > self::MAX_CODE_LENGTH) {
+            $value = substr($value, 0, self::MAX_CODE_LENGTH);
+            $value = rtrim($value, '-');
+            $value = substr($value, 0, strrpos($value, '-') ?: strlen($value));
+        }
 
         return trim($value, '-');
     }

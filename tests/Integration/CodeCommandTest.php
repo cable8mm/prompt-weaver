@@ -105,3 +105,27 @@ it('fails when the derived code already exists', function () {
         remove_code_command_directory($fixturesRoot);
     }
 });
+
+it('limits the derived code to four words', function () {
+    $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-code-'.bin2hex(random_bytes(4));
+    $sourceDirectory = $fixturesRoot.'/old-code';
+    mkdir($sourceDirectory, 0777, true);
+    file_put_contents($sourceDirectory.'/manifest.json', json_encode(['code' => 'old-code']).PHP_EOL);
+    file_put_contents($sourceDirectory.'/config.json', json_encode([
+        'style' => ['theme' => 'A timeless industrial cafe mood blending vintage concrete texture'],
+    ]).PHP_EOL);
+
+    try {
+        $result = run_code_command([
+            'code',
+            'old-code',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$fixturesRoot.'/dist',
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        expect(is_dir($fixturesRoot.'/a-timeless-industrial-cafe'))->toBeTrue();
+    } finally {
+        remove_code_command_directory($fixturesRoot);
+    }
+});
