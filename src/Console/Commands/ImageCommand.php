@@ -48,9 +48,11 @@ final class ImageCommand extends PromptWeaverCommand
             if (file_put_contents($promptPath, $promptText.PHP_EOL) === false) {
                 throw new \RuntimeException("Unable to write prompt: {$promptPath}");
             }
-        }
 
-        echo $promptText.PHP_EOL;
+            $this->displayCreated($promptPath);
+        } else {
+            echo $promptText.PHP_EOL;
+        }
 
         if ($input->getOption('generate')) {
             if (! function_exists('app')) {

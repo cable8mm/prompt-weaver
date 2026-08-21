@@ -289,18 +289,18 @@ The commands use the files created or saved in that folder:
 ./weaver preview cafe-restaurant
 ```
 
-`brief` reads `manifest.json`, prints the generated prompt, and saves it as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, prints the generated prompt, and saves it as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json`, prints the generated prompt, and saves it as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension. `config-stub` assembles the interactive image prompt described above.
+`brief` reads `manifest.json` and saves the generated prompt as `brief.prompt`. `config` reads `design-brief.json`, takes its `description`, and saves the generated prompt as `config.prompt`. Save the model's response as `raw.config.json`. `image` reads `raw.config.json` and saves the generated prompt as `image.prompt`. `calibrate` detects the actual white text boxes and QR frame in `image.png`, then writes the calibrated final configuration to `config.json` without changing `raw.config.json`. `preview` uses `config.json` when it exists, otherwise it uses `raw.config.json`; its output format is selected by the output filename extension. `config-stub` assembles the interactive image prompt described above.
 
 What each command outputs:
 
-1. `brief` prints the design-brief prompt you send to a model.
-2. `config` prints the JSON-generation prompt you send after you have a template description.
-3. `image` prints the final image-generation prompt you can paste into your image model.
+1. `brief` saves the design-brief prompt you send to a model.
+2. `config` saves the JSON-generation prompt you send after you have a template description.
+3. `image` saves the final image-generation prompt you can paste into your image model.
 4. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
 5. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
 6. `chain` prints all three prompts in one run for quick inspection.
 7. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
-8. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and prints all prompts and intermediate JSON responses. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+8. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 9. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
 10. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
 
@@ -394,7 +394,7 @@ The prompt is also saved automatically as `.weaver/cafe-restaurant/brief.prompt`
 ./weaver config cafe-restaurant
 ```
 
-The command reads `design-brief.json`, takes its `description` value, prints the JSON-generation prompt, and saves it as `.weaver/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `.weaver/cafe-restaurant/raw.config.json`.
+The command reads `design-brief.json`, takes its `description` value, and saves the JSON-generation prompt as `.weaver/cafe-restaurant/config.prompt`. Send that prompt to a model and save its JSON response as `.weaver/cafe-restaurant/raw.config.json`.
 
 ### 4) Generate the final image prompt
 
@@ -402,7 +402,7 @@ The command reads `design-brief.json`, takes its `description` value, prints the
 ./weaver image cafe-restaurant
 ```
 
-The command reads `raw.config.json`, prints the final image-generation prompt, and saves it as `.weaver/cafe-restaurant/image.prompt`.
+The command reads `raw.config.json` and saves the final image-generation prompt as `.weaver/cafe-restaurant/image.prompt`.
 
 ### 5) Calibrate the config to the generated image
 
