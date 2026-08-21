@@ -14,6 +14,7 @@ use Cable8mm\PromptWeaver\Console\Commands\ExportAllCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ExportCommand;
 use Cable8mm\PromptWeaver\Console\Commands\HelpCommand;
 use Cable8mm\PromptWeaver\Console\Commands\ImageCommand;
+use Cable8mm\PromptWeaver\Console\Commands\ImagegenCommand;
 use Cable8mm\PromptWeaver\Console\Commands\InitCommand;
 use Cable8mm\PromptWeaver\Console\Commands\PipeCommand;
 use Cable8mm\PromptWeaver\Console\Commands\PreviewCommand;
@@ -36,6 +37,7 @@ final class Application extends SymfonyApplication
             new ExportCommand,
             new ExportAllCommand,
             new ImageCommand,
+            new ImagegenCommand,
             new ChainCommand,
             new CodeCommand,
             new PipeCommand,

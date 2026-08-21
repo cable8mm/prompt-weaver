@@ -69,22 +69,6 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     echo "Fixtures saved to: {$fixtureDir}\n\n";
 
-    // Output all prompts and responses for debugging
-    echo "=== DESIGN BRIEF PROMPT ===\n";
-    echo $result->briefPrompt."\n\n";
-
-    echo "=== DESIGN BRIEF RESPONSE ===\n";
-    echo json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n\n";
-
-    echo "=== CONFIG PROMPT ===\n";
-    echo $result->configPrompt."\n\n";
-
-    echo "=== CONFIG RESPONSE ===\n";
-    echo json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n\n";
-
-    echo "=== IMAGE PROMPT ===\n";
-    echo $result->imagePrompt."\n\n";
-
     // Verify design brief response
     expect($result->briefJson)
         ->toHaveKey('description')
