@@ -465,6 +465,19 @@ dist/cafe-restaurant/
 
 If the fixture has a `preview.png`, it is copied as a thumbnail alongside the exported image.
 
+To export every fixture under `.weaver`, use `export-all`. Each fixture's own
+`image.png` is used and the output is written to `dist/<code>`:
+
+```bash
+./weaver export-all
+```
+
+Use `--fixtures-root` and `--output-dir` to change the input and output roots:
+
+```bash
+./weaver export-all --fixtures-root=.weaver --output-dir=dist
+```
+
 The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields:
 
 ```json
