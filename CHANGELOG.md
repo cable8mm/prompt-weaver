@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.8.0 - 2026-08-22
+
+### What's Changed
+
+* feat: add print target options by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/46
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.7.0...v0.8.0
+
 ## v0.7.0 - 2026-08-22
 
 ### What's Changed
