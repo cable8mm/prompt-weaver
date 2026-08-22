@@ -7,7 +7,7 @@ Use a split composition: decorative visual weight on the left and a functional r
 [Schema]
 {
   "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "{{ aspect_ratio }}" },
-  "style": { "theme": "<visual theme>", "background": "<colors, patterns, textures>", "color_mode": "{{ color_mode }}" },
+  "style": { "theme": "<visual theme>", "background": "<colors, patterns, textures>", "print_target": "<intended output medium and constraints>" },
   "content": {
     "title": { "text": "와이파이 연결", "x_pc": 27, "y_pc": 12, "align": "left", "style": "<typography>" },
     "wifi_icon": { "x_pc": 27, "y_pc": 24, "width_pc": 18, "style": "<icon style>" },
@@ -27,9 +27,11 @@ Use a split composition: decorative visual weight on the left and a functional r
 3. SSID, password, and QR areas must be separate, white, empty, readable, and printable. QR remains square.
 4. Keep Korean text content as shown. Write free-text style fields in concise English.
 5. Use Color Direction for palette and Font Mood for typography. Name is reference only.
-6. Do not add or remove fields. Output valid JSON only.
+6. Choose a concise print_target based on the color mode and design. Examples: "black-and-white laser printer safe", "full-color inkjet printer", or "RGB digital display".
+7. Do not add or remove fields. Output valid JSON only.
 
 [Inputs]
 {{ name_line }}- Description: {{ description }}
 - Color Direction: {{ color_direction }}
+- Color Mode: {{ color_mode }}
 - Font Mood: {{ font_mood }}
