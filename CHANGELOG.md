@@ -1,5 +1,17 @@
 # Release Notes
 
+## v0.6.0 - 2026-08-22
+
+### What's Changed
+
+* refactor: replace color_mode with print_target in configuration and prompts by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/40
+* feat: add ValidateConfigCommand to validate configuration JSON files and integrate validation into ExportCommand by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/41
+* feat: enhance configuration schema and prompts to include localized style properties by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/42
+* feat: add config:validate command into `README.md` by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/43
+* feat: expand design brief prompt by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/44
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.5.0...v0.6.0
+
 ## v0.5.0 - 2026-08-21
 
 ### What's Changed
