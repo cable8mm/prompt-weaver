@@ -63,10 +63,11 @@ class ExportCommand extends PromptWeaverCommand
         $manifest = $this->readJsonFile($manifestPath);
         $designBrief = $this->readJsonFile($designBriefPath);
         $config = $this->readJsonFile($configPath);
+        $localizedStyle = $config['metadata']['style'] ?? null;
         unset($config['schema_version'], $config['metadata']);
         $config = [
             'schema_version' => 1,
-            'metadata' => $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath),
+            'metadata' => $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath, $localizedStyle),
         ] + $config;
         (new ConfigValidator)->validate($config, $configPath);
         $this->validateImage($imagePath, $config);
@@ -88,8 +89,8 @@ class ExportCommand extends PromptWeaverCommand
         $this->displayCreated($outputDirectory);
     }
 
-    /** @param array<string, mixed> $manifest @param array<string, mixed> $designBrief @return array<string, string> */
-    private function metadata(array $manifest, array $designBrief, string $manifestPath, string $designBriefPath): array
+    /** @param array<string, mixed> $manifest @param array<string, mixed> $designBrief @param array<string, mixed>|null $localizedStyle @return array<string, mixed> */
+    private function metadata(array $manifest, array $designBrief, string $manifestPath, string $designBriefPath, ?array $localizedStyle): array
     {
         $fields = [
             'code' => [$manifest, 'code', $manifestPath],
@@ -110,6 +111,10 @@ class ExportCommand extends PromptWeaverCommand
             }
 
             $metadata[$key] = $value;
+        }
+
+        if (is_array($localizedStyle)) {
+            $metadata['style'] = $localizedStyle;
         }
 
         return $metadata;
