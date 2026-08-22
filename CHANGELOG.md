@@ -1,5 +1,20 @@
 # Release Notes
 
+## v0.5.0 - 2026-08-21
+
+### What's Changed
+
+* fix: enhance Y-coordinate calculation by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/32
+* feat: add export-all command to export all fixtures for Laravel import by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/33
+* feat: integrate Laravel AI client by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/34
+* feat: add code command to rename fixtures based on config theme by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/35
+* feat: add image generation command by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/36
+* feat: add UnpipeCommand to remove generated pipe files and update help command by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/37
+* feat: update QR code layout by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/38
+* refactor: UnpipeCommand output and confirmation prompts by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/39
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.4.0...v0.5.0
+
 ## v0.4.0 - 2026-08-20
 
 ### What's Changed
