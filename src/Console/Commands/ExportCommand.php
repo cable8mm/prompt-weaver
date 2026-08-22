@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
+use Cable8mm\PromptWeaver\Validators\ConfigValidator;
 use RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -67,7 +68,7 @@ class ExportCommand extends PromptWeaverCommand
             'schema_version' => 1,
             'metadata' => $this->metadata($manifest, $designBrief, $manifestPath, $designBriefPath),
         ] + $config;
-        $this->validateConfig($config, $configPath);
+        (new ConfigValidator)->validate($config, $configPath);
         $this->validateImage($imagePath, $config);
 
         if (! is_dir($outputDirectory) && ! mkdir($outputDirectory, 0777, true) && ! is_dir($outputDirectory)) {
@@ -112,21 +113,6 @@ class ExportCommand extends PromptWeaverCommand
         }
 
         return $metadata;
-    }
-
-    /** @param array<string, mixed> $config */
-    private function validateConfig(array $config, string $path): void
-    {
-        foreach (['canvas', 'style', 'content', 'placeholders'] as $key) {
-            if (! isset($config[$key]) || ! is_array($config[$key])) {
-                throw new RuntimeException("Config is missing object '{$key}': {$path}");
-            }
-        }
-
-        $aspectRatio = $config['canvas']['aspect_ratio'] ?? null;
-        if (! is_string($aspectRatio) || ! preg_match('/^\d+(?:\.\d+)?:\d+(?:\.\d+)?$/', $aspectRatio)) {
-            throw new RuntimeException("Config has an invalid canvas.aspect_ratio: {$path}");
-        }
     }
 
     /** @param array<string, mixed> $config */
