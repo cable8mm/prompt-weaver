@@ -19,6 +19,7 @@ use Cable8mm\PromptWeaver\Console\Commands\InitCommand;
 use Cable8mm\PromptWeaver\Console\Commands\PipeCommand;
 use Cable8mm\PromptWeaver\Console\Commands\PreviewCommand;
 use Cable8mm\PromptWeaver\Console\Commands\UnpipeCommand;
+use Cable8mm\PromptWeaver\Console\Commands\ValidateConfigCommand;
 use Symfony\Component\Console\Application as SymfonyApplication;
 
 final class Application extends SymfonyApplication
@@ -37,6 +38,7 @@ final class Application extends SymfonyApplication
             new ConfigStubCommand,
             new ExportCommand,
             new ExportAllCommand,
+            new ValidateConfigCommand,
             new ImageCommand,
             new ImagegenCommand,
             new ChainCommand,
