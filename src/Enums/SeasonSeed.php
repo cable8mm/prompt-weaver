@@ -12,4 +12,14 @@ enum SeasonSeed: string
     case EARLY_MORNING = 'quiet early morning mood';
     case GOLDEN_HOUR = 'warm golden hour mood';
     case NIGHT_CITY = 'calm late-night city mood';
+    case RAINY_DAY = 'quiet rainy day mood';
+    case FRESH_AFTER_RAIN = 'fresh atmosphere after rain';
+    case LATE_SPRING = 'light late-spring freshness';
+    case HIGH_SUMMER = 'bright midsummer energy';
+    case EARLY_AUTUMN = 'crisp early-autumn air';
+    case DEEP_WINTER = 'deep winter stillness';
+    case DUSK = 'soft blue-hour dusk mood';
+    case WEEKEND_MORNING = 'relaxed weekend morning mood';
+    case FESTIVAL_SEASON = 'lively festival-season mood';
+    case INDOOR_COZY = 'cozy indoor seasonal mood';
 }

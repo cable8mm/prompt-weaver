@@ -12,4 +12,14 @@ enum LayoutSeed: string
     case DIAGONAL_MOTION = 'subtle diagonal sense of movement';
     case MODULAR_GRID = 'structured modular grid';
     case LAYERED_DEPTH = 'layered foreground and background depth';
+    case TOP_HEAVY = 'strong visual emphasis in the upper area';
+    case LOWER_ANCHOR = 'grounded lower-area focal point';
+    case BORDERED = 'decorative border framing the content';
+    case RADIAL = 'radial composition around a central point';
+    case STACKED_BANDS = 'stacked horizontal bands';
+    case OFFSET_FRAME = 'offset frame with an intentional crop';
+    case SPLIT_FIELD = 'two-zone split-field composition';
+    case POSTER_WITH_MARGIN = 'poster-like composition with a defined margin';
+    case FLOATING_ELEMENTS = 'sparse floating elements with open space';
+    case REPETITIVE_RHYTHM = 'repeating visual rhythm across the surface';
 }

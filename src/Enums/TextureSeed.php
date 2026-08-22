@@ -14,4 +14,14 @@ enum TextureSeed: string
     case FABRIC_WEAVE = 'subtle woven fabric texture';
     case TILE_PATTERN = 'decorative ceramic tile pattern';
     case BRUSH_STROKES = 'expressive dry-brush strokes';
+    case LINEN_FIBER = 'fine linen fiber texture';
+    case RECYCLED_FLECKS = 'small recycled-paper flecks';
+    case WOOD_GRAIN = 'subtle natural wood grain';
+    case CONCRETE_GRAIN = 'fine architectural concrete grain';
+    case WAX_CRAYON = 'soft wax-crayon marks';
+    case PENCIL_HATCHING = 'delicate pencil hatching';
+    case CUT_PAPER_EDGES = 'layered cut-paper edges';
+    case SCREEN_PRINT = 'slightly imperfect screen-print texture';
+    case EMBOSSED_LINES = 'quiet embossed line detail';
+    case SMOOTH_FLAT = 'clean smooth flat surface';
 }

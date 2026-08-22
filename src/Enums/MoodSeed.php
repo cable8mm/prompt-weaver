@@ -16,4 +16,14 @@ enum MoodSeed: string
     case MONOCHROME_BRUTALIST = 'monochrome brutalist';
     case QUIET_EDITORIAL = 'quiet editorial';
     case WARM_HANDCRAFTED = 'warm and handcrafted';
+    case MODERN_JAPANESE = 'modern Japanese refinement';
+    case MEDITERRANEAN_SUNLIT = 'sunlit Mediterranean ease';
+    case DARK_ACADEMIA = 'dark academia atmosphere';
+    case COASTAL_MINIMAL = 'calm coastal minimalism';
+    case FUTURE_RETRO = 'optimistic retro-futurism';
+    case NORDIC_CABIN = 'quiet Nordic cabin warmth';
+    case URBAN_BOTANICAL = 'urban botanical studio';
+    case FESTIVE_CARNIVAL = 'festive and celebratory';
+    case LUXURY_HOSPITALITY = 'quiet luxury hospitality';
+    case NAIVE_ILLUSTRATION = 'charming naive illustration';
 }
