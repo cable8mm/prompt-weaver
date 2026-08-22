@@ -30,6 +30,35 @@ The package is centered around the **WiFi Note** signage flow, where a design br
 composer require cable8mm/prompt-weaver
 ```
 
+### Laravel application setup
+
+Laravel's package discovery registers the service provider automatically. If the
+application uses Vite, include Prompt Weaver's stylesheet in the application's CSS
+entry point, usually `resources/css/app.css`:
+
+```css
+@import "../../vendor/cable8mm/prompt-weaver/resources/css/prompt-weaver.css";
+```
+
+The stylesheet contains the Atkinson Hyperlegible font used by the browser preview.
+
+Because its font URLs are relative, Vite includes and versions the font files in the application build. Build the frontend as usual:
+
+```bash
+npm run build
+```
+
+Apply the `prompt-weaver-font` class to dynamic SSID and password text rendered by the service:
+
+```blade
+<span class="prompt-weaver-font">{{ $ssid }}</span>
+<span class="prompt-weaver-font">{{ $password }}</span>
+```
+
+No manual service-provider registration, Nova dependency, or `public/vendor` font
+copy is required. The package's PHP/GD preview renderer uses its bundled TTF font
+automatically.
+
 For OpenCV-based QR calibration, install `uv` first. On macOS with Homebrew:
 
 ```bash
