@@ -35,6 +35,22 @@ class CalibrateQrTest(unittest.TestCase):
         self.assertGreater(result["width"], 350)
         self.assertAlmostEqual(result["width"], result["height"], delta=15)
 
+    def test_prefers_inner_qr_area_over_decorative_outer_frame(self) -> None:
+        image = np.full((1216, 864, 3), 220, dtype=np.uint8)
+        cv2.rectangle(image, (291, 784), (598, 1092), (70, 45, 25), 8)
+        cv2.rectangle(image, (326, 821), (539, 1031), (255, 255, 255), -1)
+        cv2.rectangle(image, (326, 821), (539, 1031), (70, 45, 25), 5)
+
+        with tempfile.TemporaryDirectory() as directory:
+            image_path = Path(directory) / "decorated-sign.png"
+            self.assertTrue(cv2.imwrite(str(image_path), image))
+
+            result = MODULE.detect_frame(str(image_path), 50, 80, 28)
+
+        self.assertAlmostEqual(result["center_x"], 432.5, delta=10)
+        self.assertAlmostEqual(result["center_y"], 926, delta=10)
+        self.assertLess(result["width"], 250)
+
     def test_rejects_image_without_square_frame(self) -> None:
         image = np.full((800, 1000, 3), 35, dtype=np.uint8)
 

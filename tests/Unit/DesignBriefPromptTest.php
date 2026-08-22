@@ -20,6 +20,10 @@ it('builds a Wi-Fi signage design brief prompt using the category and format', f
     set_private_property($promptBuilder, 'moodSeeds', ['minimal Scandinavian']);
     set_private_property($promptBuilder, 'seasonSeeds', ['winter frost and pine mood']);
     set_private_property($promptBuilder, 'textureSeeds', ['subtle grid pattern']);
+    set_private_property($promptBuilder, 'layoutSeeds', ['balanced asymmetrical composition']);
+    set_private_property($promptBuilder, 'motifSeeds', ['soft architectural arches']);
+    set_private_property($promptBuilder, 'materialSeeds', ['matte paper stock']);
+    set_private_property($promptBuilder, 'contrastSeeds', ['high-contrast graphic treatment']);
 
     $promptBuilder->build();
     $prompt = $promptBuilder->prompt();
@@ -29,7 +33,7 @@ it('builds a Wi-Fi signage design brief prompt using the category and format', f
         ->toContain('You are a creative director for a Wi-Fi signage template.')
         ->toContain('Category: Cafe/Restaurant')
         ->toContain('Format: A4/A5 Poster')
-        ->toContain('minimal Scandinavian, winter frost and pine mood, subtle grid pattern')
+        ->toContain('minimal Scandinavian, winter frost and pine mood, subtle grid pattern, balanced asymmetrical composition, soft architectural arches, matte paper stock, high-contrast graphic treatment')
         ->toContain('"name": "<short template name, 2-6 words>"')
         ->toContain('"description": "<시각적 테마, 배경 스타일, 분위기를 설명하는 1-3개의 간결한 문장>')
         ->toContain('"color_direction": "<주요 색상 팔레트 설명')
