@@ -337,6 +337,7 @@ What each command outputs:
 10. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 11. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
 12. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
+13. `config:validate` validates a config JSON file against the required config structure and canvas aspect-ratio format.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 
@@ -529,7 +530,7 @@ Use `--fixtures-root` and `--output-dir` to change the input and output roots:
 ./weaver export-all --fixtures-root=.weaver --output-dir=dist
 ```
 
-The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields:
+The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields. When the source config includes localized style metadata, it also includes an optional nested `metadata.style` object:
 
 ```json
 {
@@ -542,9 +543,20 @@ The exported `config.json` contains a `metadata` object with flattened manifest 
     "name": "...",
     "description": "...",
     "color_direction": "...",
-    "font_mood": "..."
+    "font_mood": "...",
+    "style": {
+      "theme": "...",
+      "background": "...",
+      "print_target": "..."
+    }
   }
 }
+```
+
+To validate an exported or generated config file independently, run:
+
+```bash
+./weaver config:validate path/to/config.json
 ```
 
 #### Export config contract
