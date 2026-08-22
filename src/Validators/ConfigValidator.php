@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Validators;
 
+use Cable8mm\PromptWeaver\Enums\PrintTarget;
 use RuntimeException;
 
 final class ConfigValidator
@@ -29,6 +30,14 @@ final class ConfigValidator
         ) {
             throw new RuntimeException($this->message(
                 'Config has an invalid canvas.aspect_ratio',
+                $source,
+            ));
+        }
+
+        $printTarget = $config['style']['print_target'] ?? null;
+        if (! is_string($printTarget) || PrintTarget::tryFrom($printTarget) === null) {
+            throw new RuntimeException($this->message(
+                'Config has an invalid style.print_target',
                 $source,
             ));
         }

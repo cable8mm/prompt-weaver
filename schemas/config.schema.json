@@ -40,7 +40,14 @@
       "properties": {
         "theme": { "type": "string" },
         "background": { "type": "string" },
-        "print_target": { "type": "string", "minLength": 1 }
+        "print_target": {
+          "type": "string",
+          "enum": [
+            "black-and-white laser printer safe",
+            "full-color inkjet printer",
+            "RGB digital display"
+          ]
+        }
       },
       "additionalProperties": true
     },
@@ -90,11 +97,10 @@
         "font_mood": { "type": "string", "minLength": 1 },
         "style": {
           "type": "object",
-          "required": ["theme", "background", "print_target"],
+          "required": ["theme", "background"],
           "properties": {
             "theme": { "type": "string", "minLength": 1 },
-            "background": { "type": "string", "minLength": 1 },
-            "print_target": { "type": "string", "minLength": 1 }
+            "background": { "type": "string", "minLength": 1 }
           },
           "additionalProperties": false
         }
