@@ -23,7 +23,7 @@ def detect_frame(image_path: str, expected_x: float, expected_y: float, expected
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     expected_x = expected_x / 100 * width
     expected_y = expected_y / 100 * height
-    expected_width = expected_width / 100 * width
+    expected_width = max(1.0, expected_width / 100 * width)
     candidates = []
 
     for contour in contours:
@@ -45,13 +45,23 @@ def detect_frame(image_path: str, expected_x: float, expected_y: float, expected
 
         center_x = x + box_width / 2
         center_y = y + box_height / 2
+        horizontal_distance = abs(center_x - expected_x) / width
         vertical_distance = abs(center_y - expected_y) / height
+        # The model may move the frame horizontally, so use x only as a
+        # scoring prior rather than a hard search boundary.
         if vertical_distance > 0.35:
             continue
 
-        # Vertical position is a useful prior, while the generated image may
-        # move the frame horizontally. Prefer the largest square near it.
-        score = vertical_distance * 2 + abs(aspect - 1) - (box_width / width) * 0.25
+        # Generated artwork often wraps the actual white QR area in a larger
+        # decorative frame. Prefer the square whose size is closest to the
+        # configured QR width, while retaining position as a secondary prior.
+        size_distance = abs(box_width - expected_width) / expected_width
+        score = (
+            size_distance * 2
+            + horizontal_distance
+            + vertical_distance
+            + abs(aspect - 1)
+        )
         candidates.append((score, box_width * box_height, x, y, box_width, box_height))
 
     if not candidates:

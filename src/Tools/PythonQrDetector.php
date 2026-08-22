@@ -18,7 +18,7 @@ final class PythonQrDetector
         $projectPath = dirname(__DIR__, 2);
         $python = getenv('PROMPT_WEAVER_PYTHON');
         $command = $python === false || $python === ''
-            ? [getenv('PROMPT_WEAVER_UV') ?: 'uv', 'run', '--project', $projectPath, $scriptPath]
+            ? [getenv('PROMPT_WEAVER_UV') ?: 'uv', 'run', '--locked', '--project', $projectPath, $scriptPath]
             : [$python, $scriptPath];
         $command = [
             ...$command,

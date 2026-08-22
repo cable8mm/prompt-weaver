@@ -52,6 +52,45 @@ This installs the locked Python dependencies from the package's `pyproject.toml`
 
 If `uv` is not installed, preview rendering still works, but calibration for fixtures with a QR placeholder requires `uv` and OpenCV.
 
+### Service server setup
+
+QR calibration runs a Python process from PHP. The server therefore needs `uv`, a writable cache directory, and permission for the PHP process to execute `proc_open()`. The first run downloads `opencv-python-headless`; later runs reuse the `uv` cache.
+
+For a Linux server, run the following during deployment as the same user that runs the application (or PHP worker):
+
+```bash
+export UV_CACHE_DIR=/var/cache/prompt-weaver/uv
+mkdir -p "$UV_CACHE_DIR"
+
+cd /path/to/application
+composer install --no-dev --prefer-dist --optimize-autoloader
+uv sync --locked --project vendor/cable8mm/prompt-weaver
+```
+
+Give the PHP-FPM or queue-worker user read/write access to `UV_CACHE_DIR`. If the environment is managed by PHP-FPM or systemd, configure `UV_CACHE_DIR` there; setting it only in an interactive shell does not make it available to PHP.
+
+The package does not install a service-specific CLI command. Call the package's calibration service from your application's command or job, and make that command fail when calibration fails. For example, if your service wraps calibration and preview in shell commands, use:
+
+```bash
+php artisan wifi:calibrate cafe-restaurant && php artisan wifi:preview cafe-restaurant
+```
+
+`calibrate` returns a non-zero exit code when `uv`, OpenCV, the image, or QR-frame detection fails. It does not write a new `config.json` on failure. Keep `uv.lock` in the deployed package; the PHP runner uses `uv run --locked` so a server cannot silently rewrite the lockfile.
+
+For the package repository's GitHub Actions, install and cache `uv`, then install from the lockfile before running both Python and PHP tests:
+
+```yaml
+- uses: astral-sh/setup-uv@v10
+  with:
+    enable-cache: true
+- run: uv sync --locked
+- run: uv run --locked python scripts/test_calibrate_qr.py
+- run: composer install --prefer-dist --no-progress
+- run: composer test
+```
+
+The repository's `.github/workflows/run-tests.yml` follows this order.
+
 To work on this repository locally, install the development dependencies instead:
 
 ```bash
@@ -453,7 +492,7 @@ When available, QR frame calibration uses the optional Python/OpenCV detector fo
 uv run --project . scripts/calibrate_qr.py --help
 ```
 
-The first `uv run` creates the cached environment from `pyproject.toml`; subsequent runs reuse it. QR calibration uses the Python detector exclusively. If `uv` or OpenCV is unavailable, `calibrate` reports an installation error instead of using a less accurate PHP detector. Set `PROMPT_WEAVER_UV` to select a different `uv` executable, or `PROMPT_WEAVER_PYTHON` to bypass `uv` and use a Python interpreter directly.
+The first `uv run` creates the cached environment from `pyproject.toml`; subsequent runs reuse it. QR calibration uses the Python detector exclusively. If `uv` or OpenCV is unavailable, `calibrate` reports an installation error instead of using a less accurate PHP detector. Set `PROMPT_WEAVER_UV` to select a different `uv` executable, `UV_CACHE_DIR` to a writable persistent cache directory on a server, or `PROMPT_WEAVER_PYTHON` to bypass `uv` and use a Python interpreter directly.
 
 ### 6) Generate a preview image
 
