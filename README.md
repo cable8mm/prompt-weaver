@@ -156,7 +156,7 @@ $config = [
     'style' => [
         'theme' => 'Warm cafe vibe with a soft analog feel',
         'background' => 'cream paper texture with subtle grain',
-        'color_mode' => ColorMode::MONO->value,
+        'print_target' => 'black-and-white laser printer safe',
     ],
     'content' => [
         'title' => [

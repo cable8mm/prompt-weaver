@@ -36,11 +36,11 @@
     },
     "style": {
       "type": "object",
-      "required": ["theme", "background", "color_mode"],
+      "required": ["theme", "background", "print_target"],
       "properties": {
         "theme": { "type": "string" },
         "background": { "type": "string" },
-        "color_mode": { "type": "string", "enum": ["color", "mono"] }
+        "print_target": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": true
     },

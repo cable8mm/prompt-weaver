@@ -176,7 +176,7 @@ final class Pipe
             'style' => $schema->object([
                 'theme' => $schema->string()->required(),
                 'background' => $schema->string()->required(),
-                'color_mode' => $schema->string()->required(),
+                'print_target' => $schema->string()->required(),
             ])->required(),
             // Content elements are layout-dependent. Known elements remain
             // schema-described, but none is mandatory; placeholders below

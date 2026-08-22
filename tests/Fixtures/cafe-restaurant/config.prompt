@@ -8,7 +8,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
   "style": {
     "theme": "<one-sentence visual theme description>",
     "background": "<background description: colors, patterns, textures>",
-    "color_mode": "mono"
+    "print_target": "black-and-white laser printer safe"
   },
   "content": {
     "title": { "text": "와이파이 연결", "x_pc": 50, "y_pc": 10, "align": "center", "style": "<font/weight description>" },
@@ -40,7 +40,7 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 
 [Rules]
 1. "canvas.aspect_ratio" must be "5:7". Never change it.
-2. "color_mode" must be "mono". Use "color" for full-color output and "mono" for monochrome output.
+2. "print_target" must describe the intended output medium and constraints. For this monochrome design, use a value such as "black-and-white laser printer safe".
 3. "ssid", "password", and "qr" MUST keep the fixed vertical rhythm above (ssid ~40%, password ~52%, qr ~80%) — these positions are required for downstream automated overlay and must not shift.
 4. "title", "wifi_icon", "message", "footer" positions are flexible — vary their placement, size, and composition to match the mood of the Design Brief and Name, as long as they don't overlap the ssid/password/qr zones (see rule 3). Avoid defaulting to the same layout every time.
 5. "box_fill" for ssid/password/qr must always stay a light, high-contrast color (default "#FFFFFF") — this is a printing requirement, not a style choice. Do not make it dark or colored even if the overall theme is colorful.
@@ -58,4 +58,3 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
 - Description: 은은한 벚꽃 장식과 정교한 기하학적 라인 패턴을 더한 따뜻하고 편안한 카페 분위기의 포스터입니다. 넉넉한 여백과 선명한 테두리를 사용해 모노크롬 인쇄에서도 잘 보이도록 구성합니다.
 - Color Direction: 차콜, 아이보리, 웜 그레이를 중심으로 하고 회색조에서도 구분되는 은은한 블러시 포인트를 더합니다.
 - Font Mood: 은은한 아르데코 감성을 더한 우아하고 둥근 산세리프 한글 글꼴
-

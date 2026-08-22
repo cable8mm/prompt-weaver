@@ -61,7 +61,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
         'style' => [
             'theme' => 'warm cafe',
             'background' => 'cream paper',
-            'color_mode' => 'mono',
+            'print_target' => 'black-and-white laser printer safe',
         ],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
@@ -134,7 +134,7 @@ it('accepts structured responses from the AI client', function () {
 
     $configJson = [
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
-        'style' => ['theme' => 'test', 'background' => 'test bg', 'color_mode' => 'mono'],
+        'style' => ['theme' => 'test', 'background' => 'test bg', 'print_target' => 'black-and-white laser printer safe'],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
             'wifi_icon' => ['x_pc' => 50, 'y_pc' => 20, 'width_pc' => 15, 'style' => 'icon'],
@@ -182,7 +182,7 @@ it('passes the color option to DesignBriefPrompt', function () {
 
     $configJson = [
         'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
-        'style' => ['theme' => 'colorful', 'background' => 'rainbow', 'color_mode' => 'mono'],
+        'style' => ['theme' => 'colorful', 'background' => 'rainbow', 'print_target' => 'black-and-white laser printer safe'],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
             'wifi_icon' => ['x_pc' => 50, 'y_pc' => 20, 'width_pc' => 15, 'style' => 'icon'],

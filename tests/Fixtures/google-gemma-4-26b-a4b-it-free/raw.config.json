@@ -7,7 +7,7 @@
     "style": {
         "theme": "Sophisticated industrial cafe aesthetic with a cozy winter atmosphere.",
         "background": "Textured light gray concrete with a subtle geometric grid pattern and delicate frost and pine silhouettes in the corners.",
-        "color_mode": "mono"
+        "print_target": "black-and-white laser printer safe"
     },
     "content": {
         "title": {
