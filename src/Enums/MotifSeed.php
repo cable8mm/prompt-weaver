@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum MotifSeed: string
 {
+    use EnumGetter;
+
     case BOTANICAL_LEAVES = 'delicate botanical leaves';
     case ARCHES = 'soft architectural arches';
     case SUNBURST = 'geometric sunburst rays';

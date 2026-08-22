@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum MaterialSeed: string
 {
+    use EnumGetter;
+
     case MATTE_PAPER = 'matte paper stock';
     case RECYCLED_PAPER = 'recycled paper fibers';
     case CERAMIC = 'smooth ceramic surface';

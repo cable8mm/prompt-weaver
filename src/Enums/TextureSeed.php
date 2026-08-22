@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum TextureSeed: string
 {
+    use EnumGetter;
+
     case SUBTLE_GRID = 'subtle grid pattern';
     case HAND_DRAWN_LINE = 'organic hand-drawn line texture';
     case HALFTONE_DOTS = 'halftone dot pattern';

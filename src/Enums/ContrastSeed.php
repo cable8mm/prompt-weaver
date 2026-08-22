@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum ContrastSeed: string
 {
+    use EnumGetter;
+
     case HIGH_CONTRAST = 'high-contrast graphic treatment';
     case SOFT_CONTRAST = 'soft low-contrast tonal layering';
     case DARK_LIGHT = 'dramatic dark-and-light balance';

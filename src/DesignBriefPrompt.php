@@ -61,13 +61,13 @@ class DesignBriefPrompt implements PromptInterface
         public string $color = 'black-and-white',
         private ColorMode $colorMode = ColorMode::MONO,
     ) {
-        $this->moodSeeds = self::values(MoodSeed::cases());
-        $this->seasonSeeds = self::values(SeasonSeed::cases());
-        $this->textureSeeds = self::values(TextureSeed::cases());
-        $this->layoutSeeds = self::values(LayoutSeed::cases());
-        $this->motifSeeds = self::values(MotifSeed::cases());
-        $this->materialSeeds = self::values(MaterialSeed::cases());
-        $this->contrastSeeds = self::values(ContrastSeed::cases());
+        $this->moodSeeds = MoodSeed::keys();
+        $this->seasonSeeds = SeasonSeed::keys();
+        $this->textureSeeds = TextureSeed::keys();
+        $this->layoutSeeds = LayoutSeed::keys();
+        $this->motifSeeds = MotifSeed::keys();
+        $this->materialSeeds = MaterialSeed::keys();
+        $this->contrastSeeds = ContrastSeed::keys();
     }
 
     public function build(): void
@@ -113,14 +113,5 @@ class DesignBriefPrompt implements PromptInterface
         $lastPicked = $available[array_rand($available)];
 
         return $lastPicked;
-    }
-
-    /**
-     * @param  array<\BackedEnum>  $cases
-     * @return array<string>
-     */
-    private static function values(array $cases): array
-    {
-        return array_map(static fn (\BackedEnum $case): string => $case->value, $cases);
     }
 }

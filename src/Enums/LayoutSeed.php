@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum LayoutSeed: string
 {
+    use EnumGetter;
+
     case CENTERED_FOCAL = 'clear centered focal point';
     case ASYMMETRIC_BALANCE = 'balanced asymmetrical composition';
     case GENEROUS_WHITESPACE = 'generous whitespace and quiet margins';

@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum SeasonSeed: string
 {
+    use EnumGetter;
+
     case SPRING_CHERRY_BLOSSOM = 'spring cherry blossom mood';
     case SUMMER_BEACH_CITRUS = 'summer beach and citrus mood';
     case AUTUMN_AMBER_MAPLE = 'autumn amber and maple mood';

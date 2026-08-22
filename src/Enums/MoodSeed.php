@@ -2,8 +2,12 @@
 
 namespace Cable8mm\PromptWeaver\Enums;
 
+use Cable8mm\EnumGetter\EnumGetter;
+
 enum MoodSeed: string
 {
+    use EnumGetter;
+
     case FUTURISTIC_SPACE = 'futuristic and space-themed';
     case RETRO_80S_NEON = 'retro 80s neon';
     case MINIMAL_SCANDINAVIAN = 'minimal Scandinavian';
