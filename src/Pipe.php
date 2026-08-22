@@ -178,6 +178,13 @@ final class Pipe
                 'background' => $schema->string()->required(),
                 'print_target' => $schema->string()->required(),
             ])->required(),
+            'metadata' => $schema->object([
+                'style' => $schema->object([
+                    'theme' => $schema->string()->required(),
+                    'background' => $schema->string()->required(),
+                    'print_target' => $schema->string()->required(),
+                ])->required(),
+            ])->required(),
             // Content elements are layout-dependent. Known elements remain
             // schema-described, but none is mandatory; placeholders below
             // are the fixed contract consumed by the renderer.

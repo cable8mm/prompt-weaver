@@ -12,9 +12,16 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
     "aspect_ratio": "{{ aspect_ratio }}"
   },
   "style": {
-    "theme": "<visual theme>",
-    "background": "<colors, patterns, textures>",
-    "print_target": "<intended output medium and constraints>"
+    "theme": "<visual theme in English>",
+    "background": "<colors, patterns, textures in English>",
+    "print_target": "<intended output medium and constraints in English>"
+  },
+  "metadata": {
+    "style": {
+      "theme": "<visual theme in concise Korean>",
+      "background": "<colors, patterns, textures in concise Korean>",
+      "print_target": "<intended output medium and constraints in concise Korean>"
+    }
   },
   "content": {
     "title": {
@@ -83,9 +90,9 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
 1. Keep all placeholder coordinates and dimensions exactly as defined. They are overlay anchors.
 2. Never render coordinates, percentages, JSON keys, or placeholder names as visible artwork.
 3. SSID, password, and QR areas must be separate, white, empty, readable, and printable. QR remains square.
-4. Keep Korean text content as shown. Write free-text style fields in concise English.
+4. Keep Korean text content as shown. Write style.theme, style.background, and style.print_target in concise English for image generation. Write metadata.style.theme, metadata.style.background, and metadata.style.print_target in concise Korean for direct service display.
 5. Use Color Direction for palette and Font Mood for typography. Name is reference only.
-6. Choose a concise print_target based on the color mode and design. Examples: "black-and-white laser printer safe", "full-color inkjet printer", or "RGB digital display".
+6. Choose print_target in English and metadata.style.print_target in Korean based on the color mode and design. Examples: "black-and-white laser printer safe" / "흑백 레이저 프린터용", "full-color inkjet printer" / "컬러 잉크젯 프린터용", or "RGB digital display" / "RGB 디지털 디스플레이용".
 7. Do not add or remove fields. Output valid JSON only.
 
 [Inputs]
