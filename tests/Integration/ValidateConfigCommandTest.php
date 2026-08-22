@@ -53,3 +53,22 @@ it('returns an error for an invalid config JSON file', function () {
         unlink($path);
     }
 });
+
+it('rejects an unknown print target', function () {
+    $path = tempnam(sys_get_temp_dir(), 'prompt-weaver-config-');
+    file_put_contents($path, json_encode([
+        'canvas' => ['aspect_ratio' => '5:7'],
+        'style' => ['print_target' => 'thermal printer'],
+        'content' => [],
+        'placeholders' => [],
+    ]));
+
+    try {
+        $result = run_prompt_weaver_config_validate(['config:validate', $path]);
+
+        expect($result['exitCode'])->toBe(1);
+        expect($result['stderr'])->toContain('Config has an invalid style.print_target');
+    } finally {
+        unlink($path);
+    }
+});

@@ -182,7 +182,6 @@ final class Pipe
                 'style' => $schema->object([
                     'theme' => $schema->string()->required(),
                     'background' => $schema->string()->required(),
-                    'print_target' => $schema->string()->required(),
                 ])->required(),
             ])->required(),
             // Content elements are layout-dependent. Known elements remain

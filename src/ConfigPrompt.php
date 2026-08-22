@@ -6,6 +6,7 @@ use Cable8mm\PromptWeaver\Contracts\PromptInterface;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\Layout;
+use Cable8mm\PromptWeaver\Enums\PrintTarget;
 
 class ConfigPrompt implements PromptInterface
 {
@@ -34,6 +35,10 @@ class ConfigPrompt implements PromptInterface
         $nameLine = $this->name !== null
             ? "- Name: {$this->name}\n"
             : '';
+        $printTargets = implode(', ', array_map(
+            fn (string $value): string => '"'.$value.'"',
+            PrintTarget::keys(),
+        ));
 
         $template = file_get_contents(__DIR__.'/../stubs/config.'.$this->layout->value.'.prompt');
 
@@ -44,6 +49,7 @@ class ConfigPrompt implements PromptInterface
             '{{ font_mood }}' => $this->fontMood,
             '{{ aspect_ratio }}' => $this->format->ratio(),
             '{{ color_mode }}' => $this->colorMode->value,
+            '{{ print_targets }}' => $printTargets,
         ]);
     }
 

@@ -598,7 +598,7 @@ Use `--fixtures-root` and `--output-dir` to change the input and output roots:
 ./weaver export-all --fixtures-root=.weaver --output-dir=dist
 ```
 
-The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields. When the source config includes localized style metadata, it also includes an optional nested `metadata.style` object:
+The exported `config.json` contains a `metadata` object with flattened manifest and design-brief fields. When the source config includes localized style metadata, it also includes an optional nested `metadata.style` object. Display labels for enum-backed values such as `style.print_target` should be resolved by the consuming service through the corresponding enum and translation files.
 
 ```json
 {
@@ -614,8 +614,7 @@ The exported `config.json` contains a `metadata` object with flattened manifest 
     "font_mood": "...",
     "style": {
       "theme": "...",
-      "background": "...",
-      "print_target": "..."
+      "background": "..."
     }
   }
 }

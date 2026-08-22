@@ -9,7 +9,9 @@ it('accepts a config with the required top-level objects', function () {
             'height_pc' => 100,
             'aspect_ratio' => '5:7',
         ],
-        'style' => [],
+        'style' => [
+            'print_target' => 'black-and-white laser printer safe',
+        ],
         'content' => [],
         'placeholders' => [],
     ];
