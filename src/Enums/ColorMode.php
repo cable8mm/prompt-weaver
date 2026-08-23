@@ -8,15 +8,12 @@ enum ColorMode: string
 {
     use EnumGetter;
 
-    case COLOR = 'color';
-    case MONO = 'mono';
+    case COLOR = 'Color';
+    case MONO = 'Mono';
 
     public function label(): string
     {
-        return match ($this) {
-            self::COLOR => 'Color inkjet',
-            self::MONO => 'Black-and-white laser',
-        };
+        return __($this->value);
     }
 
     public static function fromCliInput(string $value): self
