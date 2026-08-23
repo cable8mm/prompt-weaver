@@ -187,7 +187,7 @@ it('shows valid categories in error message for an unknown category', function (
     ]);
 
     expect($result['exitCode'])->not->toBe(0);
-    expect($result['stderr'])->toContain('Unknown category')
+    expect($result['stderr'])->toContain('Invalid value: Unknown')
         ->and($result['stderr'])->toContain('Cafe/Restaurant, Office/Coworking, Stay/Hotel, Event/Exhibition, Other');
 });
 
@@ -199,7 +199,7 @@ it('shows valid formats in error message for an unknown format', function () {
     ]);
 
     expect($result['exitCode'])->not->toBe(0);
-    expect($result['stderr'])->toContain('Unknown format')
+    expect($result['stderr'])->toContain('Invalid value: Unknown Format')
         ->and($result['stderr'])->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square');
 });
 
@@ -238,7 +238,7 @@ it('rejects an unknown category or format before writing a manifest', function (
         ]);
 
         expect($result['exitCode'])->not->toBe(0);
-        expect($result['stderr'])->toContain('Unknown category');
+        expect($result['stderr'])->toContain('Invalid value: Unknown');
         expect(is_file($fixtureDirectory.'/manifest.json'))->toBeFalse();
     } finally {
         remove_directory($fixturesRoot);

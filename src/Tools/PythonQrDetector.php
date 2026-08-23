@@ -18,7 +18,7 @@ final class PythonQrDetector
         $projectPath = dirname(__DIR__, 2);
         $python = getenv('PROMPT_WEAVER_PYTHON');
         $command = $python === false || $python === ''
-            ? [getenv('PROMPT_WEAVER_UV') ?: 'uv', 'run', '--locked', '--project', $projectPath, $scriptPath]
+            ? [$this->uvBinary(), '--cache-dir', $this->uvCacheDir(), 'run', '--locked', '--project', $projectPath, $scriptPath]
             : [$python, $scriptPath];
         $command = [
             ...$command,
@@ -62,6 +62,40 @@ final class PythonQrDetector
             'center_x' => (float) $result['center_x'],
             'center_y' => (float) $result['center_y'],
         ];
+    }
+
+    private function uvBinary(): string
+    {
+        if (($binary = getenv('PROMPT_WEAVER_UV')) !== false && $binary !== '') {
+            return $binary;
+        }
+
+        if (function_exists('config')) {
+            $binary = config('prompt-weaver.uv.binary');
+
+            if (is_string($binary) && $binary !== '') {
+                return $binary;
+            }
+        }
+
+        return 'uv';
+    }
+
+    private function uvCacheDir(): string
+    {
+        if (($cacheDir = getenv('PROMPT_WEAVER_UV_CACHE_DIR')) !== false && $cacheDir !== '') {
+            return $cacheDir;
+        }
+
+        if (function_exists('config')) {
+            $cacheDir = config('prompt-weaver.uv.cache_dir');
+
+            if (is_string($cacheDir) && $cacheDir !== '') {
+                return $cacheDir;
+            }
+        }
+
+        return sys_get_temp_dir().'/prompt-weaver-uv';
     }
 
     /** @param array<string, mixed> $result */
