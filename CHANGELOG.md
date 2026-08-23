@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.8.1 - 2026-08-23
+
+### What's Changed
+
+* feat: update Korean translations for color modes by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/47
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.8.0...v0.8.1
+
 ## v0.8.0 - 2026-08-22
 
 ### What's Changed
