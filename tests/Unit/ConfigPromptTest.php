@@ -31,7 +31,7 @@ it('injects the design brief, color direction, and font mood into the config pro
         ->toContain($name)
         ->toContain('"canvas"')
         ->toContain('"aspect_ratio": "5:7"')
-        ->toContain('- Color Mode: mono')
+        ->toContain('- Color Mode: Mono')
         ->toContain('style.theme, style.background, and style.print_target in concise English')
         ->toContain('metadata.style.theme and metadata.style.background')
         ->toContain('"black-and-white laser printer safe", "full-color inkjet printer", "RGB digital display"')

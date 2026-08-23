@@ -37,7 +37,7 @@ final class ChainCommand extends PromptWeaverCommand
     {
         $category = $input->getOption('category');
         $format = $input->getOption('format');
-        $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
+        $colorMode = ColorMode::fromKey($input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE->value);
         $description = $input->getOption('description');
         $colorDirection = $input->getOption('color-direction');
         $fontMood = $input->getOption('font-mood');
@@ -50,9 +50,8 @@ final class ChainCommand extends PromptWeaverCommand
             throw new \RuntimeException("Config file not found: {$configFile}");
         }
 
-        $format = Format::fromCliInput($format);
-        $colorMode = ColorMode::fromCliInput($colorMode);
-        $briefPrompt = new DesignBriefPrompt(Category::fromCliInput($category), $format, colorMode: $colorMode);
+        $format = Format::fromKey($format);
+        $briefPrompt = new DesignBriefPrompt(Category::fromKey($category), $format, colorMode: $colorMode);
         $briefPrompt->build();
 
         $configPrompt = new ConfigPrompt($description, $colorDirection, $fontMood, $format, name: $name, colorMode: $colorMode);

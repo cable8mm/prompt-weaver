@@ -291,7 +291,7 @@ it('exports a generated png and config for Laravel import', function () {
                     'code' => 'cafe-restaurant',
                     'category' => 'Cafe/Restaurant',
                     'format' => 'A4/A5 Poster',
-                    'color_mode' => 'mono',
+                    'color_mode' => 'Mono',
                     'name' => '벚꽃 아르데코',
                     'description' => '은은한 벚꽃 장식과 정교한 기하학적 라인 패턴을 더한 따뜻하고 편안한 카페 분위기의 포스터입니다. 넉넉한 여백과 선명한 테두리를 사용해 모노크롬 인쇄에서도 잘 보이도록 구성합니다.',
                     'color_direction' => '차콜, 아이보리, 웜 그레이를 중심으로 하고 회색조에서도 구분되는 은은한 블러시 포인트를 더합니다.',

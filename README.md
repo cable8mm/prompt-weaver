@@ -400,7 +400,7 @@ What each command outputs:
 5. `calibrate` writes the final `config.json` to match the actual text-box and QR-frame positions in `image.png`.
 6. `preview` renders a human-checkable `preview.png` or browser-based `preview.html` for a fixture.
 7. `chain` prints all three prompts in one run for quick inspection.
-8. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=color` for color output or `--color-mode=mono` for monochrome output.
+8. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=Color` for color output or `--color-mode=Mono` for monochrome output.
 9. `code` renames a fixture from its current code to a kebab-case code derived from `config.json`'s `style.theme`. It updates the fixture folder, `manifest.json`, and any matching `dist/<code>` export.
 10. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
 11. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
@@ -607,7 +607,7 @@ The exported `config.json` contains a `metadata` object with flattened manifest 
     "code": "cafe-restaurant",
     "category": "Cafe/Restaurant",
     "format": "A4/A5 Poster",
-    "color_mode": "mono",
+    "color_mode": "Mono",
     "name": "...",
     "description": "...",
     "color_direction": "...",
@@ -676,7 +676,7 @@ Or with explicit options:
 ./weaver pipe \
   --category="Cafe/Restaurant" \
   --format="A4/A5 Poster" \
-  --color-mode=mono \
+  --color-mode=Mono \
   --provider=openrouter \
   --api-key=sk-or-v1-... \
   --model=google/gemma-4-26b-a4b-it:free \

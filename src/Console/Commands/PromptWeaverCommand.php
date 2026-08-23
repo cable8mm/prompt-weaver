@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
+use Cable8mm\PromptWeaver\Enums\ColorMode;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -26,7 +27,7 @@ abstract class PromptWeaverCommand extends Command
 
     protected const DEFAULT_FORMAT = 'A4/A5 Poster';
 
-    protected const DEFAULT_COLOR_MODE = 'mono';
+    protected const DEFAULT_COLOR_MODE = ColorMode::MONO;
 
     protected function fixturesRoot(InputInterface $input): string
     {

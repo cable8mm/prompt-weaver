@@ -18,13 +18,4 @@ enum Category: string
     {
         return __($this->value);
     }
-
-    public static function fromCliInput(string $value): self
-    {
-        return self::tryFrom($value)
-            ?? throw new \InvalidArgumentException(
-                "Unknown category: {$value}".PHP_EOL.
-                'Valid categories: '.implode(', ', self::keys())
-            );
-    }
 }

@@ -57,13 +57,13 @@ final class PipeCommand extends PromptWeaverCommand
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
             $category = $manifest['category'] ?? null;
             $format = $manifest['format'] ?? null;
-            $colorMode = $manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE;
-            $layout = Layout::fromCliInput($manifest['layout'] ?? Layout::CENTERED->value);
+            $colorMode = ColorMode::fromKey($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE->value);
+            $layout = Layout::fromKey($manifest['layout'] ?? Layout::CENTERED->value);
         } else {
             $category = $input->getOption('category');
             $format = $input->getOption('format');
-            $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
-            $layout = Layout::fromCliInput($input->getOption('layout') ?? Layout::CENTERED->value);
+            $colorMode = ColorMode::fromKey($input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE->value);
+            $layout = Layout::fromKey($input->getOption('layout') ?? Layout::CENTERED->value);
         }
 
         $this->requireValues($category, $format);
@@ -75,10 +75,10 @@ final class PipeCommand extends PromptWeaverCommand
         }
 
         $result = (new Pipe($client))->run(
-            Category::fromCliInput($category),
-            Format::fromCliInput($format),
+            Category::fromKey($category),
+            Format::fromKey($format),
             $input->getOption('color'),
-            ColorMode::fromCliInput($colorMode),
+            $colorMode,
             $layout,
             function (string $stage, string $message) use ($progressBar): void {
                 if (! $progressBar instanceof Progress) {

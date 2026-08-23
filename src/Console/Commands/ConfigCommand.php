@@ -40,23 +40,23 @@ final class ConfigCommand extends PromptWeaverCommand
             $fontMood = $designBriefJson['font_mood'] ?? null;
             $name = $designBriefJson['name'] ?? null;
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
-            $format = isset($manifest['format']) ? Format::fromCliInput($manifest['format']) : null;
-            $colorMode = ColorMode::fromCliInput($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE);
-            $layout = Layout::fromCliInput($manifest['layout'] ?? Layout::CENTERED->value);
+            $format = isset($manifest['format']) ? Format::fromKey($manifest['format']) : null;
+            $colorMode = ColorMode::fromKey($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE->value);
+            $layout = Layout::fromKey($manifest['layout'] ?? Layout::CENTERED->value);
         } else {
             $description = $input->getOption('description');
             $colorDirection = $input->getOption('color-direction');
             $fontMood = $input->getOption('font-mood');
             $name = $input->getOption('name');
             $format = $input->getOption('format');
-            $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
-            $layout = Layout::fromCliInput($input->getOption('layout') ?? Layout::CENTERED->value);
+            $colorMode = ColorMode::fromKey($input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE->value);
+            $layout = Layout::fromKey($input->getOption('layout') ?? Layout::CENTERED->value);
         }
 
         $this->requireValues($description, $colorDirection, $fontMood);
         if (! $format instanceof Format) {
             $this->requireValues($format);
-            $format = Format::fromCliInput($format);
+            $format = Format::fromKey($format);
         }
 
         $prompt = new ConfigPrompt(
@@ -64,7 +64,7 @@ final class ConfigCommand extends PromptWeaverCommand
             colorDirection: $colorDirection,
             fontMood: $fontMood,
             format: $format,
-            colorMode: $colorMode instanceof ColorMode ? $colorMode : ColorMode::fromCliInput($colorMode),
+            colorMode: $colorMode,
             name: $name,
             layout: $layout,
         );

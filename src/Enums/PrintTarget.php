@@ -16,13 +16,4 @@ enum PrintTarget: string
     {
         return __($this->value);
     }
-
-    public static function fromCliInput(string $value): self
-    {
-        return self::tryFrom($value)
-            ?? throw new \InvalidArgumentException(
-                "Unknown print target: {$value}".PHP_EOL.
-                'Valid print targets: '.implode(', ', self::keys())
-            );
-    }
 }

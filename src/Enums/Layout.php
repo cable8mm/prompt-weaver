@@ -22,13 +22,4 @@ enum Layout: string
             self::QR_FOCUS => 'QR focus',
         };
     }
-
-    public static function fromCliInput(string $value): self
-    {
-        return self::tryFrom($value)
-            ?? throw new \InvalidArgumentException(
-                "Unknown layout: {$value}".PHP_EOL.
-                'Valid layouts: '.implode(', ', self::keys())
-            );
-    }
 }

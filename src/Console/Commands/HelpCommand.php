@@ -25,7 +25,7 @@ final class HelpCommand extends SymfonyHelpCommand
 Prompt Weaver CLI
 
 Usage:
-  bin/prompt-weaver init code [--category="..."] [--format="..."] [--color-mode=color|mono] [--layout="..."] [--fixtures-root=.weaver]
+  bin/prompt-weaver init code [--category="..."] [--format="..."] [--color-mode=Color|Mono] [--layout="..."] [--fixtures-root=.weaver]
   bin/prompt-weaver code code [--fixtures-root=.weaver] [--dist-root=dist]
   bin/prompt-weaver calibrate code [--fixtures-root=.weaver]
   bin/prompt-weaver config-stub editorial
@@ -33,8 +33,8 @@ Usage:
   bin/prompt-weaver preview --fixture="path/to/fixture"
   bin/prompt-weaver preview --fixture="path/to/fixture" --output="path/to/preview.html"
   bin/prompt-weaver preview --code="..." [--fixtures-root=.weaver]
-  bin/prompt-weaver brief code [--color-mode=color|mono] [--fixtures-root=.weaver]
-  bin/prompt-weaver config code [--color-mode=color|mono] [--layout="..."] [--fixtures-root=.weaver]
+  bin/prompt-weaver brief code [--color-mode=Color|Mono] [--fixtures-root=.weaver]
+  bin/prompt-weaver config code [--color-mode=Color|Mono] [--layout="..."] [--fixtures-root=.weaver]
   bin/prompt-weaver image code [--fixtures-root=.weaver]
   bin/prompt-weaver imagegen code [--provider=openai] [--model=...] [--output=path/to/image.png] [--fixtures-root=.weaver]
   bin/prompt-weaver export code [--image=path/to/generated.png] [--output-dir=dist/code] [--fixtures-root=.weaver]
