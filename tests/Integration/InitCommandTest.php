@@ -77,7 +77,7 @@ it('creates a new fixture manifest with default values', function () {
             'code' => 'wifi-warm-cafe-in-summer',
             'category' => 'Cafe/Restaurant',
             'format' => 'A4/A5 Poster',
-            'color_mode' => 'mono',
+            'color_mode' => 'Mono',
             'layout' => 'centered',
         ]);
         expect($manifestJson)
@@ -121,7 +121,7 @@ it('creates a new fixture manifest with custom category and format', function ()
             'wifi-warm-cafe-in-summer',
             '--category=Office/Coworking',
             '--format=A6/A7 Poster',
-            '--color-mode=color',
+            '--color-mode=Color',
             '--fixtures-root='.$fixturesRoot,
         ]);
 
@@ -137,7 +137,7 @@ it('creates a new fixture manifest with custom category and format', function ()
             'code' => 'wifi-warm-cafe-in-summer',
             'category' => 'Office/Coworking',
             'format' => 'A6/A7 Poster',
-            'color_mode' => 'color',
+            'color_mode' => 'Color',
             'layout' => 'centered',
         ]);
     } finally {
