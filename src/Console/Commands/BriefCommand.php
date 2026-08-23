@@ -33,19 +33,19 @@ final class BriefCommand extends PromptWeaverCommand
             $manifest = $this->readJsonFile($this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json');
             $category = $manifest['category'] ?? null;
             $format = $manifest['format'] ?? null;
-            $colorMode = $manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE;
+            $colorMode = ColorMode::fromKey($manifest['color_mode'] ?? self::DEFAULT_COLOR_MODE->value);
         } else {
             $category = $input->getOption('category');
             $format = $input->getOption('format');
-            $colorMode = $input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE;
+            $colorMode = ColorMode::fromKey($input->getOption('color-mode') ?? self::DEFAULT_COLOR_MODE->value);
         }
 
         $this->requireValues($category, $format);
 
         $prompt = new DesignBriefPrompt(
-            category: Category::fromCliInput($category),
-            format: Format::fromCliInput($format),
-            colorMode: ColorMode::fromCliInput($colorMode),
+            category: Category::fromKey($category),
+            format: Format::fromKey($format),
+            colorMode: $colorMode,
         );
         $prompt->build();
         $promptText = $prompt->prompt();

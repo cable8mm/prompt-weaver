@@ -17,15 +17,6 @@ enum Format: string
         return __($this->value);
     }
 
-    public static function fromCliInput(string $value): self
-    {
-        return self::tryFrom($value)
-            ?? throw new \InvalidArgumentException(
-                "Unknown format: {$value}".PHP_EOL.
-                'Valid formats: '.implode(', ', self::keys())
-            );
-    }
-
     public function pages(): array
     {
         return match ($this) {

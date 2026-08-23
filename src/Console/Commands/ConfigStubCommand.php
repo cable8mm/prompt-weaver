@@ -22,7 +22,7 @@ final class ConfigStubCommand extends PromptWeaverCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $layout = Layout::fromCliInput((string) $input->getArgument('layout'));
+        $layout = Layout::fromKey((string) $input->getArgument('layout'));
         $this->copyPromptToClipboard($layout->value, (bool) $input->getOption('print'));
 
         return self::SUCCESS;
