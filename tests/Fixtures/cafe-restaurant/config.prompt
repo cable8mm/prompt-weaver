@@ -21,13 +21,13 @@ Your ONLY job is to output a single valid JSON object matching the schema below.
       "box_x_pc": 50, "box_y_pc": 40, "box_width_pc": 70, "box_height_pc": 8,
       "label": "SSID:", "label_position": "outside_above",
       "box_fill": "#FFFFFF", "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
-      "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111"
+      "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 36, "font_weight": "normal", "color": "#111111"
     },
     "password": {
       "box_x_pc": 50, "box_y_pc": 52, "box_width_pc": 70, "box_height_pc": 8,
       "label": "PASSWORD:", "label_position": "outside_above",
       "box_fill": "#FFFFFF", "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
-      "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111"
+      "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 36, "font_weight": "normal", "color": "#111111"
     },
     "qr": {
       "x_pc": 50, "y_pc": 80, "width_pc": 28,
