@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.8.2 - 2026-08-24
+
+### What's Changed
+
+* feat: update font family to "Pretendard" in CSS by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/48
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.8.1...v0.8.2
+
 ## v0.8.1 - 2026-08-23
 
 ### What's Changed
