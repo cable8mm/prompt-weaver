@@ -19,7 +19,7 @@ it('provides a Vite-compatible browser stylesheet', function () {
     $stylesheet = (string) file_get_contents(dirname(__DIR__, 2).'/resources/css/prompt-weaver.css');
 
     expect($stylesheet)
-        ->toContain("url('../../fonts/AtkinsonHyperlegible-Regular.woff2')")
-        ->toContain("url('../../fonts/AtkinsonHyperlegible-Bold.woff2')")
+        ->toContain('../../fonts/AtkinsonHyperlegible-Regular.woff2')
+        ->toContain('../../fonts/AtkinsonHyperlegible-Bold.woff2')
         ->not->toContain('/vendor/prompt-weaver/fonts/');
 });
