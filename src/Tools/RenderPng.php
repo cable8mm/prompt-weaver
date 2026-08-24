@@ -47,7 +47,7 @@ final class RenderPng
             $baseImage,
             $this->configPlaceholder($config, 'ssid'),
             $ssid,
-            1,
+            0,
             $this->canvasDpi($config),
         );
 
@@ -55,7 +55,7 @@ final class RenderPng
             $baseImage,
             $this->configPlaceholder($config, 'password'),
             $password,
-            2,
+            0,
             $this->canvasDpi($config),
         );
 
