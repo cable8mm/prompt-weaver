@@ -16,8 +16,8 @@ Use a split composition: decorative visual weight on the left and a functional r
     "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 96, "align": "center" }
   },
   "placeholders": {
-    "ssid": { "box_x_pc": 70, "box_y_pc": 37, "box_width_pc": 48, "box_height_pc": 7, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Pretendard", "font_size_px": 30, "font_weight": "bold", "color": "#111111" },
-    "password": { "box_x_pc": 70, "box_y_pc": 48, "box_width_pc": 48, "box_height_pc": 7, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Pretendard", "font_size_px": 30, "font_weight": "bold", "color": "#111111" },
+    "ssid": { "box_x_pc": 70, "box_y_pc": 37, "box_width_pc": 48, "box_height_pc": 7, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 30, "font_weight": "normal", "color": "#111111" },
+    "password": { "box_x_pc": 70, "box_y_pc": 48, "box_width_pc": 48, "box_height_pc": 7, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 30, "font_weight": "normal", "color": "#111111" },
     "qr": { "x_pc": 70, "y_pc": 78, "width_pc": 23, "style": "<QR frame style>", "box_fill": "#FFFFFF", "box_fill_note": "solid white square with quiet zone" }
   }
 }

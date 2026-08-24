@@ -16,8 +16,8 @@ Use a balanced centered composition with symmetrical margins and a clear vertica
     "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 96, "align": "center" }
   },
   "placeholders": {
-    "ssid": { "box_x_pc": 50, "box_y_pc": 40, "box_width_pc": 70, "box_height_pc": 8, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111" },
-    "password": { "box_x_pc": 50, "box_y_pc": 52, "box_width_pc": 70, "box_height_pc": 8, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Pretendard", "font_size_px": 36, "font_weight": "bold", "color": "#111111" },
+    "ssid": { "box_x_pc": 50, "box_y_pc": 40, "box_width_pc": 70, "box_height_pc": 8, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 36, "font_weight": "normal", "color": "#111111" },
+    "password": { "box_x_pc": 50, "box_y_pc": 52, "box_width_pc": 70, "box_height_pc": 8, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 36, "font_weight": "normal", "color": "#111111" },
     "qr": { "x_pc": 50, "y_pc": 80, "width_pc": 28, "style": "<QR frame style>", "box_fill": "#FFFFFF", "box_fill_note": "solid white square with quiet zone" }
   }
 }

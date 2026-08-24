@@ -43,9 +43,9 @@
       "box_fill": "#FFFFFF",
       "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
       "align": "center",
-      "font_family": "Pretendard",
+      "font_family": "Atkinson Hyperlegible",
       "font_size_px": 36,
-      "font_weight": "bold",
+      "font_weight": "normal",
       "color": "#111111"
     },
     "password": {
@@ -58,9 +58,9 @@
       "box_fill": "#FFFFFF",
       "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
       "align": "center",
-      "font_family": "Pretendard",
+      "font_family": "Atkinson Hyperlegible",
       "font_size_px": 36,
-      "font_weight": "bold",
+      "font_weight": "normal",
       "color": "#111111"
     },
     "qr": {
