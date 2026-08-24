@@ -65,7 +65,7 @@ class ImagePrompt implements PromptInterface
 
         // QR
         $qr = $placeholders['qr'];
-        $layoutLines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}.";
+        $layoutLines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}. The square must have a clearly visible high-contrast black or deep charcoal outer border, with a solid white empty interior and no QR code drawn inside; keep the border geometrically square so calibration can detect it.";
         $step++;
 
         // Footer

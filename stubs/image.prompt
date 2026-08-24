@@ -22,6 +22,7 @@
 - The finished artwork must contain only the requested visible Korean labels/messages and the requested SSID/PASSWORD labels. It must contain no coordinate notation such as "x=50%", "y=40%", "50%", "70%", or any similar numeric placement text.
 - Do not turn the layout instructions into a diagram, wireframe, blueprint, measurement overlay, or UI mockup. Render a polished finished poster.
 - The SSID box, PASSWORD box, and QR square must each be a solid, flat white fill with sharp, clean edges — treat them as "cutout windows" in the surrounding background, not a stylized box with a white border.
+- Exception for the QR square: keep its interior solid white, but add a clearly visible high-contrast black or deep-charcoal continuous outer square border. The border is required for OpenCV contour calibration and must be geometrically square and easy to detect.
 - Do not let the background pattern show through or bleed into these three white areas.
 - Do not render any text or QR code inside these three areas — leave them blank.
 - Final request: generate the finished image now, following every instruction above exactly.
