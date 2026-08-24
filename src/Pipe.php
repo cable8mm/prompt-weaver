@@ -162,6 +162,7 @@ final class Pipe
             'box_fill_note' => $schema->string(),
             'align' => $schema->string(),
             'font_family' => $schema->string(),
+            'font_size_pt' => $schema->number(),
             'font_size_px' => $schema->number(),
             'font_weight' => $schema->string(),
             'color' => $schema->string(),
@@ -172,6 +173,9 @@ final class Pipe
                 'width_pc' => $schema->number()->required(),
                 'height_pc' => $schema->number()->required(),
                 'aspect_ratio' => $schema->string()->required(),
+                'width_mm' => $schema->number()->required(),
+                'height_mm' => $schema->number()->required(),
+                'dpi' => $schema->number()->required(),
             ])->required(),
             'style' => $schema->object([
                 'theme' => $schema->string()->required(),

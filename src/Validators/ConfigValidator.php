@@ -41,6 +41,40 @@ final class ConfigValidator
                 $source,
             ));
         }
+
+        foreach (['ssid', 'password'] as $placeholder) {
+            $fontPt = $config['placeholders'][$placeholder]['font_size_pt'] ?? null;
+            $fontPx = $config['placeholders'][$placeholder]['font_size_px'] ?? null;
+            if ($fontPt === null && $fontPx === null) {
+                throw new RuntimeException($this->message(
+                    "Config placeholder '{$placeholder}' is missing font_size_pt or font_size_px",
+                    $source,
+                ));
+            }
+            if ($fontPx !== null && (! is_numeric($fontPx) || (float) $fontPx <= 0)) {
+                throw new RuntimeException($this->message(
+                    "Config placeholder '{$placeholder}' has an invalid font_size_px",
+                    $source,
+                ));
+            }
+            if ($fontPt !== null && (! is_numeric($fontPt) || (float) $fontPt < 6 || (float) $fontPt > 96)) {
+                throw new RuntimeException($this->message(
+                    "Config placeholder '{$placeholder}' has an invalid font_size_pt",
+                    $source,
+                ));
+            }
+        }
+
+        if (isset($config['placeholders']['ssid']['font_size_pt']) || isset($config['placeholders']['password']['font_size_pt'])) {
+            foreach (['width_mm', 'height_mm', 'dpi'] as $key) {
+                if (! isset($config['canvas'][$key]) || ! is_numeric($config['canvas'][$key]) || (float) $config['canvas'][$key] <= 0) {
+                    throw new RuntimeException($this->message(
+                        "Config canvas is missing valid {$key} metadata",
+                        $source,
+                    ));
+                }
+            }
+        }
     }
 
     private function message(string $message, ?string $source): string

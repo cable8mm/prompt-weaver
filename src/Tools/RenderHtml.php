@@ -9,6 +9,7 @@ final class RenderHtml
     use Traits\ConfigHelperTrait;
     use Traits\PlaceholderGeometryTrait;
     use Traits\QrHelperTrait;
+    use Traits\TypographyTrait;
     use Traits\WifiHelperTrait;
 
     private const DEFAULT_SSID = 'WIFI-NOTE';
@@ -47,12 +48,15 @@ final class RenderHtml
         $width = $dimensions[0];
         $height = $dimensions[1];
 
-        $textElement = static function (string $class, array $placeholder): string {
+        $textElement = function (string $class, array $placeholder): string {
             $x = (float) ($placeholder['box_x_pc'] ?? 0);
             $y = (float) ($placeholder['box_y_pc'] ?? 0);
-            $fontSize = (int) ($placeholder['font_size_px'] ?? 36);
+            $boxWidth = (float) ($placeholder['box_width_pc'] ?? 0);
+            $typography = $this->typography($placeholder);
+            $fontSize = rtrim(rtrim((string) $typography['value'], '0'), '.');
+            $fontDeclaration = "font-size: {$fontSize}{$typography['unit']};";
             $color = htmlspecialchars((string) ($placeholder['color'] ?? '#111111'), ENT_QUOTES, 'UTF-8');
-            $style = "left: {$x}%; top: {$y}%; --font-size: {$fontSize}; color: {$color};";
+            $style = "left: {$x}%; top: {$y}%; width: {$boxWidth}%; {$fontDeclaration} color: {$color};";
 
             return '<div id="'.$class.'" class="text-placeholder" style="'.$style.'"></div>';
         };
@@ -67,7 +71,7 @@ final class RenderHtml
         $html = '<!doctype html>'.PHP_EOL
             .'<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'.PHP_EOL
             .'<title>Prompt Weaver Preview</title><style>'.PHP_EOL
-            .'*{box-sizing:border-box}@font-face{font-family:PreviewFont;src:url("'.$fontUrl.'") format("woff2");font-weight:400;font-style:normal;font-display:block}body{margin:0;background:#ddd;display:grid;place-items:center;min-height:100vh}.preview{position:relative;width:min(100vw,'.$width.'px);aspect-ratio:'.$width.'/'.$height.';container-type:inline-size}.preview>img.background{position:absolute;inset:0;width:100%;height:100%;display:block}.text-placeholder{position:absolute;transform:translate(-50%,-50%);width:70%;text-align:center;font-family:PreviewFont,sans-serif;font-weight:400;line-height:1;white-space:nowrap;font-size:calc(var(--font-size) * 100cqw / '.$width.')} .qr{position:absolute;transform:translate(-50%,-50%);width:'.$qrWidth.'%;height:auto;image-rendering:auto}</style></head><body>'.PHP_EOL
+            .'*{box-sizing:border-box}@font-face{font-family:PreviewFont;src:url("'.$fontUrl.'") format("woff2");font-weight:400;font-style:normal;font-display:block}body{margin:0;background:#ddd;display:grid;place-items:center;min-height:100vh}.preview{position:relative;width:min(100vw,'.$width.'px);aspect-ratio:'.$width.'/'.$height.';}.preview>img.background{position:absolute;inset:0;width:100%;height:100%;display:block}.text-placeholder{position:absolute;transform:translate(-50%,-50%);text-align:center;font-family:PreviewFont,sans-serif;font-weight:400;line-height:1;white-space:nowrap}.qr{position:absolute;transform:translate(-50%,-50%);width:'.$qrWidth.'%;height:auto;image-rendering:auto}</style></head><body>'.PHP_EOL
             .'<main class="preview"><img class="background" src="image.png" alt="">'
             .$textElement('ssid', $ssidPlaceholder).$textElement('password', $passwordPlaceholder)
             .'<img class="qr" src="'.$qrDataUri.'" alt="Wi-Fi QR code" style="left: '.$qrX.'%; top: '.$qrY.'%;"></main>'.PHP_EOL

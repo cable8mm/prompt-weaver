@@ -6,7 +6,7 @@ Use an editorial poster composition with asymmetrical typography, generous negat
 
 [Schema]
 {
-  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "{{ aspect_ratio }}" },
+  "canvas": { "width_pc": 100, "height_pc": 100, "aspect_ratio": "{{ aspect_ratio }}", "width_mm": {{ width_mm }}, "height_mm": {{ height_mm }}, "dpi": {{ dpi }} },
   "style": { "theme": "<visual theme in English>", "background": "<colors, patterns, textures in English>", "print_target": "<intended output medium and constraints in English>" },
   "metadata": { "style": { "theme": "<visual theme in concise Korean>", "background": "<colors, patterns, textures in concise Korean>" } },
   "content": {
@@ -16,8 +16,8 @@ Use an editorial poster composition with asymmetrical typography, generous negat
     "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 95, "align": "center" }
   },
   "placeholders": {
-    "ssid": { "box_x_pc": 50, "box_y_pc": 34, "box_width_pc": 58, "box_height_pc": 7, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 32, "font_weight": "normal", "color": "#111111" },
-    "password": { "box_x_pc": 50, "box_y_pc": 45, "box_width_pc": 58, "box_height_pc": 7, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_px": 32, "font_weight": "normal", "color": "#111111" },
+    "ssid": { "box_x_pc": 50, "box_y_pc": 34, "box_width_pc": 58, "box_height_pc": 7, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_pt": 16, "font_weight": "normal", "color": "#111111" },
+    "password": { "box_x_pc": 50, "box_y_pc": 45, "box_width_pc": 58, "box_height_pc": 7, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_pt": 16, "font_weight": "normal", "color": "#111111" },
     "qr": { "x_pc": 50, "y_pc": 76, "width_pc": 24, "style": "<QR frame style>", "box_fill": "#FFFFFF", "box_fill_note": "solid white square with quiet zone" }
   }
 }

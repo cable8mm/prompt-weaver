@@ -9,7 +9,10 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
   "canvas": {
     "width_pc": 100,
     "height_pc": 100,
-    "aspect_ratio": "{{ aspect_ratio }}"
+    "aspect_ratio": "{{ aspect_ratio }}",
+    "width_mm": {{ width_mm }},
+    "height_mm": {{ height_mm }},
+    "dpi": {{ dpi }}
   },
   "style": {
     "theme": "<visual theme in English>",
@@ -63,7 +66,7 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
       "box_fill_note": "solid white cutout",
       "align": "center",
       "font_family": "Atkinson Hyperlegible",
-      "font_size_px": 38,
+      "font_size_pt": 18,
       "font_weight": "normal",
       "color": "#111111"
     },
@@ -78,7 +81,7 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
       "box_fill_note": "solid white cutout",
       "align": "center",
       "font_family": "Atkinson Hyperlegible",
-      "font_size_px": 38,
+      "font_size_pt": 18,
       "font_weight": "normal",
       "color": "#111111"
     }
