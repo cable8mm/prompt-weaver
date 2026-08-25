@@ -29,6 +29,7 @@ Keep every other line and field identical to stubs/config.centered.prompt unless
 In particular, do not change:
 
 - top-level keys: canvas, style, content, placeholders
+- canvas includes width_mm, height_mm, and dpi for the selected print format.
 - content and placeholder object structure
 - fixed Korean text
 - placeholder labels and overlay semantics
@@ -38,7 +39,7 @@ In particular, do not change:
 Do not add layout_name, layout_goal, required_composition, forbidden_composition, schema_version, metadata, or any other new runtime fields.
 
 [Coordinate rules]
-Coordinates are percentage-based overlay anchors for a portrait canvas.
+Coordinates are percentage-based overlay anchors for a portrait canvas. Typography is physical: return font_size_pt (6–96 pt) for SSID and password, using the same size unless the design clearly requires otherwise. Do not derive font size from source image pixels. Keep x/y/box coordinates and dimensions separate from typography units. Use readable print sizes for the selected format. New configs must not use font_size_px; that field is accepted only for legacy configs.
 
 - x_pc and y_pc are element center points.
 - box_x_pc and box_y_pc are SSID/password box center points.

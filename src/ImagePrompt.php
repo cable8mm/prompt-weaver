@@ -27,6 +27,12 @@ class ImagePrompt implements PromptInterface
         $step = 1;
 
         foreach ($content as $name => $element) {
+            // Message and footer are emitted below with their dedicated
+            // placement rules; do not add them again in this generic pass.
+            if (in_array($name, ['message', 'footer'], true)) {
+                continue;
+            }
+
             if (! is_array($element) || ! isset($element['x_pc'], $element['y_pc'])) {
                 continue;
             }
@@ -65,7 +71,7 @@ class ImagePrompt implements PromptInterface
 
         // QR
         $qr = $placeholders['qr'];
-        $layoutLines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}.";
+        $layoutLines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}. The square must have a clearly visible continuous outer border in a color that strongly contrasts with both the solid white interior and the surrounding background, with no QR code drawn inside; keep the border geometrically square so calibration can detect it.";
         $step++;
 
         // Footer

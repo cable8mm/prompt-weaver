@@ -10,6 +10,7 @@ final class RenderPng
     use Traits\ConfigHelperTrait;
     use Traits\PlaceholderGeometryTrait;
     use Traits\QrHelperTrait;
+    use Traits\TypographyTrait;
     use Traits\WifiHelperTrait;
 
     private const DEFAULT_SSID = 'WIFI-NOTE';
@@ -46,14 +47,16 @@ final class RenderPng
             $baseImage,
             $this->configPlaceholder($config, 'ssid'),
             $ssid,
-            1,
+            0,
+            $this->canvasDpi($config),
         );
 
         $this->drawPlaceholderText(
             $baseImage,
             $this->configPlaceholder($config, 'password'),
             $password,
-            2,
+            0,
+            $this->canvasDpi($config),
         );
 
         $this->drawQr(
@@ -77,11 +80,11 @@ final class RenderPng
     /**
      * @param  array<string, mixed>  $placeholder
      */
-    private function drawPlaceholderText(GdImage $image, array $placeholder, string $text, int $verticalAdjustment = 0): void
+    private function drawPlaceholderText(GdImage $image, array $placeholder, string $text, int $verticalAdjustment = 0, int $dpi = 300): void
     {
         $box = $this->placeholderBox($image, $placeholder);
         $font = $this->fontPath();
-        $fontSize = (int) ($placeholder['font_size_px'] ?? 36);
+        $fontSize = $this->typographyPixels($placeholder, $dpi);
         $colorHex = (string) ($placeholder['color'] ?? '#111111');
         $color = $this->allocateColor($image, $colorHex);
 
@@ -164,5 +167,13 @@ final class RenderPng
         }
 
         throw new RuntimeException("Preview font file not found: {$fontPath}");
+    }
+
+    /** @param array<string, mixed> $config */
+    private function canvasDpi(array $config): int
+    {
+        $dpi = $config['canvas']['dpi'] ?? 300;
+
+        return is_numeric($dpi) && (int) $dpi > 0 ? (int) $dpi : 300;
     }
 }

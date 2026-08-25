@@ -41,6 +41,7 @@ class ConfigPrompt implements PromptInterface
         ));
 
         $template = file_get_contents(__DIR__.'/../stubs/config.'.$this->layout->value.'.prompt');
+        [$widthMm, $heightMm] = $this->format->canvasDimensions();
 
         $this->promptString = strtr($template, [
             '{{ name_line }}' => $nameLine,
@@ -50,6 +51,9 @@ class ConfigPrompt implements PromptInterface
             '{{ aspect_ratio }}' => $this->format->ratio(),
             '{{ color_mode }}' => $this->colorMode->value,
             '{{ print_targets }}' => $printTargets,
+            '{{ width_mm }}' => (string) $widthMm,
+            '{{ height_mm }}' => (string) $heightMm,
+            '{{ dpi }}' => '300',
         ]);
     }
 
