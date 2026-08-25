@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.9.0 - 2026-08-25
+
+### What's Changed
+
+* feat: implement physical typegraphy support by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/50
+* feat: add mini-square layout support by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/51
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.8.3...v0.9.0
+
 ## v0.8.3 - 2026-08-24
 
 ### What's Changed
