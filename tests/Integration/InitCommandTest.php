@@ -157,7 +157,7 @@ it('shows available categories and formats in help output', function () {
         ->toContain('Available formats')
         ->toContain('A4/A5 Poster, A6/A7 Poster, Mini Square')
         ->toContain('Available layouts')
-        ->toContain('centered, editorial, split, qr-focus');
+        ->toContain('centered, editorial, split, qr-focus, mini-square');
 });
 
 it('stores the selected layout in the manifest', function () {

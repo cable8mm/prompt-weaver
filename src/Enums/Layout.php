@@ -12,6 +12,7 @@ enum Layout: string
     case EDITORIAL = 'editorial';
     case SPLIT = 'split';
     case QR_FOCUS = 'qr-focus';
+    case MINI_SQUARE = 'mini-square';
 
     public function label(): string
     {
@@ -20,6 +21,7 @@ enum Layout: string
             self::EDITORIAL => 'Editorial',
             self::SPLIT => 'Split composition',
             self::QR_FOCUS => 'QR focus',
+            self::MINI_SQUARE => 'Mini Square composition',
         };
     }
 }

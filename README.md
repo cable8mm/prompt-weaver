@@ -325,8 +325,8 @@ To inspect or pipe the assembled prompt without using the clipboard, run:
 ./weaver config-stub editorial --print
 ```
 
-The currently registered layout names are `centered`, `editorial`, `split`, and
-`qr-focus`. A new layout name must also be registered in the CLI before it can be
+The currently registered layout names are `centered`, `editorial`, `split`,
+`qr-focus`, and `mini-square`. A new layout name must also be registered in the CLI before it can be
 used with `./weaver config-stub <layout>`.
 
 ## CLI Workflow
@@ -358,7 +358,7 @@ You can also specify the category and format when creating a fixture:
 ./weaver init cafe-restaurant --category="Office/Coworking" --format="A4/A5 Poster"
 ```
 
-When run from a terminal, `init` interactively prompts you to select a category, format, and layout if you omit the corresponding options. Available layouts are `centered`, `editorial`, `split`, and `qr-focus`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. You can select one explicitly with `--layout=editorial`.
+When run from a terminal, `init` interactively prompts you to select a category, format, and layout if you omit the corresponding options. Available layouts are `centered`, `editorial`, `split`, `qr-focus`, and `mini-square`. In non-interactive environments (tests, CI, pipes), the defaults are used automatically. You can select one explicitly with `--layout=editorial`.
 
 The fixture reference is positional for commands such as `brief`, `config`, `image`, `preview`, and `calibrate`. `config-stub` accepts a registered layout name and assembles an image prompt from `prompts/preview.prompt` and `stubs/config.<layout>.prompt`. `preview` and `calibrate` also accept a direct fixture directory with `--fixture=/path/to/fixture`.
 
