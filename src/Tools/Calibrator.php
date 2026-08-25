@@ -87,41 +87,68 @@ final class Calibrator
         $searchRadius = max($box['height'] * 2, (int) round(imagesy($image) * 0.08));
         $startY = max(0, $box['center_y'] - $searchRadius);
         $endY = min(imagesy($image) - 1, $box['center_y'] + $searchRadius);
-        $runs = [];
-        $runStart = null;
+        $rowRatios = [];
 
         for ($y = $startY; $y <= $endY; $y++) {
-            $whiteRatio = $this->whitePixelRatio($image, $left, $right, $y);
-            $isWhiteRow = $whiteRatio >= 0.8;
+            $rowRatios[$y] = $this->whitePixelRatio($image, $left, $right, $y);
+        }
 
-            if ($isWhiteRow && $runStart === null) {
+        // Generated artwork may give the cutout a paper tint or soft shadow.
+        // Relax the brightness threshold only when the run still resembles
+        // the expected height of a text box.
+        foreach ([0.8, 0.65, 0.55] as $threshold) {
+            $runs = $this->brightRuns($rowRatios, $box['height'], $threshold, $minimumCenterY);
+
+            if ($runs === []) {
+                continue;
+            }
+
+            usort($runs, fn (array $first, array $second): int => abs($first['center'] - $box['center_y']) <=>
+                abs($second['center'] - $box['center_y'])
+            );
+
+            return (int) round($runs[0]['center']);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<int, float>  $rowRatios
+     * @return array<int, array{start:int, end:int, center:float}>
+     */
+    private function brightRuns(array $rowRatios, int $expectedHeight, float $threshold, ?int $minimumCenterY): array
+    {
+        $runs = [];
+        $runStart = null;
+        $minimumLength = max(12, (int) round($expectedHeight * 0.5));
+        $maximumLength = max($minimumLength, (int) round($expectedHeight * 1.7));
+        $lastY = array_key_last($rowRatios);
+
+        foreach ($rowRatios as $y => $ratio) {
+            $isBright = $ratio >= $threshold;
+
+            if ($isBright && $runStart === null) {
                 $runStart = $y;
             }
 
-            if ((! $isWhiteRow || $y === $endY) && $runStart !== null) {
-                $runEnd = $isWhiteRow && $y === $endY ? $y : $y - 1;
-
-                $runCenterY = ($runStart + $runEnd) / 2;
+            if ((! $isBright || $y === $lastY) && $runStart !== null) {
+                $runEnd = $isBright && $y === $lastY ? $y : $y - 1;
+                $length = $runEnd - $runStart + 1;
+                $center = ($runStart + $runEnd) / 2;
 
                 if (
-                    $runEnd - $runStart + 1 >= max(12, (int) round($box['height'] * 0.5))
-                    && ($minimumCenterY === null || $runCenterY > $minimumCenterY)
+                    $length >= $minimumLength
+                    && $length <= $maximumLength
+                    && ($minimumCenterY === null || $center > $minimumCenterY)
                 ) {
-                    $runs[] = [$runStart, $runEnd];
+                    $runs[] = ['start' => $runStart, 'end' => $runEnd, 'center' => $center];
                 }
 
                 $runStart = null;
             }
         }
 
-        if ($runs === []) {
-            return null;
-        }
-
-        usort($runs, fn (array $first, array $second): int => abs((($first[0] + $first[1]) / 2) - $box['center_y']) <=>
-            abs((($second[0] + $second[1]) / 2) - $box['center_y'])
-        );
-
-        return (int) round(($runs[0][0] + $runs[0][1]) / 2);
+        return $runs;
     }
 }
