@@ -2,6 +2,7 @@
 
 namespace Cable8mm\PromptWeaver\Tools;
 
+use Cable8mm\PromptWeaver\Support\FontPath;
 use GdImage;
 use RuntimeException;
 
@@ -160,13 +161,7 @@ final class RenderPng
 
     private function fontPath(): string
     {
-        $fontPath = dirname(__DIR__, 2).'/fonts/AtkinsonHyperlegible-Regular.ttf';
-
-        if (is_file($fontPath)) {
-            return $fontPath;
-        }
-
-        throw new RuntimeException("Preview font file not found: {$fontPath}");
+        return FontPath::outputRegular();
     }
 
     /** @param array<string, mixed> $config */
