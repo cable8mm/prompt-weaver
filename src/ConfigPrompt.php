@@ -42,6 +42,7 @@ class ConfigPrompt implements PromptInterface
 
         $template = file_get_contents(__DIR__.'/../stubs/config.'.$this->layout->value.'.prompt');
         [$widthMm, $heightMm] = $this->format->canvasDimensions();
+        $typography = $this->format->placeholderTypography();
 
         $this->promptString = strtr($template, [
             '{{ name_line }}' => $nameLine,
@@ -54,6 +55,9 @@ class ConfigPrompt implements PromptInterface
             '{{ width_mm }}' => (string) $widthMm,
             '{{ height_mm }}' => (string) $heightMm,
             '{{ dpi }}' => '300',
+            '{{ placeholder_box_width_pc }}' => (string) $typography['box_width_pc'],
+            '{{ placeholder_box_height_pc }}' => (string) $typography['box_height_pc'],
+            '{{ placeholder_font_size_pt }}' => (string) $typography['font_size_pt'],
         ]);
     }
 
