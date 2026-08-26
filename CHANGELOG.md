@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.9.1 - 2026-08-26
+
+### What's Changed
+
+* feat: enhance typography handling by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/52
+* feat: add image prompt file handling in export command by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/53
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.9.0...v0.9.1
+
 ## v0.9.0 - 2026-08-25
 
 ### What's Changed
