@@ -59,6 +59,22 @@ No manual service-provider registration, Nova dependency, or `public/vendor` fon
 copy is required. The package's PHP/GD preview renderer uses its bundled TTF font
 automatically.
 
+If the consuming service needs to access the bundled font files directly, use
+`Cable8mm\PromptWeaver\Support\FontPath`:
+
+```php
+use Cable8mm\PromptWeaver\Support\FontPath;
+
+$ttf = FontPath::outputRegular();
+$woff2 = FontPath::webRegular();
+```
+
+The available methods are:
+
+- `outputRegular()` / `outputBold()` — TTF paths for GD/image output
+- `webRegular()` / `webBold()` — WOFF2 paths for browser usage
+- `webRegularWoff()` / `webBoldWoff()` — WOFF paths for browser usage
+
 For OpenCV-based QR calibration, install `uv` first. On macOS with Homebrew:
 
 ```bash

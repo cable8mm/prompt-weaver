@@ -2,6 +2,7 @@
 
 namespace Cable8mm\PromptWeaver\Tools;
 
+use Cable8mm\PromptWeaver\Support\FontPath;
 use RuntimeException;
 
 final class RenderHtml
@@ -90,13 +91,7 @@ final class RenderHtml
 
     private function webFontPath(): string
     {
-        $fontPath = dirname(__DIR__, 2).'/fonts/AtkinsonHyperlegible-Regular.woff2';
-
-        if (is_file($fontPath)) {
-            return $fontPath;
-        }
-
-        throw new RuntimeException("Webfont file not found: {$fontPath}");
+        return FontPath::webRegular();
     }
 
     private function relativePath(string $fromDirectory, string $targetPath): string
