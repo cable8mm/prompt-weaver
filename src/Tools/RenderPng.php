@@ -48,7 +48,7 @@ final class RenderPng
             $this->configPlaceholder($config, 'ssid'),
             $ssid,
             0,
-            $this->canvasDpi($config),
+            $this->canvasWidthMm($config),
         );
 
         $this->drawPlaceholderText(
@@ -56,7 +56,7 @@ final class RenderPng
             $this->configPlaceholder($config, 'password'),
             $password,
             0,
-            $this->canvasDpi($config),
+            $this->canvasWidthMm($config),
         );
 
         $this->drawQr(
@@ -80,11 +80,11 @@ final class RenderPng
     /**
      * @param  array<string, mixed>  $placeholder
      */
-    private function drawPlaceholderText(GdImage $image, array $placeholder, string $text, int $verticalAdjustment = 0, int $dpi = 300): void
+    private function drawPlaceholderText(GdImage $image, array $placeholder, string $text, int $verticalAdjustment = 0, float $canvasWidthMm = 0): void
     {
         $box = $this->placeholderBox($image, $placeholder);
         $font = $this->fontPath();
-        $fontSize = $this->typographyPixels($placeholder, $dpi);
+        $fontSize = $this->typographyPixels($placeholder, imagesx($image), $canvasWidthMm);
         $colorHex = (string) ($placeholder['color'] ?? '#111111');
         $color = $this->allocateColor($image, $colorHex);
 
@@ -170,10 +170,10 @@ final class RenderPng
     }
 
     /** @param array<string, mixed> $config */
-    private function canvasDpi(array $config): int
+    private function canvasWidthMm(array $config): float
     {
-        $dpi = $config['canvas']['dpi'] ?? 300;
+        $widthMm = $config['canvas']['width_mm'] ?? 0;
 
-        return is_numeric($dpi) && (int) $dpi > 0 ? (int) $dpi : 300;
+        return is_numeric($widthMm) ? (float) $widthMm : 0.0;
     }
 }

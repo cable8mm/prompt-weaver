@@ -57,3 +57,19 @@ it('loads the selected layout preset into the config prompt', function () {
         ->toContain('Make the QR code the primary visual anchor')
         ->toContain('"box_y_pc": 62');
 });
+
+it('injects typography defaults from the selected format', function () {
+    $configPrompt = new ConfigPrompt(
+        description: 'A compact sign.',
+        colorDirection: 'warm neutrals',
+        fontMood: 'clean sans serif',
+        format: Format::MINI_SQUARE,
+    );
+    $configPrompt->build();
+
+    expect($configPrompt->prompt())
+        ->toContain('"box_width_pc": 80')
+        ->toContain('"box_height_pc": 12')
+        ->toContain('"font_size_pt": 10')
+        ->not->toContain('"box_width_pc": {{ placeholder_box_width_pc }}');
+});

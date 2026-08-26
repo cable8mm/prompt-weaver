@@ -34,6 +34,14 @@ final class ConfigValidator
             ));
         }
 
+        if (array_key_exists('width_mm', $config['canvas'])
+            && (! is_numeric($config['canvas']['width_mm']) || (float) $config['canvas']['width_mm'] <= 0)) {
+            throw new RuntimeException($this->message(
+                'Config canvas has an invalid width_mm',
+                $source,
+            ));
+        }
+
         $printTarget = $config['style']['print_target'] ?? null;
         if (! is_string($printTarget) || PrintTarget::tryFrom($printTarget) === null) {
             throw new RuntimeException($this->message(

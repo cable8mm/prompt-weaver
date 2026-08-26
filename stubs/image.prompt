@@ -5,8 +5,9 @@
 - Treat every coordinate and percentage in this prompt as invisible machine instructions only. They must affect placement internally but must never appear visibly in any form, including as decorative typography or background texture.
 
 [Canvas]
-- Portrait canvas, aspect ratio {{ aspect_ratio }}.
+{{ canvas_description }}
 - Use the following measurements only as invisible placement metadata: 0% means top/left and 100% means bottom/right. These measurements are instructions for composition, never visible design content.
+- Placeholder dimensions are exact production requirements, not approximate guidance. Render each placeholder at the specified width and height across the full canvas, with its stated center and edges; do not shrink, inset, or reinterpret these boxes as a smaller card or sheet.
 
 [Style]
 {{ style }}

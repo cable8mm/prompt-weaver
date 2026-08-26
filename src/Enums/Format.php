@@ -45,6 +45,23 @@ enum Format: string
         };
     }
 
+    /** @return array{box_width_pc:int, box_height_pc:int, font_size_pt:int} */
+    public function placeholderTypography(): array
+    {
+        return match ($this) {
+            self::A45_POSTER => [
+                'box_width_pc' => 70,
+                'box_height_pc' => 8,
+                'font_size_pt' => 18,
+            ],
+            self::A67_POSTER, self::MINI_SQUARE => [
+                'box_width_pc' => 80,
+                'box_height_pc' => 12,
+                'font_size_pt' => 10,
+            ],
+        };
+    }
+
     /** @return array<string, array{width_mm:int, height_mm:int}> */
     public static function physicalPageDimensions(): array
     {
