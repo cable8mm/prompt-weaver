@@ -51,6 +51,27 @@ class CalibrateQrTest(unittest.TestCase):
         self.assertAlmostEqual(result["center_y"], 926, delta=10)
         self.assertLess(result["width"], 250)
 
+    def test_detects_rounded_square_frame(self) -> None:
+        image = np.full((1216, 864, 3), 220, dtype=np.uint8)
+        cv2.rectangle(image, (249, 264), (615, 630), (255, 255, 255), -1)
+        cv2.ellipse(image, (249, 264), (42, 42), 180, 270, 360, (70, 45, 25), -1)
+        cv2.ellipse(image, (615, 264), (42, 42), 270, 0, 90, (70, 45, 25), -1)
+        cv2.ellipse(image, (249, 630), (42, 42), 90, 180, 270, (70, 45, 25), -1)
+        cv2.ellipse(image, (615, 630), (42, 42), 0, 90, 180, (70, 45, 25), -1)
+        cv2.rectangle(image, (291, 264), (573, 630), (70, 45, 25), -1)
+        cv2.rectangle(image, (249, 306), (615, 588), (70, 45, 25), -1)
+        cv2.rectangle(image, (291, 306), (573, 588), (255, 255, 255), -1)
+
+        with tempfile.TemporaryDirectory() as directory:
+            image_path = Path(directory) / "rounded-sign.png"
+            self.assertTrue(cv2.imwrite(str(image_path), image))
+
+            result = MODULE.detect_frame(str(image_path), 50, 20, 52)
+
+        self.assertAlmostEqual(result["center_x"], 432, delta=30)
+        self.assertAlmostEqual(result["center_y"], 447, delta=30)
+        self.assertAlmostEqual(result["width"], result["height"], delta=20)
+
     def test_rejects_image_without_square_frame(self) -> None:
         image = np.full((800, 1000, 3), 35, dtype=np.uint8)
 
