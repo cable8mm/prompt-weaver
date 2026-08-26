@@ -32,7 +32,12 @@ def detect_frame(image_path: str, expected_x: float, expected_y: float, expected
             continue
 
         polygon = cv2.approxPolyDP(contour, perimeter * 0.03, True)
-        if len(polygon) != 4 or not cv2.isContourConvex(polygon):
+        # A generated QR frame may have rounded corners. OpenCV then returns
+        # more than four vertices (and, for the double edge of a thick frame,
+        # may report the contour as non-convex), so do not require an exact
+        # convex quadrilateral here. The size/position priors below and the
+        # near-square check still keep unrelated contours out of contention.
+        if len(polygon) < 4 or len(polygon) > 12:
             continue
 
         x, y, box_width, box_height = cv2.boundingRect(polygon)
@@ -41,6 +46,14 @@ def detect_frame(image_path: str, expected_x: float, expected_y: float, expected
 
         aspect = box_width / max(1, box_height)
         if aspect < 0.8 or aspect > 1.25:
+            continue
+
+        # Reject contours that only happen to have a square bounding box but
+        # occupy very little of it. This is especially useful when accepting
+        # rounded or thick frames, whose contour approximation is less exact.
+        contour_area = cv2.contourArea(contour)
+        bounding_area = float(box_width * box_height)
+        if contour_area / max(1.0, bounding_area) < 0.45:
             continue
 
         center_x = x + box_width / 2
