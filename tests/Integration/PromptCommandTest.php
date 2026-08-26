@@ -279,6 +279,7 @@ it('exports a generated png and config for Laravel import', function () {
         expect($result['stdout'])->toContain('Created '.$outputDirectory);
         expect(is_file($outputDirectory.'/config.json'))->toBeTrue();
         expect(is_file($outputDirectory.'/image.png'))->toBeTrue();
+        expect(is_file($outputDirectory.'/image.prompt'))->toBeTrue();
         expect(is_file($outputDirectory.'/preview.png'))->toBeTrue();
         expect(is_file($outputDirectory.'/manifest.json'))->toBeFalse();
         $exportedConfig = json_decode((string) file_get_contents($outputDirectory.'/config.json'), true, 512, JSON_THROW_ON_ERROR);
@@ -299,6 +300,7 @@ it('exports a generated png and config for Laravel import', function () {
                 ],
             ]);
         expect(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($fixtureDirectory.'/image.png'));
+        expect(md5_file($outputDirectory.'/image.prompt'))->toBe(md5_file($fixtureDirectory.'/image.prompt'));
         expect(md5_file($outputDirectory.'/preview.png'))->toBe(md5_file($fixtureDirectory.'/preview.png'));
     } finally {
         remove_directory_cmd($workingRoot);
@@ -339,8 +341,10 @@ it('exports every fixture with export-all', function () {
         expect($result['stdout'])->toContain('Created '.$outputRoot.'/office-coworking');
         expect(is_file($outputRoot.'/cafe-restaurant/config.json'))->toBeTrue();
         expect(is_file($outputRoot.'/cafe-restaurant/image.png'))->toBeTrue();
+        expect(is_file($outputRoot.'/cafe-restaurant/image.prompt'))->toBeTrue();
         expect(is_file($outputRoot.'/office-coworking/config.json'))->toBeTrue();
         expect(is_file($outputRoot.'/office-coworking/image.png'))->toBeTrue();
+        expect(is_file($outputRoot.'/office-coworking/image.prompt'))->toBeTrue();
     } finally {
         remove_directory_cmd($workingRoot);
     }

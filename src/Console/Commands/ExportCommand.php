@@ -40,6 +40,7 @@ class ExportCommand extends PromptWeaverCommand
         $fixtureDirectory = $this->fixtureDirectoryFromReference($code, $fixturesRoot);
         $manifestPath = $fixtureDirectory.'/manifest.json';
         $designBriefPath = $fixtureDirectory.'/design-brief.json';
+        $imagePromptPath = $fixtureDirectory.'/image.prompt';
         $configPath = $fixtureDirectory.'/config.json';
         $previewPath = $fixtureDirectory.'/preview.png';
         $imagePath ??= $fixtureDirectory.'/image.png';
@@ -50,6 +51,10 @@ class ExportCommand extends PromptWeaverCommand
 
         if (! is_file($designBriefPath)) {
             throw new RuntimeException("Design brief file not found: {$designBriefPath}");
+        }
+
+        if (! is_file($imagePromptPath)) {
+            throw new RuntimeException("Image prompt file not found: {$imagePromptPath}");
         }
 
         if (! is_file($configPath)) {
@@ -80,6 +85,10 @@ class ExportCommand extends PromptWeaverCommand
 
         if (! copy($imagePath, $outputDirectory.'/image.png')) {
             throw new RuntimeException("Unable to copy image to: {$outputDirectory}/image.png");
+        }
+
+        if (! copy($imagePromptPath, $outputDirectory.'/image.prompt')) {
+            throw new RuntimeException("Unable to copy image prompt to: {$outputDirectory}/image.prompt");
         }
 
         if (is_file($previewPath) && ! copy($previewPath, $outputDirectory.'/preview.png')) {
