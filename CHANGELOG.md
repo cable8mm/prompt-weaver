@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.9.2 - 2026-08-26
+
+### What's Changed
+
+* feat: add FontPath class for font file handling and update RenderHtml and RenderPng to use it by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/54
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.9.1...v0.9.2
+
 ## v0.9.1 - 2026-08-26
 
 ### What's Changed
