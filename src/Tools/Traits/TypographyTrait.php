@@ -24,12 +24,22 @@ trait TypographyTrait
         throw new \InvalidArgumentException('Placeholder is missing font_size_pt or font_size_px.');
     }
 
-    private function typographyPixels(array $placeholder, int $dpi): int
+    private function typographyPixels(array $placeholder, int $imageWidth, float $canvasWidthMm): int
     {
         $typography = $this->typography($placeholder);
 
-        return (int) round($typography['unit'] === 'pt'
-            ? $typography['value'] * $dpi / 72
-            : $typography['value']);
+        if ($typography['unit'] === 'px') {
+            return (int) round($typography['value']);
+        }
+
+        if ($imageWidth <= 0 || $canvasWidthMm <= 0) {
+            throw new \InvalidArgumentException(
+                'Point-based typography requires a positive canvas.width_mm and image width.'
+            );
+        }
+
+        return (int) round(
+            $typography['value'] * $imageWidth * 25.4 / ($canvasWidthMm * 72)
+        );
     }
 }

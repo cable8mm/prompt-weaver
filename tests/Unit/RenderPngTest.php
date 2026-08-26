@@ -162,3 +162,49 @@ it('throws an exception when background image is missing', function () {
 
     $renderer->render($this->config, '/nonexistent/image.png', $this->outputPath);
 })->throws(RuntimeException::class);
+
+it('converts point typography using the physical canvas width and raster width', function () {
+    $renderer = new RenderPng;
+    $method = new ReflectionMethod($renderer, 'typographyPixels');
+
+    expect($method->invoke($renderer, ['font_size_pt' => 18], 1728, 210.0))
+        ->toBeBetween(50, 54);
+    expect($method->invoke($renderer, ['font_size_pt' => 18], 2480, 210.0))
+        ->toBe(75);
+});
+
+it('preserves the physical font proportion across raster widths', function () {
+    $renderer = new RenderPng;
+    $method = new ReflectionMethod($renderer, 'typographyPixels');
+
+    $at1728 = $method->invoke($renderer, ['font_size_pt' => 18], 1728, 210.0);
+    $at2480 = $method->invoke($renderer, ['font_size_pt' => 18], 2480, 210.0);
+
+    expect(abs(($at1728 / 1728) - ($at2480 / 2480)))->toBeLessThan(0.001);
+});
+
+it('converts point typography for common physical canvas widths', function (float $canvasWidthMm, int $expectedPixels) {
+    $renderer = new RenderPng;
+    $method = new ReflectionMethod($renderer, 'typographyPixels');
+
+    expect($method->invoke($renderer, ['font_size_pt' => 18], 1728, $canvasWidthMm))
+        ->toBe($expectedPixels);
+})->with([
+    'A5' => [148.0, 74],
+    'A6' => [105.0, 105],
+    'Mini Square' => [100.0, 110],
+]);
+
+it('preserves legacy pixel typography exactly', function () {
+    $renderer = new RenderPng;
+    $method = new ReflectionMethod($renderer, 'typographyPixels');
+
+    expect($method->invoke($renderer, ['font_size_px' => 36], 1728, 0.0))->toBe(36);
+});
+
+it('rejects point typography without a physical canvas width', function () {
+    $renderer = new RenderPng;
+    $method = new ReflectionMethod($renderer, 'typographyPixels');
+
+    $method->invoke($renderer, ['font_size_pt' => 18], 1728, 0.0);
+})->throws(InvalidArgumentException::class, 'canvas.width_mm');

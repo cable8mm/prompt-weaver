@@ -21,6 +21,9 @@ class ImagePrompt implements PromptInterface
         $style = $this->config['style'];
         $content = $this->config['content'];
         $placeholders = $this->config['placeholders'];
+        $canvasDescription = $canvas['aspect_ratio'] === '1:1'
+            ? '- Square canvas, aspect ratio 1:1. The artwork must fill the entire square canvas edge-to-edge. Do not place the design on an inner sheet, portrait page, A4 paper, card, or secondary background; do not add outer margins or a nested paper shape.'
+            : "- Portrait canvas, aspect ratio {$canvas['aspect_ratio']}. The artwork must fill the entire canvas; do not place it on an inner sheet or secondary background.";
 
         $layoutLines = [];
 
@@ -44,7 +47,7 @@ class ImagePrompt implements PromptInterface
             $text = isset($element['text']) ? ' "'.$element['text'].'"' : '';
             $elementStyle = isset($element['style']) ? ' '.$element['style'].'.' : '';
             $width = isset($element['width_pc'])
-                ? ", width≈{$element['width_pc']}% of canvas width"
+                ? ", width={$element['width_pc']}% of canvas width exactly"
                 : '';
 
             $layoutLines[] = "{$step}. {$label}{$text}: centered at x={$element['x_pc']}%, y={$element['y_pc']}%{$width}.{$elementStyle}";
@@ -57,7 +60,9 @@ class ImagePrompt implements PromptInterface
                 continue;
             }
             $box = $placeholders[$key];
-            $layoutLines[] = "{$step}. {$key} placeholder box: centered at x={$box['box_x_pc']}%, y={$box['box_y_pc']}%, box width≈{$box['box_width_pc']}%, height≈{$box['box_height_pc']}% of canvas.";
+            $left = (float) $box['box_x_pc'] - ((float) $box['box_width_pc'] / 2);
+            $right = (float) $box['box_x_pc'] + ((float) $box['box_width_pc'] / 2);
+            $layoutLines[] = "{$step}. {$key} placeholder box: centered exactly at x={$box['box_x_pc']}%, y={$box['box_y_pc']}%, width={$box['box_width_pc']}% and height={$box['box_height_pc']}% of the full canvas exactly, from x={$left}% to x={$right}%.";
             $layoutLines[] = "   - The box's INTERIOR FILL must be solid {$box['box_fill']} — {$box['box_fill_note']}.";
             $layoutLines[] = "   - A small label \"{$box['label']}\" sits ".$this->describeLabelPosition($box['label_position']).' (against the surrounding background, not inside the white area).';
             $layoutLines[] = "   - Nothing else is drawn inside the box — it stays empty and pure {$box['box_fill']}.";
@@ -71,7 +76,7 @@ class ImagePrompt implements PromptInterface
 
         // QR
         $qr = $placeholders['qr'];
-        $layoutLines[] = "{$step}. QR placeholder: square area centered at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width≈{$qr['width_pc']}% of canvas. {$qr['style']}. The square must have a clearly visible continuous outer border in a color that strongly contrasts with both the solid white interior and the surrounding background, with no QR code drawn inside; keep the border geometrically square so calibration can detect it.";
+        $layoutLines[] = "{$step}. QR placeholder: square area centered exactly at x={$qr['x_pc']}%, y={$qr['y_pc']}%, width={$qr['width_pc']}% of the full canvas exactly. {$qr['style']}. The square must have a clearly visible continuous outer border in a color that strongly contrasts with both the solid white interior and the surrounding background, with no QR code drawn inside; keep the border geometrically square so calibration can detect it.";
         $step++;
 
         // Footer
@@ -82,6 +87,7 @@ class ImagePrompt implements PromptInterface
 
         $this->promptString = strtr($template, [
             '{{ aspect_ratio }}' => $canvas['aspect_ratio'],
+            '{{ canvas_description }}' => $canvasDescription,
             '{{ style }}' => $this->joinSentences([
                 $style['theme'],
                 $style['background'],

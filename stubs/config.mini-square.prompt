@@ -14,9 +14,9 @@ Use a compact, balanced square composition with one clear central focal point. M
     "footer": { "text": "제작: WIFI NOTE", "x_pc": 50, "y_pc": 96, "align": "center" }
   },
   "placeholders": {
-    "qr": { "x_pc": 50, "y_pc": 27, "width_pc": 44, "style": "<QR frame style>", "box_fill": "#FFFFFF", "box_fill_note": "solid white square with quiet zone" },
-    "ssid": { "box_x_pc": 50, "box_y_pc": 54, "box_width_pc": 72, "box_height_pc": 7, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_pt": 15, "font_weight": "normal", "color": "#111111" },
-    "password": { "box_x_pc": 50, "box_y_pc": 65, "box_width_pc": 72, "box_height_pc": 7, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_pt": 15, "font_weight": "normal", "color": "#111111" }
+    "qr": { "x_pc": 50, "y_pc": 27, "width_pc": 60, "style": "<QR frame style>", "box_fill": "#FFFFFF", "box_fill_note": "solid white square with quiet zone" },
+    "ssid": { "box_x_pc": 50, "box_y_pc": 59, "box_width_pc": 80, "box_height_pc": 12, "label": "SSID:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_pt": 10, "font_weight": "normal", "color": "#111111" },
+    "password": { "box_x_pc": 50, "box_y_pc": 70, "box_width_pc": 80, "box_height_pc": 12, "label": "PASSWORD:", "label_position": "outside_above", "box_fill": "#FFFFFF", "box_fill_note": "solid white cutout", "align": "center", "font_family": "Atkinson Hyperlegible", "font_size_pt": 10, "font_weight": "normal", "color": "#111111" }
   }
 }
 

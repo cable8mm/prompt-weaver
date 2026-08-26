@@ -81,9 +81,16 @@
       "if": {
         "properties": {
           "placeholders": {
-            "properties": {
-              "ssid": { "required": ["font_size_pt"] }
-            }
+            "anyOf": [
+              {
+                "required": ["ssid"],
+                "properties": { "ssid": { "required": ["font_size_pt"] } }
+              },
+              {
+                "required": ["password"],
+                "properties": { "password": { "required": ["font_size_pt"] } }
+              }
+            ]
           }
         }
       },

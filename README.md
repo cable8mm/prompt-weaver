@@ -576,7 +576,7 @@ If `--image` is omitted, the command uses `.weaver/cafe-restaurant/image.png`. T
 
 The export command validates that the manifest, design brief, and config exist, the image is a PNG, and its aspect ratio matches `canvas.aspect_ratio`. The resulting directory contains:
 
-Typography in new configs is physical: use `placeholders.ssid.font_size_pt` and `placeholders.password.font_size_pt` (6–96 pt), with `canvas.width_mm`, `canvas.height_mm`, and `canvas.dpi` describing the print canvas. HTML previews use CSS points; PNG previews convert points with `pixels = points * dpi / 72`. Existing configs using `font_size_px` remain supported as a legacy fallback and do not require migration, though converting them to points is recommended when the physical format is known.
+Typography in new configs is physical: use `placeholders.ssid.font_size_pt` and `placeholders.password.font_size_pt` (6–96 pt), with `canvas.width_mm`, `canvas.height_mm`, and `canvas.dpi` describing the print canvas. HTML previews use CSS points; PNG previews convert points using the configured physical width and the loaded raster width: `pixels = points * image_width_px * 25.4 / (canvas.width_mm * 72)`. Existing configs using `font_size_px` remain supported as a legacy fallback and do not require migration, though converting them to points is recommended when the physical format is known.
 
 ```text
 dist/cafe-restaurant/
