@@ -30,6 +30,12 @@ The package is centered around the **WiFi Note** signage flow, where a design br
 composer require cable8mm/prompt-weaver
 ```
 
+Laravel에서 패키지 설정을 애플리케이션의 `config/prompt-weaver.php`로 복사하려면 다음 명령을 실행합니다:
+
+```bash
+php artisan vendor:publish --tag=prompt-weaver-config
+```
+
 ### Laravel application setup
 
 Laravel's package discovery registers the service provider automatically. If the
