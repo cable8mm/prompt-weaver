@@ -10,4 +10,11 @@ return [
                 : sys_get_temp_dir().'/prompt-weaver-uv'
         ),
     ],
+
+    'ai' => [
+        'provider' => env('PROMPT_WEAVER_PROVIDER'),
+        'model' => env('PROMPT_WEAVER_MODEL'),
+        'image_provider' => env('PROMPT_WEAVER_IMAGE_PROVIDER'),
+        'image_model' => env('PROMPT_WEAVER_IMAGE_MODEL'),
+    ],
 ];
