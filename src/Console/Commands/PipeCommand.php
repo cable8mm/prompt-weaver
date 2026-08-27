@@ -28,8 +28,8 @@ final class PipeCommand extends PromptWeaverCommand
         $this->addArgument('fixture', InputArgument::OPTIONAL, 'Template code.');
         foreach (['category', 'format', 'color-mode', 'layout', 'provider', 'api-key', 'model', 'color', 'fixtures-root'] as $option) {
             $default = match ($option) {
-                'provider' => getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter',
-                'model' => getenv('PROMPT_WEAVER_MODEL') ?: 'google/gemma-4-26b-a4b-it:free',
+                'provider' => $this->aiConfig('provider'),
+                'model' => $this->aiConfig('model'),
                 'fixtures-root' => self::DEFAULT_FIXTURES_ROOT,
                 default => null,
             };
@@ -42,12 +42,18 @@ final class PipeCommand extends PromptWeaverCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $provider = (string) $input->getOption('provider');
+        $provider = $input->getOption('provider');
+        $provider = is_string($provider) && $provider !== '' ? $provider : null;
         $apiKey = $input->getOption('api-key');
-        $model = (string) $input->getOption('model');
+        $model = $input->getOption('model');
+        $model = is_string($model) && $model !== '' ? $model : null;
 
         if (is_string($apiKey) && $apiKey !== '' && function_exists('config')) {
-            config(["ai.providers.{$provider}.key" => $apiKey]);
+            $providerForKey = $provider ?? config('ai.default');
+
+            if (is_string($providerForKey) && $providerForKey !== '') {
+                config(["ai.providers.{$providerForKey}.key" => $apiKey]);
+            }
         }
 
         $client = $this->aiClient();

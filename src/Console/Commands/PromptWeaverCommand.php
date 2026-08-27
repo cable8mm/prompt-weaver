@@ -29,6 +29,13 @@ abstract class PromptWeaverCommand extends Command
 
     protected const DEFAULT_COLOR_MODE = ColorMode::MONO;
 
+    protected function aiConfig(string $key): mixed
+    {
+        return function_exists('config')
+            ? config('prompt-weaver.ai.'.$key)
+            : null;
+    }
+
     protected function fixturesRoot(InputInterface $input): string
     {
         return (string) $input->getOption('fixtures-root');

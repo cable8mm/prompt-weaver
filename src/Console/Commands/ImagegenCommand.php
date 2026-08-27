@@ -16,8 +16,8 @@ final class ImagegenCommand extends PromptWeaverCommand
     {
         $this->setName('imagegen')->setDescription('Generate an image from image.prompt.');
         $this->addArgument('fixture', InputArgument::REQUIRED, 'Template code.');
-        $this->addOption('provider', null, InputOption::VALUE_REQUIRED, default: getenv('IMAGEGEN_PROVIDER') ?: 'gemini');
-        $this->addOption('model', null, InputOption::VALUE_REQUIRED, default: getenv('IMAGEGEN_MODEL') ?: 'gemini-3.1-flash-image-preview');
+        $this->addOption('provider', null, InputOption::VALUE_REQUIRED, default: $this->aiConfig('image_provider'));
+        $this->addOption('model', null, InputOption::VALUE_REQUIRED, default: $this->aiConfig('image_model'));
         $this->addOption('output', null, InputOption::VALUE_REQUIRED, 'Output image path.');
         $this->addFixturesRootOption();
     }
