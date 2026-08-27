@@ -7,6 +7,7 @@ use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\ColorMode;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\Layout;
+use Cable8mm\PromptWeaver\Validators\ConfigValidator;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 
@@ -100,6 +101,8 @@ final class Pipe
             $onProgress('config.complete', 'Config JSON received.');
         }
 
+        $this->validateConfig($config);
+
         // Step 3 — final image prompt (build only, execution is left to the caller)
         if ($onProgress !== null) {
             $onProgress('image', 'Building image prompt...');
@@ -117,6 +120,22 @@ final class Pipe
             config: $config,
             imagePrompt: $imagePrompt->prompt() ?? '',
         );
+    }
+
+    /**
+     * Validate the model's config response before passing it to the renderer.
+     *
+     * @param  array<string, mixed>  $config
+     */
+    private function validateConfig(array $config): void
+    {
+        foreach (['canvas', 'style', 'content', 'placeholders'] as $key) {
+            if (! isset($config[$key]) || ! is_array($config[$key])) {
+                throw new \RuntimeException("Config response is missing required key [{$key}].");
+            }
+        }
+
+        (new ConfigValidator)->validate($config);
     }
 
     /**

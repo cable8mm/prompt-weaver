@@ -172,6 +172,26 @@ it('throws when the design brief response is missing the description field', fun
     );
 })->throws(RuntimeException::class, 'Design brief response missing "description" field.');
 
+it('validates the config response before building the image prompt', function () {
+    $briefJson = [
+        'name' => '테스트',
+        'description' => 'A test design brief.',
+        'color_direction' => 'test colors',
+        'font_mood' => 'test font',
+    ];
+
+    $client = new FakeAiClient([$briefJson, [
+        'style' => [],
+        'content' => [],
+        'placeholders' => [],
+    ]]);
+
+    (new Pipe($client))->run(
+        category: Category::CAFE_RESTAURANT,
+        format: Format::A45_POSTER,
+    );
+})->throws(RuntimeException::class, 'Config response is missing required key [canvas].');
+
 it('passes the color option to DesignBriefPrompt', function () {
     $briefJson = [
         'name' => '색칠',
