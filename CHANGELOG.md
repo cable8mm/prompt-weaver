@@ -1,5 +1,14 @@
 # Release Notes
 
+## v1.0.0 - 2026-08-27
+
+### What's Changed
+
+* feat: enhance QR frame detection to support rounded corners and improve contour validation by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/55
+* feat: add support for image generation provider and model configuration in .env and commands by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/56
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v0.9.2...v1.0.0
+
 ## v0.9.2 - 2026-08-26
 
 ### What's Changed
