@@ -1,5 +1,14 @@
 # Release Notes
 
+## v1.0.1 - 2026-08-27
+
+### What's Changed
+
+* docs: add instructions for Laravel package configuration in README by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/57
+* feat: add config validation in Pipe class by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/58
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v1.0.0...v1.0.1
+
 ## v1.0.0 - 2026-08-27
 
 ### What's Changed
