@@ -1,5 +1,13 @@
 # Release Notes
 
+## v1.0.2 - 2026-08-28
+
+### What's Changed
+
+* feat: implement Code tool for deriving fixture codes from theme strings by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/59
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v1.0.1...v1.0.2
+
 ## v1.0.1 - 2026-08-27
 
 ### What's Changed
