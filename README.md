@@ -474,6 +474,20 @@ echo $result->imagePrompt;   // Final image generation prompt
 
 The `PipeResult` object contains all three prompts plus the parsed intermediate JSON responses, making it easy to inspect or log each step of the pipeline.
 
+### Derive a fixture code
+
+The `Code` tool derives a kebab-case code directly from a theme string. It does not read or write files, so it can be used independently of the CLI and fixture workflow:
+
+```php
+use Cable8mm\PromptWeaver\Tools\Code;
+
+$code = (new Code)->deriveFromTheme('Wabi-Sabi Minimalist');
+
+// wabi-sabi-minimalist
+```
+
+The derived code uses at most the first four words and 48 characters. The `code` CLI command uses this same tool while handling fixture directories and JSON files.
+
 ## Notes
 
 - `DesignBriefPrompt` intentionally adds a small amount of randomness so the generated briefs feel less repetitive.
