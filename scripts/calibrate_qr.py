@@ -24,6 +24,61 @@ def detect_frame(image_path: str, expected_x: float, expected_y: float, expected
     expected_x = expected_x / 100 * width
     expected_y = expected_y / 100 * height
     expected_width = max(1.0, expected_width / 100 * width)
+
+    # Generated artwork often renders the QR frame as a colored border around
+    # a solid white square. The border can disappear in the edge map when it
+    # blends into the illustration, while the white QR area remains a stable
+    # connected component. Prefer that component before considering arbitrary
+    # square contours from the artwork (cups, icons, labels, etc.).
+    bright_candidates = []
+    for threshold in (245, 235, 220):
+        bright = cv2.inRange(gray, threshold, 255)
+        component_count, _, stats, centroids = cv2.connectedComponentsWithStats(bright, 8)
+
+        for index in range(1, component_count):
+            x, y, box_width, box_height, area = stats[index]
+            # A bright label or text box can also be square-ish. Require the
+            # detected interior to be reasonably close to the configured QR
+            # size; otherwise let the contour detector handle cases where the
+            # artwork's frame is larger than the initial estimate.
+            if (
+                box_width < max(40, expected_width * 0.75)
+                or box_height < max(40, expected_width * 0.75)
+                or box_width > expected_width * 1.25
+                or box_height > expected_width * 1.25
+            ):
+                continue
+
+            aspect = box_width / max(1, box_height)
+            if aspect < 0.8 or aspect > 1.25:
+                continue
+
+            center_x, center_y = centroids[index]
+            vertical_distance = abs(center_y - expected_y) / height
+            if vertical_distance > 0.35:
+                continue
+
+            size_distance = abs(box_width - expected_width) / expected_width
+            score = (
+                size_distance * 2
+                + abs(center_x - expected_x) / width
+                + vertical_distance
+                + abs(aspect - 1)
+            )
+            bright_candidates.append((score, int(area), x, y, box_width, box_height))
+
+    if bright_candidates:
+        bright_candidates.sort(key=lambda item: (item[0], -item[1]))
+        _, _, x, y, box_width, box_height = bright_candidates[0]
+        return {
+            "left": float(x),
+            "top": float(y),
+            "width": float(box_width),
+            "height": float(box_height),
+            "center_x": x + box_width / 2,
+            "center_y": y + box_height / 2,
+        }
+
     candidates = []
 
     for contour in contours:
