@@ -52,12 +52,12 @@ enum Format: string
             self::A45_POSTER => [
                 'box_width_pc' => 70,
                 'box_height_pc' => 8,
-                'font_size_pt' => 18,
+                'font_size_pt' => 24,
             ],
             self::A67_POSTER, self::MINI_SQUARE => [
                 'box_width_pc' => 80,
                 'box_height_pc' => 12,
-                'font_size_pt' => 10,
+                'font_size_pt' => 18,
             ],
         };
     }
