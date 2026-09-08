@@ -38,16 +38,16 @@ it('provides format-specific placeholder typography defaults', function () {
     expect(Format::A45_POSTER->placeholderTypography())->toBe([
         'box_width_pc' => 70,
         'box_height_pc' => 8,
-        'font_size_pt' => 18,
+        'font_size_pt' => 24,
     ]);
     expect(Format::A67_POSTER->placeholderTypography())->toBe([
         'box_width_pc' => 80,
         'box_height_pc' => 12,
-        'font_size_pt' => 10,
+        'font_size_pt' => 18,
     ]);
     expect(Format::MINI_SQUARE->placeholderTypography())->toBe([
         'box_width_pc' => 80,
         'box_height_pc' => 12,
-        'font_size_pt' => 10,
+        'font_size_pt' => 11,
     ]);
 });
