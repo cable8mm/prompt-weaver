@@ -1,5 +1,13 @@
 # Release Notes
 
+## v1.0.3 - 2026-09-08
+
+### What's Changed
+
+* feat: update font sizes and patch some functions by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/60
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v1.0.2...v1.0.3
+
 ## v1.0.2 - 2026-08-28
 
 ### What's Changed
