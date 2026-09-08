@@ -129,3 +129,80 @@ it('limits the derived code to four words', function () {
         remove_code_command_directory($fixturesRoot);
     }
 });
+
+it('renames every fixture with code-all after validating the complete batch', function () {
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-code-all-'.bin2hex(random_bytes(4));
+    $fixturesRoot = $workingRoot.'/fixtures';
+    $distRoot = $workingRoot.'/dist';
+
+    foreach (['first', 'second'] as $code) {
+        mkdir($fixturesRoot.'/'.$code, 0777, true);
+        file_put_contents($fixturesRoot.'/'.$code.'/manifest.json', json_encode(['code' => $code]).PHP_EOL);
+    }
+
+    file_put_contents($fixturesRoot.'/first/config.json', json_encode([
+        'style' => ['theme' => 'Warm Linen Cafe'],
+    ]).PHP_EOL);
+    file_put_contents($fixturesRoot.'/second/config.json', json_encode([
+        'style' => ['theme' => 'Modern Quiet Office'],
+    ]).PHP_EOL);
+    mkdir($distRoot.'/first', 0777, true);
+    file_put_contents($distRoot.'/first/config.json', json_encode([
+        'metadata' => ['code' => 'first'],
+    ]).PHP_EOL);
+
+    try {
+        $dryRun = run_code_command([
+            'code-all',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$distRoot,
+            '--dry-run',
+        ]);
+
+        expect($dryRun['exitCode'])->toBe(0);
+        expect($dryRun['stdout'])->toContain('first -> warm-linen-cafe');
+        expect($dryRun['stdout'])->toContain('second -> modern-quiet-office');
+        expect(is_dir($fixturesRoot.'/first'))->toBeTrue();
+
+        $result = run_code_command([
+            'code-all',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$distRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0);
+        expect(is_dir($fixturesRoot.'/warm-linen-cafe'))->toBeTrue();
+        expect(is_dir($fixturesRoot.'/modern-quiet-office'))->toBeTrue();
+        expect(is_dir($distRoot.'/warm-linen-cafe'))->toBeTrue();
+        expect(is_dir($fixturesRoot.'/first'))->toBeFalse();
+    } finally {
+        remove_code_command_directory($workingRoot);
+    }
+});
+
+it('does not change any fixture when code-all finds duplicate derived codes', function () {
+    $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-code-all-'.bin2hex(random_bytes(4));
+
+    foreach (['first', 'second'] as $code) {
+        mkdir($fixturesRoot.'/'.$code, 0777, true);
+        file_put_contents($fixturesRoot.'/'.$code.'/manifest.json', json_encode(['code' => $code]).PHP_EOL);
+        file_put_contents($fixturesRoot.'/'.$code.'/config.json', json_encode([
+            'style' => ['theme' => 'Same Theme'],
+        ]).PHP_EOL);
+    }
+
+    try {
+        $result = run_code_command([
+            'code-all',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$fixturesRoot.'/dist',
+        ]);
+
+        expect($result['exitCode'])->not->toBe(0);
+        expect($result['stderr'])->toContain('Multiple fixtures derive the same code');
+        expect(is_dir($fixturesRoot.'/first'))->toBeTrue();
+        expect(is_dir($fixturesRoot.'/second'))->toBeTrue();
+    } finally {
+        remove_code_command_directory($fixturesRoot);
+    }
+});

@@ -413,6 +413,19 @@ After the design has been generated, assign its final code from `config.json`'s 
 
 The command converts the theme to kebab-case, keeps at most the first four words and 48 characters, and removes a partial trailing word when the length limit is reached. For example, `Wabi-Sabi Minimalist` becomes `wabi-sabi-minimalist`. It renames the matching `.weaver/<code>` folder, updates `manifest.json`, and renames and updates `dist/<code>` when an export already exists. If the target code is already in use, the command stops without renaming anything.
 
+To apply the same operation to every fixture under `.weaver`, use `code-all`:
+
+```bash
+./weaver code-all
+```
+
+`code-all` first builds and validates the complete rename plan, including duplicate codes and existing fixture or export directories. Only if every fixture passes validation are the folders and JSON files changed. Use `--dry-run` to inspect the mappings without changing files, or use `--fixtures-root` and `--dist-root` to change the input and export roots:
+
+```bash
+./weaver code-all --dry-run
+./weaver code-all --fixtures-root=.weaver --dist-root=dist
+```
+
 What each command outputs:
 
 1. `brief` saves the design-brief prompt you send to a model.
@@ -424,10 +437,11 @@ What each command outputs:
 7. `chain` prints all three prompts in one run for quick inspection.
 8. `init` creates a new fixture manifest folder with the template `code` and default values for `category`, `format`, and `color_mode`. Use `--color-mode=Color` for color output or `--color-mode=Mono` for monochrome output.
 9. `code` renames a fixture from its current code to a kebab-case code derived from `config.json`'s `style.theme`. It updates the fixture folder, `manifest.json`, and any matching `dist/<code>` export.
-10. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
-11. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
-12. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
-13. `config:validate` validates a config JSON file against the required config structure and canvas aspect-ratio format.
+10. `code-all` applies the `code` rename to every fixture after validating the complete batch. Use `--dry-run` to print the plan without changing files.
+11. `pipe` runs the full three-step pipeline end-to-end through `laravel/ai` and saves the prompts and intermediate JSON responses. Use `--show-output` to print them. The default provider is `openrouter` with the `google/gemma-4-26b-a4b-it:free` model; use `--provider=openai` to switch to OpenAI.
+12. `export` packages a manually generated PNG and the working config into a Laravel-ready `dist/<code>` directory.
+13. `config-stub` assembles a registered layout stub into the image-generation prompt and copies it to the clipboard for interactive AI testing. Use `--print` to print it instead.
+14. `config:validate` validates a config JSON file against the required config structure and canvas aspect-ratio format.
 
 For the complete command and option list, run `./weaver --help` or `./weaver list`.
 

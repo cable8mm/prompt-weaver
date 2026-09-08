@@ -18,6 +18,24 @@ SPEC.loader.exec_module(MODULE)
 
 
 class CalibrateQrTest(unittest.TestCase):
+    def test_prefers_bright_qr_area_when_artwork_has_a_square_decoy(self) -> None:
+        image = np.full((1216, 864, 3), 220, dtype=np.uint8)
+        # This is the real QR area, with a decorative colored frame around it.
+        cv2.rectangle(image, (307, 827), (557, 1077), (180, 220, 205), -1)
+        cv2.rectangle(image, (330, 850), (534, 1054), (255, 255, 255), -1)
+        # A coffee-cup-like square contour that the old edge detector selected.
+        cv2.rectangle(image, (183, 821), (307, 943), (70, 45, 25), 8)
+
+        with tempfile.TemporaryDirectory() as directory:
+            image_path = Path(directory) / "decoy-sign.png"
+            self.assertTrue(cv2.imwrite(str(image_path), image))
+
+            result = MODULE.detect_frame(str(image_path), 50, 80, 28)
+
+        self.assertAlmostEqual(result["center_x"], 432, delta=10)
+        self.assertAlmostEqual(result["center_y"], 952, delta=10)
+        self.assertGreater(result["width"], 190)
+
     def test_detects_outer_square_frame(self) -> None:
         image = np.full((800, 1000, 3), 35, dtype=np.uint8)
         cv2.rectangle(image, (280, 180), (680, 580), (255, 255, 255), -1)
