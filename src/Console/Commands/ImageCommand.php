@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Console\Commands;
 
+use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\ImagePrompt;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,7 +34,14 @@ final class ImageCommand extends PromptWeaverCommand
             throw new \RuntimeException("Config file not found: {$configPath}");
         }
 
-        $prompt = new ImagePrompt($this->readJsonFile($configPath));
+        $layout = Layout::CENTERED;
+        if (is_string($fixtureReference) && $fixtureReference !== '') {
+            $manifestPath = $this->fixtureDirectoryFromReference($fixtureReference, $this->fixturesRoot($input)).'/manifest.json';
+            $manifest = $this->readJsonFile($manifestPath);
+            $layout = Layout::fromKey($manifest['layout'] ?? Layout::CENTERED->value);
+        }
+
+        $prompt = new ImagePrompt($this->readJsonFile($configPath), $layout);
         $prompt->build();
         $promptText = $prompt->prompt();
 

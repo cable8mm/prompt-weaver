@@ -1,5 +1,6 @@
 <?php
 
+use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\ImagePrompt;
 
 function imagePromptConfig(string $aspectRatio): array
@@ -7,10 +8,7 @@ function imagePromptConfig(string $aspectRatio): array
     return [
         'canvas' => ['aspect_ratio' => $aspectRatio],
         'style' => ['theme' => 'warm', 'background' => 'plain', 'print_target' => 'full-color inkjet printer'],
-        'content' => [
-            'message' => ['text' => '스캔하여 연결하세요.', 'x_pc' => 50, 'y_pc' => 80],
-            'footer' => ['text' => '제작: WIFI NOTE', 'x_pc' => 50, 'y_pc' => 96],
-        ],
+        'content' => [],
         'placeholders' => [
             'ssid' => [
                 'box_x_pc' => 50, 'box_y_pc' => 54, 'box_width_pc' => 80, 'box_height_pc' => 8,
@@ -42,4 +40,33 @@ it('keeps non-square canvas instructions portrait and full-bleed', function () {
     expect($prompt->prompt())
         ->toContain('Portrait canvas, aspect ratio 5:7')
         ->toContain('The artwork must fill the entire canvas');
+});
+
+it('injects application-owned message and footer content', function () {
+    $prompt = new ImagePrompt(imagePromptConfig('5:7'));
+    $prompt->build();
+
+    expect($prompt->prompt())
+        ->toContain('Title "와이파이 연결": centered at x=50%, y=10%.')
+        ->toContain('Message "스캔하여 연결하세요.": centered at x=50%, y=62%.')
+        ->toContain('Footer "제작: WIFI NOTE": centered at x=50%, y=96%.');
+});
+
+it('uses the fixed message position for the selected layout', function () {
+    $prompt = new ImagePrompt(imagePromptConfig('5:7'), Layout::SPLIT);
+    $prompt->build();
+
+    expect($prompt->prompt())
+        ->toContain('Title "와이파이 연결": centered at x=27%, y=12%.')
+        ->toContain('Message "스캔하여 연결하세요.": centered at x=70%, y=61%.')
+        ->toContain('Footer "제작: WIFI NOTE": centered at x=50%, y=96%.');
+});
+
+it('does not inject a title into the mini square layout', function () {
+    $prompt = new ImagePrompt(imagePromptConfig('1:1'), Layout::MINI_SQUARE);
+    $prompt->build();
+
+    expect($prompt->prompt())
+        ->not->toContain('Title "와이파이 연결"')
+        ->toContain('Message "스캔하여 연결하세요.": centered at x=50%, y=80%.');
 });

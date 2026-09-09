@@ -103,11 +103,24 @@ final class Pipe
 
         $this->validateConfig($config);
 
+        // Title, message, and footer are application-owned content, not AI-generated copy.
+        unset($config['content']['message'], $config['content']['footer']);
+        if ($layout === Layout::MINI_SQUARE) {
+            unset($config['content']['title']);
+        } elseif (isset($config['content']['title']) && is_array($config['content']['title'])) {
+            unset(
+                $config['content']['title']['text'],
+                $config['content']['title']['x_pc'],
+                $config['content']['title']['y_pc'],
+                $config['content']['title']['align'],
+            );
+        }
+
         // Step 3 — final image prompt (build only, execution is left to the caller)
         if ($onProgress !== null) {
             $onProgress('image', 'Building image prompt...');
         }
-        $imagePrompt = new ImagePrompt($config);
+        $imagePrompt = new ImagePrompt($config, $layout);
         $imagePrompt->build();
         if ($onProgress !== null) {
             $onProgress('image.complete', 'Pipeline complete.');
@@ -186,6 +199,10 @@ final class Pipe
             'font_weight' => $schema->string(),
             'color' => $schema->string(),
         ])->required();
+        $titleElement = $schema->object([
+            'style' => $schema->string(),
+            'width_pc' => $schema->number(),
+        ]);
 
         return [
             'canvas' => $schema->object([
@@ -211,10 +228,8 @@ final class Pipe
             // schema-described, but none is mandatory; placeholders below
             // are the fixed contract consumed by the renderer.
             'content' => $schema->object([
-                'title' => $contentElement,
+                'title' => $titleElement,
                 'wifi_icon' => $contentElement,
-                'message' => $contentElement,
-                'footer' => $contentElement,
             ])->required(),
             'placeholders' => $schema->object([
                 'ssid' => $placeholder,
