@@ -712,7 +712,9 @@ The `--provider` and `--model` options override the corresponding `.env` values 
 
 The `.env` file is ignored by Git. Existing shell environment variables take precedence over values in `.env`. Laravel applications can continue using Laravel's own `.env` loading; the package does not load `.env` from its service provider.
 
-Prompt Weaver records command and AI-provider failures through PSR-3 logging. In the standalone `weaver` CLI, the default log file is `.weaver/logs/prompt-weaver.log`; set `PROMPT_WEAVER_LOG` to change it. When installed in a Laravel application, the package delegates to Laravel's registered logger, so entries use the application's configured channel and log path (such as `storage/logs/laravel.log`). API keys and full prompts are not written to these logs.
+Prompt Weaver records command and AI-provider failures through PSR-3 logging. In the standalone `weaver` CLI, the default log file is `logs/prompt-weaver.log`; set `PROMPT_WEAVER_LOG` to change it. When installed in a Laravel application, the package delegates to Laravel's registered logger, so entries use the application's configured channel and log path (such as `storage/logs/laravel.log`). API keys and full prompts are not written to these logs.
+
+AI requests use a 20-second timeout by default and retry transient connection, rate-limit, and provider-overload failures twice with exponential backoff. Configure `PROMPT_WEAVER_AI_TIMEOUT`, `PROMPT_WEAVER_AI_RETRIES`, and `PROMPT_WEAVER_AI_RETRY_SLEEP_MS` in `.env` when needed. Authentication, invalid-request, schema, and other non-transient failures are not retried.
 
 While `pipe` is running, it displays progress for the design brief, config JSON, and image prompt stages. Use `--no-progress` when running it from a script or when you only want the completion message:
 
