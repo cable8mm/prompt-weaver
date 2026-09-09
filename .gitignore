@@ -205,3 +205,4 @@ $RECYCLE.BIN/
 # Doctum
 /cache
 # /doctum.php
+logs/

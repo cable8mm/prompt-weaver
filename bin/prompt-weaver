@@ -15,11 +15,13 @@ use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\TranslationServiceProvider;
 use Laravel\Ai\AiServiceProvider;
+use Psr\Log\LoggerInterface;
 
 Environment::load(dirname(__DIR__).'/.env');
 
 $laravel = new LaravelApplication(dirname(__DIR__));
 Facade::setFacadeApplication($laravel);
+$laravel->instance('prompt-weaver.standalone', true);
 $laravel->instance('config', new Repository);
 $laravel->register(FilesystemServiceProvider::class);
 $laravel->register(EventServiceProvider::class);
@@ -33,6 +35,13 @@ $application = new Application;
 try {
     exit($application->run());
 } catch (Throwable $throwable) {
+    if ($laravel->bound(LoggerInterface::class)) {
+        $laravel->make(LoggerInterface::class)->error('Prompt Weaver command failed.', [
+            'command' => $argv[1] ?? null,
+            'exception' => $throwable,
+        ]);
+    }
+
     fwrite(STDERR, $throwable->getMessage().PHP_EOL);
 
     exit(1);

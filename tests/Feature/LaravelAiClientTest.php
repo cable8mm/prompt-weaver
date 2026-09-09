@@ -3,6 +3,11 @@
 use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Laravel\Ai\Image;
 use Laravel\Ai\StructuredAnonymousAgent;
+use Psr\Log\LoggerInterface;
+
+it('uses the host Laravel logger when available', function () {
+    expect(app(LoggerInterface::class))->toBe(app('log'));
+});
 
 it('uses Laravel AI structured output for text responses', function () {
     StructuredAnonymousAgent::fake([
