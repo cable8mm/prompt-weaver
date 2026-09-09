@@ -17,4 +17,8 @@ return [
         'image_provider' => env('PROMPT_WEAVER_IMAGE_PROVIDER'),
         'image_model' => env('PROMPT_WEAVER_IMAGE_MODEL'),
     ],
+
+    'logging' => [
+        'path' => env('PROMPT_WEAVER_LOG', base_path('logs/prompt-weaver.log')),
+    ],
 ];
