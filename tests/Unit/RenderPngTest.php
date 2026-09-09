@@ -83,20 +83,21 @@ it('centers the qr image inside its placeholder box', function () {
     imagedestroy($background);
 
     $config = [
+        'canvas' => ['width_mm' => 210],
         'placeholders' => [
             'ssid' => [
                 'box_x_pc' => 50,
                 'box_y_pc' => 20,
                 'box_width_pc' => 40,
                 'box_height_pc' => 10,
-                'font_size_px' => 20,
+                'font_size_pt' => 18,
             ],
             'password' => [
                 'box_x_pc' => 50,
                 'box_y_pc' => 35,
                 'box_width_pc' => 40,
                 'box_height_pc' => 10,
-                'font_size_px' => 20,
+                'font_size_pt' => 18,
             ],
             'qr' => [
                 'x_pc' => 50,
@@ -195,12 +196,12 @@ it('converts point typography for common physical canvas widths', function (floa
     'Mini Square' => [100.0, 110],
 ]);
 
-it('preserves legacy pixel typography exactly', function () {
+it('rejects pixel typography', function () {
     $renderer = new RenderPng;
     $method = new ReflectionMethod($renderer, 'typographyPixels');
 
-    expect($method->invoke($renderer, ['font_size_px' => 36], 1728, 0.0))->toBe(36);
-});
+    $method->invoke($renderer, ['font_size_px' => 36], 1728, 210.0);
+})->throws(InvalidArgumentException::class, 'missing font_size_pt');
 
 it('rejects point typography without a physical canvas width', function () {
     $renderer = new RenderPng;

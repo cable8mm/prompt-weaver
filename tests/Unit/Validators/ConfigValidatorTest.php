@@ -8,14 +8,17 @@ it('accepts a config with the required top-level objects', function () {
             'width_pc' => 100,
             'height_pc' => 100,
             'aspect_ratio' => '5:7',
+            'width_mm' => 210,
+            'height_mm' => 297,
+            'dpi' => 300,
         ],
         'style' => [
             'print_target' => 'black-and-white laser printer safe',
         ],
         'content' => [],
         'placeholders' => [
-            'ssid' => ['font_size_px' => 36],
-            'password' => ['font_size_px' => 36],
+            'ssid' => ['font_size_pt' => 18],
+            'password' => ['font_size_pt' => 18],
         ],
     ];
 
@@ -62,7 +65,7 @@ it('rejects a config without a valid font size', function () {
         'content' => [],
         'placeholders' => ['ssid' => [], 'password' => []],
     ]);
-})->throws(RuntimeException::class, 'missing font_size_pt or font_size_px');
+})->throws(RuntimeException::class, 'missing font_size_pt');
 
 it('rejects a physical font size outside the print range', function () {
     (new ConfigValidator)->validate([
@@ -80,7 +83,7 @@ it('rejects point typography without a valid canvas width', function () {
         'content' => [],
         'placeholders' => [
             'ssid' => ['font_size_pt' => 18],
-            'password' => ['font_size_px' => 36],
+            'password' => ['font_size_pt' => 18],
         ],
     ]);
 })->throws(RuntimeException::class, 'missing valid width_mm metadata');
@@ -103,8 +106,8 @@ it('rejects an invalid canvas width when provided', function () {
         'style' => ['print_target' => 'black-and-white laser printer safe'],
         'content' => [],
         'placeholders' => [
-            'ssid' => ['font_size_px' => 36],
-            'password' => ['font_size_px' => 36],
+            'ssid' => ['font_size_pt' => 18],
+            'password' => ['font_size_pt' => 18],
         ],
     ]);
 })->throws(RuntimeException::class, 'invalid width_mm');

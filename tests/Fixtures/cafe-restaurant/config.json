@@ -2,7 +2,10 @@
     "canvas": {
         "width_pc": 100,
         "height_pc": 100,
-        "aspect_ratio": "5:7"
+        "aspect_ratio": "5:7",
+        "width_mm": 210,
+        "height_mm": 297,
+        "dpi": 300
     },
     "style": {
         "theme": "A warm and inviting cafe poster blending elegant Art Deco geometry with subtle cherry blossom-inspired accents in a refined, timeless composition.",
@@ -48,7 +51,7 @@
             "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
             "align": "center",
             "font_family": "Atkinson Hyperlegible",
-            "font_size_px": 36,
+            "font_size_pt": 24,
             "font_weight": "normal",
             "color": "#111111"
         },
@@ -63,7 +66,7 @@
             "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
             "align": "center",
             "font_family": "Atkinson Hyperlegible",
-            "font_size_px": 36,
+            "font_size_pt": 24,
             "font_weight": "normal",
             "color": "#111111"
         },

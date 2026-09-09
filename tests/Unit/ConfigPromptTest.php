@@ -70,6 +70,6 @@ it('injects typography defaults from the selected format', function () {
     expect($configPrompt->prompt())
         ->toContain('"box_width_pc": 80')
         ->toContain('"box_height_pc": 12')
-        ->toContain('"font_size_pt": 11')
+        ->not->toContain('font_size_pt')
         ->not->toContain('"box_width_pc": {{ placeholder_box_width_pc }}');
 });

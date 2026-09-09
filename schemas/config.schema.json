@@ -154,16 +154,14 @@
     },
     "placeholder": {
       "type": "object",
-      "required": ["box_x_pc", "box_y_pc", "box_width_pc", "box_height_pc"],
+      "required": ["box_x_pc", "box_y_pc", "box_width_pc", "box_height_pc", "font_size_pt"],
       "properties": {
         "box_x_pc": { "$ref": "#/$defs/percentage" },
         "box_y_pc": { "$ref": "#/$defs/percentage" },
         "box_width_pc": { "$ref": "#/$defs/percentage" },
         "box_height_pc": { "$ref": "#/$defs/percentage" },
-        "font_size_pt": { "type": "number", "minimum": 6, "maximum": 96 },
-        "font_size_px": { "type": "number", "exclusiveMinimum": 0 }
+        "font_size_pt": { "type": "number", "minimum": 6, "maximum": 96 }
       },
-      "anyOf": [{ "required": ["font_size_pt"] }, { "required": ["font_size_px"] }],
       "additionalProperties": true
     },
     "qrPlaceholder": {

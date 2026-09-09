@@ -52,16 +52,15 @@ final class ConfigValidator
 
         foreach (['ssid', 'password'] as $placeholder) {
             $fontPt = $config['placeholders'][$placeholder]['font_size_pt'] ?? null;
-            $fontPx = $config['placeholders'][$placeholder]['font_size_px'] ?? null;
-            if ($fontPt === null && $fontPx === null) {
+            if (array_key_exists('font_size_px', $config['placeholders'][$placeholder])) {
                 throw new RuntimeException($this->message(
-                    "Config placeholder '{$placeholder}' is missing font_size_pt or font_size_px",
+                    "Config placeholder '{$placeholder}' uses removed font_size_px",
                     $source,
                 ));
             }
-            if ($fontPx !== null && (! is_numeric($fontPx) || (float) $fontPx <= 0)) {
+            if ($fontPt === null) {
                 throw new RuntimeException($this->message(
-                    "Config placeholder '{$placeholder}' has an invalid font_size_px",
+                    "Config placeholder '{$placeholder}' is missing font_size_pt",
                     $source,
                 ));
             }

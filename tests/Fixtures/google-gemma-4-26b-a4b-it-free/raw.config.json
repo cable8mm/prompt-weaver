@@ -48,7 +48,7 @@
             "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
             "align": "center",
             "font_family": "Pretendard",
-            "font_size_px": 36,
+            "font_size_pt": 24,
             "font_weight": "bold",
             "color": "#111111"
         },
@@ -63,7 +63,7 @@
             "box_fill_note": "solid flat white cutout, no background pattern bleeding through",
             "align": "center",
             "font_family": "Pretendard",
-            "font_size_px": 36,
+            "font_size_pt": 24,
             "font_weight": "bold",
             "color": "#111111"
         },
