@@ -101,6 +101,7 @@ final class Pipe
             $onProgress('config.complete', 'Config JSON received.');
         }
 
+        $config = $this->applyTypographyDefaults($config, $format);
         $this->validateConfig($config);
 
         // Title, message, and footer are application-owned content, not AI-generated copy.
@@ -152,6 +153,28 @@ final class Pipe
     }
 
     /**
+     * Placeholder typography is a physical format contract, not AI output.
+     *
+     * @param  array<string, mixed>  $config
+     * @return array<string, mixed>
+     */
+    private function applyTypographyDefaults(array $config, Format $format): array
+    {
+        $fontSizePt = $format->placeholderTypography()['font_size_pt'];
+
+        foreach (['ssid', 'password'] as $placeholder) {
+            if (! isset($config['placeholders'][$placeholder]) || ! is_array($config['placeholders'][$placeholder])) {
+                continue;
+            }
+
+            $config['placeholders'][$placeholder]['font_size_pt'] = $fontSizePt;
+            unset($config['placeholders'][$placeholder]['font_size_px']);
+        }
+
+        return $config;
+    }
+
+    /**
      * @return array<string, Type>
      */
     private static function briefSchema(JsonSchema $schema): array
@@ -194,8 +217,6 @@ final class Pipe
             'box_fill_note' => $schema->string(),
             'align' => $schema->string(),
             'font_family' => $schema->string(),
-            'font_size_pt' => $schema->number(),
-            'font_size_px' => $schema->number(),
             'font_weight' => $schema->string(),
             'color' => $schema->string(),
         ])->required();

@@ -57,7 +57,7 @@ it('runs the full three-step pipeline and returns all prompts', function () {
     ];
 
     $configJson = [
-        'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
+        'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7', 'width_mm' => 210, 'height_mm' => 297, 'dpi' => 300],
         'style' => [
             'theme' => 'warm cafe',
             'background' => 'cream paper',
@@ -74,13 +74,13 @@ it('runs the full three-step pipeline and returns all prompts', function () {
                 'box_x_pc' => 50, 'box_y_pc' => 40, 'box_width_pc' => 70, 'box_height_pc' => 8,
                 'label' => 'SSID:', 'label_position' => 'outside_above',
                 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid flat white cutout',
-                'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111',
+                'align' => 'center', 'font_family' => 'Pretendard', 'font_weight' => 'bold', 'color' => '#111111',
             ],
             'password' => [
                 'box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8,
                 'label' => 'PASSWORD:', 'label_position' => 'outside_above',
                 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid flat white cutout',
-                'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111',
+                'align' => 'center', 'font_family' => 'Pretendard', 'font_weight' => 'bold', 'color' => '#111111',
             ],
             'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean square'],
         ],
@@ -120,6 +120,11 @@ it('runs the full three-step pipeline and returns all prompts', function () {
         ->not->toHaveKey('footer')
         ->and($result->config['content']['title']['text'] ?? null)
         ->toBeNull();
+    expect($result->config['placeholders']['ssid'])
+        ->toHaveKey('font_size_pt')
+        ->not->toHaveKey('font_size_px')
+        ->and($result->config['placeholders']['ssid']['font_size_pt'])
+        ->toBe(24);
 
     // Image prompt should be the final output
     expect($result->imagePrompt)
@@ -139,7 +144,7 @@ it('accepts structured responses from the AI client', function () {
     ];
 
     $configJson = [
-        'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
+        'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7', 'width_mm' => 210, 'height_mm' => 297, 'dpi' => 300],
         'style' => ['theme' => 'test', 'background' => 'test bg', 'print_target' => 'black-and-white laser printer safe'],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
@@ -148,8 +153,8 @@ it('accepts structured responses from the AI client', function () {
             'footer' => ['text' => '제작: WIFI NOTE', 'x_pc' => 50, 'y_pc' => 96, 'align' => 'center'],
         ],
         'placeholders' => [
-            'ssid' => ['box_x_pc' => 50, 'box_y_pc' => 40, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'SSID:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111'],
-            'password' => ['box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'PASSWORD:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111'],
+            'ssid' => ['box_x_pc' => 50, 'box_y_pc' => 40, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'SSID:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_weight' => 'bold', 'color' => '#111111'],
+            'password' => ['box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'PASSWORD:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_weight' => 'bold', 'color' => '#111111'],
             'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean'],
         ],
     ];
@@ -207,7 +212,7 @@ it('passes the color option to DesignBriefPrompt', function () {
     ];
 
     $configJson = [
-        'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7'],
+        'canvas' => ['width_pc' => 100, 'height_pc' => 100, 'aspect_ratio' => '5:7', 'width_mm' => 210, 'height_mm' => 297, 'dpi' => 300],
         'style' => ['theme' => 'colorful', 'background' => 'rainbow', 'print_target' => 'black-and-white laser printer safe'],
         'content' => [
             'title' => ['text' => '와이파이 연결', 'x_pc' => 50, 'y_pc' => 10, 'align' => 'center', 'style' => 'bold'],
@@ -216,8 +221,8 @@ it('passes the color option to DesignBriefPrompt', function () {
             'footer' => ['text' => '제작: WIFI NOTE', 'x_pc' => 50, 'y_pc' => 96, 'align' => 'center'],
         ],
         'placeholders' => [
-            'ssid' => ['box_x_pc' => 50, 'box_y_pc' => 40, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'SSID:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111'],
-            'password' => ['box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'PASSWORD:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_size_px' => 36, 'font_weight' => 'bold', 'color' => '#111111'],
+            'ssid' => ['box_x_pc' => 50, 'box_y_pc' => 40, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'SSID:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_weight' => 'bold', 'color' => '#111111'],
+            'password' => ['box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8, 'label' => 'PASSWORD:', 'label_position' => 'outside_above', 'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid', 'align' => 'center', 'font_family' => 'Pretendard', 'font_weight' => 'bold', 'color' => '#111111'],
             'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean'],
         ],
     ];

@@ -57,7 +57,6 @@ class ConfigPrompt implements PromptInterface
             '{{ dpi }}' => '300',
             '{{ placeholder_box_width_pc }}' => (string) $typography['box_width_pc'],
             '{{ placeholder_box_height_pc }}' => (string) $typography['box_height_pc'],
-            '{{ placeholder_font_size_pt }}' => (string) $typography['font_size_pt'],
         ]);
     }
 

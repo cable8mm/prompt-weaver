@@ -50,7 +50,6 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
       "box_fill_note": "solid white cutout",
       "align": "center",
       "font_family": "Atkinson Hyperlegible",
-      "font_size_pt": {{ placeholder_font_size_pt }},
       "font_weight": "normal",
       "color": "#111111"
     },
@@ -65,7 +64,6 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
       "box_fill_note": "solid white cutout",
       "align": "center",
       "font_family": "Atkinson Hyperlegible",
-      "font_size_pt": {{ placeholder_font_size_pt }},
       "font_weight": "normal",
       "color": "#111111"
     }

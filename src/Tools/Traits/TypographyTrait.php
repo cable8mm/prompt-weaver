@@ -6,7 +6,7 @@ trait TypographyTrait
 {
     /**
      * Returns the configured typography without applying a renderer-specific scale.
-     * New configs use points; font_size_px remains a legacy image-pixel fallback.
+     * Placeholder typography is always expressed in physical points.
      *
      * @param  array<string, mixed>  $placeholder
      * @return array{value: float, unit: string}
@@ -17,20 +17,12 @@ trait TypographyTrait
             return ['value' => (float) $placeholder['font_size_pt'], 'unit' => 'pt'];
         }
 
-        if (isset($placeholder['font_size_px']) && is_numeric($placeholder['font_size_px'])) {
-            return ['value' => (float) $placeholder['font_size_px'], 'unit' => 'px'];
-        }
-
-        throw new \InvalidArgumentException('Placeholder is missing font_size_pt or font_size_px.');
+        throw new \InvalidArgumentException('Placeholder is missing font_size_pt.');
     }
 
     private function typographyPixels(array $placeholder, int $imageWidth, float $canvasWidthMm): int
     {
         $typography = $this->typography($placeholder);
-
-        if ($typography['unit'] === 'px') {
-            return (int) round($typography['value']);
-        }
 
         if ($imageWidth <= 0 || $canvasWidthMm <= 0) {
             throw new \InvalidArgumentException(
