@@ -3,6 +3,7 @@
 namespace Cable8mm\PromptWeaver;
 
 use Cable8mm\PromptWeaver\Contracts\PromptInterface;
+use Cable8mm\PromptWeaver\Enums\Layout;
 
 class ImagePrompt implements PromptInterface
 {
@@ -13,6 +14,7 @@ class ImagePrompt implements PromptInterface
      */
     public function __construct(
         private array $config,
+        private Layout $layout = Layout::CENTERED,
     ) {}
 
     public function build(): void
@@ -20,6 +22,12 @@ class ImagePrompt implements PromptInterface
         $canvas = $this->config['canvas'];
         $style = $this->config['style'];
         $content = $this->config['content'];
+        foreach (ContentDefaults::forLayout($this->layout) as $name => $defaults) {
+            $content[$name] = array_merge($content[$name] ?? [], $defaults);
+        }
+        if ($this->layout === Layout::MINI_SQUARE) {
+            unset($content['title']);
+        }
         $placeholders = $this->config['placeholders'];
         $canvasDescription = $canvas['aspect_ratio'] === '1:1'
             ? '- Square canvas, aspect ratio 1:1. The artwork must fill the entire square canvas edge-to-edge. Do not place the design on an inner sheet, portrait page, A4 paper, card, or secondary background; do not add outer margins or a nested paper shape.'

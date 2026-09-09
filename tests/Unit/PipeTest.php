@@ -115,10 +115,16 @@ it('runs the full three-step pipeline and returns all prompts', function () {
 
     // Config should be the parsed JSON
     expect($result->config['style']['theme'])->toBe('warm cafe');
+    expect($result->config['content'])
+        ->not->toHaveKey('message')
+        ->not->toHaveKey('footer')
+        ->and($result->config['content']['title']['text'] ?? null)
+        ->toBeNull();
 
     // Image prompt should be the final output
     expect($result->imagePrompt)
         ->toContain('[Task] Generate a high-contrast Wi-Fi signage image ONLY')
+        ->toContain('와이파이 연결')
         ->toContain('와이파이 연결')
         ->toContain('SSID:')
         ->toContain('PASSWORD:');

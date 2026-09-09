@@ -94,10 +94,10 @@ it('runs the full pipeline with real OpenRouter API', function () {
 
     // Verify content structure
     expect($result->config['content'])
-        ->toHaveKey('title')
         ->toHaveKey('wifi_icon')
-        ->toHaveKey('message')
-        ->toHaveKey('footer');
+        ->not->toHaveKey('title')
+        ->not->toHaveKey('message')
+        ->not->toHaveKey('footer');
 
     // Verify placeholders structure
     expect($result->config['placeholders'])

@@ -27,23 +27,7 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
   },
   "content": {
     "title": {
-      "text": "와이파이 연결",
-      "x_pc": 50,
-      "y_pc": 8,
-      "align": "center",
       "style": "<typography>"
-    },
-    "message": {
-      "text": "스캔하여 연결하세요.",
-      "x_pc": 50,
-      "y_pc": 50,
-      "align": "center"
-    },
-    "footer": {
-      "text": "제작: WIFI NOTE",
-      "x_pc": 50,
-      "y_pc": 95,
-      "align": "center"
     }
   },
   "placeholders": {
@@ -92,7 +76,7 @@ Make the QR code the primary visual anchor near the upper-middle area with stron
 1. Keep all placeholder coordinates and dimensions exactly as defined. They are overlay anchors.
 2. Never render coordinates, percentages, JSON keys, or placeholder names as visible artwork.
 3. SSID, password, and QR areas must be separate, white, empty, readable, and printable. QR remains square.
-4. Keep Korean text content as shown. Write style.theme, style.background, and style.print_target in concise English for image generation. Write metadata.style.theme and metadata.style.background in concise Korean for direct service display.
+4. Keep fixed service content out of the AI response; the application inserts the Korean title, message, and footer. Only provide title styling. Write style.theme, style.background, and style.print_target in concise English for image generation. Write metadata.style.theme and metadata.style.background in concise Korean for direct service display.
 5. Use Color Direction for palette and Font Mood for typography. Name is reference only.
 6. Choose print_target from these exact values based on the color mode and design: {{ print_targets }}.
 7. Do not add or remove fields. Output valid JSON only.
