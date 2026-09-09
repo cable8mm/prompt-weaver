@@ -16,7 +16,6 @@ final class ContentDefaults
         return match ($layout) {
             Layout::CENTERED => self::content(50, 10, 'center', 50, 62, 50, 96),
             Layout::EDITORIAL => self::content(32, 12, 'left', 50, 58, 50, 95),
-            Layout::SPLIT => self::content(27, 12, 'left', 70, 61, 50, 96),
             Layout::QR_FOCUS => self::content(50, 8, 'center', 50, 50, 50, 95),
             Layout::MINI_SQUARE => self::contentWithoutTitle(50, 80, 50, 96),
         };

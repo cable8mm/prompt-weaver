@@ -52,14 +52,14 @@ it('injects application-owned message and footer content', function () {
         ->toContain('Footer "제작: WIFI NOTE": centered at x=50%, y=96%.');
 });
 
-it('uses the fixed message position for the selected layout', function () {
-    $prompt = new ImagePrompt(imagePromptConfig('5:7'), Layout::SPLIT);
+it('uses the fixed message position for the editorial layout', function () {
+    $prompt = new ImagePrompt(imagePromptConfig('5:7'), Layout::EDITORIAL);
     $prompt->build();
 
     expect($prompt->prompt())
-        ->toContain('Title "와이파이 연결": centered at x=27%, y=12%.')
-        ->toContain('Message "스캔하여 연결하세요.": centered at x=70%, y=61%.')
-        ->toContain('Footer "제작: WIFI NOTE": centered at x=50%, y=96%.');
+        ->toContain('Title "와이파이 연결": centered at x=32%, y=12%.')
+        ->toContain('Message "스캔하여 연결하세요.": centered at x=50%, y=58%.')
+        ->toContain('Footer "제작: WIFI NOTE": centered at x=50%, y=95%.');
 });
 
 it('does not inject a title into the mini square layout', function () {
