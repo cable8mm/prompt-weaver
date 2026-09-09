@@ -16,6 +16,9 @@ return [
         'model' => env('PROMPT_WEAVER_MODEL'),
         'image_provider' => env('PROMPT_WEAVER_IMAGE_PROVIDER'),
         'image_model' => env('PROMPT_WEAVER_IMAGE_MODEL'),
+        'timeout' => (int) env('PROMPT_WEAVER_AI_TIMEOUT', 20),
+        'retries' => (int) env('PROMPT_WEAVER_AI_RETRIES', 2),
+        'retry_sleep_ms' => (int) env('PROMPT_WEAVER_AI_RETRY_SLEEP_MS', 500),
     ],
 
     'logging' => [
