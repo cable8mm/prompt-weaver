@@ -128,7 +128,16 @@ php artisan prompt-weaver:doctor
 The environment variables must also be available to PHP-FPM and queue workers;
 setting them only in an interactive shell is not sufficient. Give the runtime user read/write access to `UV_PROJECT_ENVIRONMENT` and `PROMPT_WEAVER_UV_CACHE_DIR`.
 
-The service's Dockerfile should install `uv` and run the same Artisan commands at image-build time. A representative build stage is:
+#### Coolify deployment
+
+Coolify builds the service image from this Dockerfile and then runs the resulting container. Configure these values in the Coolify application's Environment Variables section as well as in any local deployment configuration:
+
+```dotenv
+UV_PROJECT_ENVIRONMENT=/opt/prompt-weaver/venv
+PROMPT_WEAVER_UV_CACHE_DIR=/var/cache/prompt-weaver/uv
+```
+
+The service's Dockerfile should install `uv` and run the same Artisan commands at image-build time. A representative Coolify build stage is:
 
 ```dockerfile
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
@@ -143,11 +152,19 @@ RUN composer install --no-dev --prefer-dist --optimize-autoloader
 RUN php artisan prompt-weaver:install --no-interaction
 RUN php artisan prompt-weaver:doctor
 
+# Use this only when the service container runs as www-data.
 RUN chown -R www-data:www-data \
     /opt/prompt-weaver /var/cache/prompt-weaver
 ```
 
-The exact PHP base image, package manager, runtime user, and Docker stage are service decisions. The important contract is that `uv` is installed before `prompt-weaver:install`, and that installation and verification happen during the image build rather than on the first web request.
+If the service uses another runtime user, replace `www-data:www-data` with the matching user and group, or use the numeric UID and GID required by the image.
+Do not assume that Coolify itself uses `www-data`; the Dockerfile's `USER`, PHP-FPM configuration, and queue-worker configuration determine the process
+user. That user must be able to execute the venv and write to the uv cache.
+
+The venv and cache are created in the image during the build, so they normally do not need a Coolify Persistent Storage mount. If the service chooses to mount either path, configure the mount destination to exactly match the environment variable and ensure that the container user can read/write the mounted path.
+Coolify storage is external to the replaceable container; files written only to another container path are not preserved across redeployments.
+
+The exact PHP base image, package manager, runtime user, and Docker stage are service decisions. The important contract is that `uv` is installed before `prompt-weaver:install`, and that installation and verification happen during the image build rather than on the first web request. In Coolify, inspect the Docker build log after deployment and run `php artisan prompt-weaver:doctor` in the deployed container if the service still reports an environment error. See Coolify's [Dockerfile deployment documentation](https://coolify.io/docs/applications/builds/dockerfile) and [Persistent Storage documentation](https://coolify.io/docs/applications/configuration/persistent-storage) when configuring the application.
 
 The package does not install a service-specific calibration command. Call the package's calibration service from the application's command or job, and make that command fail when calibration fails. For example, if the service wraps calibration and preview in shell commands, use:
 
