@@ -1,5 +1,19 @@
 # Release Notes
 
+## v1.1.0 - 2026-09-18
+
+### What's Changed
+
+* feat: implement logging for AI provider failures and add standalone logger by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/61
+* feat: add AI request timeout and retry configuration with exponential backoff by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/62
+* feat: implement layout-based content management and update prompt configurations by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/63
+* feat: update typography handling to use physical points and remove legacy pixel support across configurations and tests by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/64
+* feat: remove 'split' layout support and update related documentation and tests by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/65
+* feat: add commands for managing Python environment by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/66
+* docs: add documentation for cli usage and etc by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/67
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v1.0.3...v1.1.0
+
 ## v1.0.3 - 2026-09-08
 
 ### What's Changed
