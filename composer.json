@@ -25,8 +25,8 @@
   "require-dev": {
     "pestphp/pest": "^4.0",
     "laravel/pint": "^1.0",
-    "laravel/framework": "^13.22",
-    "orchestra/testbench": "^11.1"
+    "laravel/framework": "^12.0|^13.0",
+    "orchestra/testbench": "^10.6|^11.1"
   },
   "suggest": {
     "ext-gd": "Required for generating QR codes."
@@ -41,7 +41,10 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Cable8mm\\PromptWeaver\\Tests\\": "tests/"
+      "Cable8mm\\PromptWeaver\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/",
+      "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+      "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
     }
   },
   "extra": {
@@ -57,7 +60,19 @@
     "test": "./vendor/bin/pest",
     "test:e2e": "RUN_E2E_TESTS=1 ./vendor/bin/pest --group=e2e",
     "lint": "./vendor/bin/pint",
-    "inspect": "./vendor/bin/pint --test"
+    "inspect": "./vendor/bin/pint --test",
+    "post-autoload-dump": [
+      "@clear",
+      "@prepare"
+    ],
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve --host=localhost --port=8000 --ansi"
+    ]
   },
   "config": {
     "allow-plugins": {

@@ -342,9 +342,35 @@ it('exports every fixture with export-all', function () {
         expect(is_file($outputRoot.'/cafe-restaurant/config.json'))->toBeTrue();
         expect(is_file($outputRoot.'/cafe-restaurant/image.png'))->toBeTrue();
         expect(is_file($outputRoot.'/cafe-restaurant/image.prompt'))->toBeTrue();
+        expect(is_file($outputRoot.'/cafe-restaurant/preview.png'))->toBeTrue();
         expect(is_file($outputRoot.'/office-coworking/config.json'))->toBeTrue();
         expect(is_file($outputRoot.'/office-coworking/image.png'))->toBeTrue();
         expect(is_file($outputRoot.'/office-coworking/image.prompt'))->toBeTrue();
+        expect(is_file($outputRoot.'/office-coworking/preview.png'))->toBeTrue();
+
+        $exportedConfig = json_decode(
+            (string) file_get_contents($outputRoot.'/cafe-restaurant/config.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+
+        expect($exportedConfig['schema_version'])->toBe(1);
+        expect($exportedConfig['metadata'])->toHaveKeys([
+            'code',
+            'category',
+            'format',
+            'color_mode',
+            'name',
+            'description',
+            'color_direction',
+            'font_mood',
+        ])->toMatchArray([
+            'code' => 'cafe-restaurant',
+            'category' => 'Cafe/Restaurant',
+            'format' => 'A4/A5 Poster',
+            'color_mode' => 'Mono',
+        ]);
     } finally {
         remove_directory_cmd($workingRoot);
     }
