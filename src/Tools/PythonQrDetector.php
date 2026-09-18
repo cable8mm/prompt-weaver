@@ -2,6 +2,8 @@
 
 namespace Cable8mm\PromptWeaver\Tools;
 
+use Cable8mm\PromptWeaver\Support\PythonEnvironment;
+
 final class PythonQrDetector
 {
     /**
@@ -17,8 +19,9 @@ final class PythonQrDetector
 
         $projectPath = dirname(__DIR__, 2);
         $python = getenv('PROMPT_WEAVER_PYTHON');
+        $environment = new PythonEnvironment;
         $command = $python === false || $python === ''
-            ? [$this->uvBinary(), '--cache-dir', $this->uvCacheDir(), 'run', '--locked', '--project', $projectPath, $scriptPath]
+            ? [$environment->binary(), '--cache-dir', $environment->cacheDirectory(), 'run', '--locked', '--project', $projectPath, $scriptPath]
             : [$python, $scriptPath];
         $command = [
             ...$command,
@@ -28,7 +31,13 @@ final class PythonQrDetector
             '--width', (string) ($placeholder['width_pc'] ?? 0),
         ];
         $pipes = [];
-        $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        $process = @proc_open(
+            $command,
+            [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+            $pipes,
+            $projectPath,
+            $environment->processEnvironment(),
+        );
 
         if (! is_resource($process)) {
             return null;
@@ -62,40 +71,6 @@ final class PythonQrDetector
             'center_x' => (float) $result['center_x'],
             'center_y' => (float) $result['center_y'],
         ];
-    }
-
-    private function uvBinary(): string
-    {
-        if (($binary = getenv('PROMPT_WEAVER_UV')) !== false && $binary !== '') {
-            return $binary;
-        }
-
-        if (function_exists('config')) {
-            $binary = config('prompt-weaver.uv.binary');
-
-            if (is_string($binary) && $binary !== '') {
-                return $binary;
-            }
-        }
-
-        return 'uv';
-    }
-
-    private function uvCacheDir(): string
-    {
-        if (($cacheDir = getenv('PROMPT_WEAVER_UV_CACHE_DIR')) !== false && $cacheDir !== '') {
-            return $cacheDir;
-        }
-
-        if (function_exists('config')) {
-            $cacheDir = config('prompt-weaver.uv.cache_dir');
-
-            if (is_string($cacheDir) && $cacheDir !== '') {
-                return $cacheDir;
-            }
-        }
-
-        return sys_get_temp_dir().'/prompt-weaver-uv';
     }
 
     /** @param array<string, mixed> $result */

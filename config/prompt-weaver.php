@@ -3,6 +3,12 @@
 return [
     'uv' => [
         'binary' => env('PROMPT_WEAVER_UV', 'uv'),
+        'project_environment' => env(
+            'UV_PROJECT_ENVIRONMENT',
+            function_exists('storage_path')
+                ? storage_path('framework/cache/prompt-weaver/venv')
+                : sys_get_temp_dir().'/prompt-weaver-venv'
+        ),
         'cache_dir' => env(
             'PROMPT_WEAVER_UV_CACHE_DIR',
             function_exists('storage_path')

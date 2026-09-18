@@ -23,3 +23,30 @@ it('provides a Vite-compatible browser stylesheet', function () {
         ->toContain('../../fonts/AtkinsonHyperlegible-Bold.woff2')
         ->not->toContain('/vendor/prompt-weaver/fonts/');
 });
+
+it('registers the Python environment commands', function () {
+    expect(array_keys(Artisan::all()))
+        ->toContain('prompt-weaver:install')
+        ->toContain('prompt-weaver:doctor');
+});
+
+it('installs and checks the Python environment through uv', function () {
+    $binary = tempnam(sys_get_temp_dir(), 'prompt-weaver-uv-');
+    file_put_contents($binary, "#!/bin/sh\necho fake-uv\nexit 0\n");
+    chmod($binary, 0755);
+    config(['prompt-weaver.uv.binary' => $binary]);
+
+    try {
+        $this->artisan('prompt-weaver:install')
+            ->expectsOutput('Prompt Weaver Python environment is ready.')
+            ->assertExitCode(0);
+
+        $this->artisan('prompt-weaver:doctor')
+            ->expectsOutputToContain('[OK] uv')
+            ->expectsOutputToContain('[OK] OpenCV')
+            ->expectsOutput('Prompt Weaver Python runtime is ready.')
+            ->assertExitCode(0);
+    } finally {
+        unlink($binary);
+    }
+});
