@@ -2,6 +2,24 @@
 
 이 문서는 Prompt Weaver를 사용하는 Laravel 서비스를 Coolify의 Dockerfile 방식으로 배포할 때 필요한 부분만 설명합니다.
 
+## Prompt Weaver CI/CD 필수 조건
+
+Prompt Weaver를 사용하는 서비스의 Dockerfile 또는 CI/CD 설정에는 다음 단계가 반드시 포함되어야 합니다.
+
+- [ ] Docker 이미지에 `uv` 설치
+- [ ] `UV_PROJECT_ENVIRONMENT` 설정
+- [ ] `PROMPT_WEAVER_UV_CACHE_DIR` 설정
+- [ ] `composer install` 실행
+- [ ] `php artisan prompt-weaver:install --no-interaction` 실행
+- [ ] `php artisan prompt-weaver:doctor` 실행
+- [ ] PHP-FPM과 queue worker가 동일한 Python 환경을 사용하도록 설정
+- [ ] runtime user가 venv를 실행하고 uv cache에 쓸 수 있도록 권한 설정
+- [ ] 첫 HTTP 요청에서 Python 의존성을 설치하지 않도록 설정
+
+`prompt-weaver:doctor`가 CI/CD 단계에서 실패하면 배포를 성공으로 처리하지 않아야 합니다. `uv` 설치 또는 Python 의존성 설치를 생략한 Dockerfile은 Prompt Weaver를 사용할 수 있는 배포로 간주하지 않습니다.
+
+AI가 이 서비스를 위한 Dockerfile, CI/CD 또는 Coolify 배포 설정을 작성할 때는 위 체크리스트를 배포 완료 조건으로 사용해야 합니다.
+
 ## 서비스 책임
 
 Prompt Weaver 패키지는 `pyproject.toml`, `uv.lock`, Python script와 `prompt-weaver:install`, `prompt-weaver:doctor`를 제공합니다. 다음은 Laravel 서비스의 책임입니다.
