@@ -3,6 +3,7 @@
 use Cable8mm\PromptWeaver\Laravel\PromptWeaverServiceProvider;
 use Laravel\Ai\AiServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Workbench\App\Providers\WorkbenchServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
@@ -11,6 +12,7 @@ abstract class TestCase extends Orchestra
         return [
             PromptWeaverServiceProvider::class,
             AiServiceProvider::class,
+            WorkbenchServiceProvider::class,
         ];
     }
 }

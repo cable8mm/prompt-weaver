@@ -41,7 +41,10 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Cable8mm\\PromptWeaver\\Tests\\": "tests/"
+      "Cable8mm\\PromptWeaver\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/",
+      "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+      "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
     }
   },
   "extra": {
@@ -57,7 +60,19 @@
     "test": "./vendor/bin/pest",
     "test:e2e": "RUN_E2E_TESTS=1 ./vendor/bin/pest --group=e2e",
     "lint": "./vendor/bin/pint",
-    "inspect": "./vendor/bin/pint --test"
+    "inspect": "./vendor/bin/pint --test",
+    "post-autoload-dump": [
+      "@clear",
+      "@prepare"
+    ],
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve --host=localhost --port=8000 --ansi"
+    ]
   },
   "config": {
     "allow-plugins": {

@@ -54,6 +54,21 @@ php artisan wifi:preview cafe-restaurant
 
 보정 실패 시 후속 미리보기나 export를 실행하지 않도록 서비스 command가 실패를 전파해야 합니다.
 
+## Export 결과 import 계약
+
+standalone에서 `export` 또는 `export-all`을 실행하면 각 fixture 디렉터리에 다음 파일이 생성됩니다.
+
+```text
+config.json
+image.png
+image.prompt
+preview.png
+```
+
+Laravel 서비스의 Seeder는 `config.json`의 `metadata`와 `canvas` 값을 읽고, 두 PNG 파일을 서비스의 storage에 복사해야 합니다. `image.prompt`는 이후 재생성이나 디버깅에 사용할 수 있으므로 필요하다면 별도로 보관합니다.
+
+패키지는 서비스의 `Template` 모델이나 테이블을 알지 못하므로, 실제 database mapping과 Seeder idempotency는 소비 서비스에서 테스트해야 합니다.
+
 ## 브라우저 폰트
 
 Vite를 사용하는 서비스는 `resources/css/app.css`에 다음을 추가합니다.
@@ -73,3 +88,21 @@ Vite를 사용하는 서비스는 `resources/css/app.css`에 다음을 추가합
 
 - [PHP API](php-api.md)
 - [Docker와 Coolify 배포](coolify.md)
+
+## Workbench에서 전체 흐름 확인
+
+패키지 저장소에는 실제 Laravel 서비스의 최소 workflow를 재현하는 Workbench 화면이 있습니다. 외부 AI provider를 호출하지 않고 fixture 응답을 사용하므로 prompt 생성 단계는 반복해서 확인할 수 있습니다. 업로드 이후의 `Calibrator`는 실제 Python/OpenCV 환경을 사용합니다.
+
+```bash
+composer serve
+```
+
+서버가 시작되면 표시된 주소를 브라우저에서 열고 다음 순서로 확인합니다.
+
+1. `init + pipe`를 실행합니다.
+2. 화면에 나온 `image prompt`를 확인합니다.
+3. 이미지 생성 결과 PNG를 업로드합니다.
+4. `calibrate + preview`를 실행합니다.
+5. 업로드 이미지와 calibration preview를 확인합니다.
+
+Workbench는 `template_generations` 테이블에 prompt, 원본 config, 업로드 경로, 보정 config, preview 경로와 상태를 저장합니다. 이 화면은 서비스의 `TemplateGeneration` job 흐름을 설명하기 위한 reference app이며, 서비스의 모델이나 job을 패키지에 요구하지 않습니다.

@@ -3,6 +3,7 @@
 [![code-style](https://github.com/cable8mm/prompt-weaver/actions/workflows/code-style.yml/badge.svg)](https://github.com/cable8mm/prompt-weaver/actions/workflows/code-style.yml)
 [![run-tests](https://github.com/cable8mm/prompt-weaver/actions/workflows/run-tests.yml/badge.svg)](https://github.com/cable8mm/prompt-weaver/actions/workflows/run-tests.yml)
 ![PHP Version](https://img.shields.io/packagist/dependency-v/cable8mm/prompt-weaver/php)
+![Laravel Version](https://img.shields.io/badge/laravel-%5E12.0%7C%5E13.0-orange?style=flat&logo=laravel)
 ![Packagist Version](https://img.shields.io/packagist/v/cable8mm/prompt-weaver)
 ![Packagist Downloads](https://img.shields.io/packagist/dt/cable8mm/prompt-weaver)
 ![Packagist License](https://img.shields.io/packagist/l/cable8mm/prompt-weaver)
@@ -72,6 +73,8 @@ php artisan prompt-weaver:doctor
 ```
 
 서비스에서 실행할 calibration command와 도메인 workflow는 패키지가 대신 만들지 않습니다. Laravel 통합 방법은 [Laravel 서비스 통합](docs/laravel.md)을 참고하세요.
+
+패키지 저장소에서 Laravel workflow를 직접 확인하려면 `composer serve`로 Workbench를 실행할 수 있습니다. fixture 기반 `init + pipe`, 이미지 업로드, 실제 calibration, preview 흐름은 [Laravel 서비스 통합](docs/laravel.md)에 설명되어 있습니다.
 
 ### Docker와 Coolify
 
