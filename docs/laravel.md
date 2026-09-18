@@ -93,6 +93,8 @@ Vite를 사용하는 서비스는 `resources/css/app.css`에 다음을 추가합
 
 패키지 저장소에는 실제 Laravel 서비스의 최소 workflow를 재현하는 Workbench 화면이 있습니다. 외부 AI provider를 호출하지 않고 fixture 응답을 사용하므로 prompt 생성 단계는 반복해서 확인할 수 있습니다. 업로드 이후의 `Calibrator`는 실제 Python/OpenCV 환경을 사용합니다.
 
+Workbench는 Laravel 12와 Laravel 13을 지원합니다. Composer가 설치된 Laravel 버전에 맞는 Testbench major 버전을 선택하므로, 서비스가 사용하는 Laravel 버전을 임의로 바꿀 필요는 없습니다.
+
 ```bash
 composer serve
 ```

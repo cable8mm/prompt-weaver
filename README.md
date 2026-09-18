@@ -22,6 +22,7 @@ Prompt Weaver는 Wi-Fi signage 제작을 위한 프롬프트와 이미지 결과
 
 - PHP 8.3 이상
 - Composer 2.x
+- Workbench 개발 환경은 Laravel 12 또는 13
 - GD PHP extension
 - QR calibration을 사용할 경우 `uv`와 OpenCV 실행 환경
 
