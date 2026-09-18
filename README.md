@@ -49,13 +49,15 @@ composer update
 uv sync --locked
 ```
 
-기본 CLI 흐름은 `init → pipe → calibrate → preview`입니다.
+기본 CLI 흐름은 `init → pipe → calibrate → preview`입니다. 미리보기를 확인한 뒤 `code → export`를 실행합니다.
 
 ```bash
 ./weaver init cafe-restaurant
 ./weaver pipe cafe-restaurant
 ./weaver calibrate cafe-restaurant
 ./weaver preview cafe-restaurant
+./weaver code cafe-restaurant
+./weaver export cafe-restaurant
 ```
 
 `pipe` 대신 `brief`, `config`, `image`를 단계별로 실행하면 각 AI 단계의 입력과 결과를 확인하면서 디버깅할 수 있습니다. 자세한 명령 순서는 [CLI 사용법](docs/cli.md)을 참고하세요.
@@ -114,14 +116,9 @@ uv run --locked python scripts/test_calibrate_qr.py
 composer test:e2e
 ```
 
-패키지의 CLI 명령을 변경하면 [CLI 사용법](docs/cli.md)과 테스트를 함께
-수정합니다. Laravel 통합 명령을 변경하면
-[Laravel 서비스 통합](docs/laravel.md)과 [Docker/Coolify 배포](docs/coolify.md)를
-함께 확인합니다. `pyproject.toml` 또는 `uv.lock`을 변경하면 Python 환경
-설치와 Docker 배포 예시도 함께 확인합니다.
+패키지의 CLI 명령을 변경하면 [CLI 사용법](docs/cli.md)과 테스트를 함께 수정합니다. Laravel 통합 명령을 변경하면 [Laravel 서비스 통합](docs/laravel.md)과 [Docker/Coolify 배포](docs/coolify.md)를 함께 확인합니다. `pyproject.toml` 또는 `uv.lock`을 변경하면 Python 환경 설치와 Docker 배포 예시도 함께 확인합니다.
 
-서비스 고유의 command 이름은 패키지에 추가하지 않고 소비 서비스에서
-정의합니다.
+서비스 고유의 command 이름은 패키지에 추가하지 않고 소비 서비스에서 정의합니다.
 
 ## 라이선스
 

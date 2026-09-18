@@ -22,7 +22,7 @@ uv sync --locked
 
 ## 기본 작업 흐름
 
-기본 흐름은 `init → pipe → calibrate → preview`입니다. `pipe`가 생성한 `image.prompt`를 사용해 이미지를 생성한 뒤, 결과 이미지를 `image.png`로 작업 폴더에 저장하고 `calibrate`를 실행합니다.
+기본 흐름은 `init → pipe → calibrate → preview`입니다. `pipe`가 생성한 `image.prompt`로 이미지를 생성한 뒤 `image.png`로 저장하고 `calibrate`를 실행합니다. 미리보기를 확인한 뒤 `code → export`를 실행합니다.
 
 ### 1. 작업 폴더 만들기
 
@@ -89,18 +89,62 @@ PROMPT_WEAVER_MODEL=google/gemma-4-26b-a4b-it:free \
 ./weaver preview cafe-restaurant --output=preview.html
 ```
 
-### 6. 결과 내보내기
+### 6. 미리보기 확인 후 코드 확정
+
+```bash
+./weaver code cafe-restaurant
+```
+
+### 7. 서비스용 결과 내보내기
 
 ```bash
 ./weaver export cafe-restaurant
 ```
 
-여러 fixture를 한 번에 처리하려면 다음을 사용합니다.
+export 결과는 `dist` 아래에 서비스가 import할 파일을 생성합니다.
+
+```text
+dist/cafe-restaurant/
+├── config.json
+├── image.png
+├── image.prompt
+└── preview.png
+```
+
+## 여러 fixture 만들기
+
+여러 디자인을 만들 때는 각 fixture를 먼저 preview까지 확인합니다.
 
 ```bash
-./weaver export-all
-./weaver export-all --fixtures-root=.weaver --output-dir=dist
+./weaver init a
+./weaver pipe a
+./weaver calibrate a
+./weaver preview a
+
+./weaver init b
+./weaver pipe b
+./weaver calibrate b
+./weaver preview b
+
+./weaver init c
+./weaver pipe c
+./weaver calibrate c
+./weaver preview c
+
+./weaver init d
+./weaver pipe d
+./weaver calibrate d
+./weaver preview d
 ```
+
+모든 preview가 정상인지 확인한 뒤 한 번에 code와 export를 실행합니다.
+
+```bash
+./weaver code-all
+./weaver export-all
+```
+
+그러면 `dist` 폴더에 fixture별 4개 export 파일이 생성됩니다. 이 결과물을 Laravel 서비스에 import하여 실제 서비스의 템플릿 데이터로 등록합니다.
 
 ## 단계별 디버깅
 
