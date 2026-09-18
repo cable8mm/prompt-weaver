@@ -30,7 +30,7 @@ The package is centered around the **WiFi Note** signage flow, where a design br
 composer require cable8mm/prompt-weaver
 ```
 
-Laravel에서 패키지 설정을 애플리케이션의 `config/prompt-weaver.php`로 복사하려면 다음 명령을 실행합니다:
+To publish the package configuration to your application's `config/prompt-weaver.php`, run the following command:
 
 ```bash
 php artisan vendor:publish --tag=prompt-weaver-config
@@ -38,9 +38,7 @@ php artisan vendor:publish --tag=prompt-weaver-config
 
 ### Laravel application setup
 
-Laravel's package discovery registers the service provider automatically. If the
-application uses Vite, include Prompt Weaver's stylesheet in the application's CSS
-entry point, usually `resources/css/app.css`:
+Laravel's package discovery registers the service provider automatically. If the application uses Vite, include Prompt Weaver's stylesheet in the application's CSS entry point, usually `resources/css/app.css`:
 
 ```css
 @import "../../vendor/cable8mm/prompt-weaver/resources/css/prompt-weaver.css";
@@ -61,12 +59,9 @@ Apply the `prompt-weaver-font` class to dynamic SSID and password text rendered 
 <span class="prompt-weaver-font">{{ $password }}</span>
 ```
 
-No manual service-provider registration, Nova dependency, or `public/vendor` font
-copy is required. The package's PHP/GD preview renderer uses its bundled TTF font
-automatically.
+No manual service-provider registration, Nova dependency, or `public/vendor` font copy is required. The package's PHP/GD preview renderer uses its bundled TTF font automatically.
 
-If the consuming service needs to access the bundled font files directly, use
-`Cable8mm\PromptWeaver\Support\FontPath`:
+If the consuming service needs to access the bundled font files directly, use `Cable8mm\PromptWeaver\Support\FontPath`:
 
 ```php
 use Cable8mm\PromptWeaver\Support\FontPath;
@@ -81,7 +76,9 @@ The available methods are:
 - `webRegular()` / `webBold()` — WOFF2 paths for browser usage
 - `webRegularWoff()` / `webBoldWoff()` — WOFF paths for browser usage
 
-For OpenCV-based QR calibration, install `uv` first. On macOS with Homebrew:
+For OpenCV-based QR calibration, the consuming Laravel service must provide the `uv` executable. Prompt Weaver provides the Python project files and exposes Laravel commands to install and check that environment; it does not install system packages or run network-dependent setup during Composer installation.
+
+Install `uv` on macOS with Homebrew:
 
 ```bash
 brew install uv
@@ -93,34 +90,66 @@ Or use the official installer on macOS/Linux:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-After Composer installation, initialize the Python environment from the package directory:
+After Composer installation, initialize the Python environment through Laravel:
 
 ```bash
-uv sync --project vendor/cable8mm/prompt-weaver
+php artisan prompt-weaver:install
 ```
 
-This installs the locked Python dependencies from the package's `pyproject.toml` and `uv.lock` (currently `opencv-python-headless`). The package does not ask Composer to run network-dependent Python installation commands. `requirements.txt` is provided as a compatibility file for users who prefer a requirements-based workflow; the package's `uv` runner uses the project files above.
+This installs the locked Python dependencies from the package's `pyproject.toml`
+and `uv.lock` (currently `opencv-python-headless`). Run the environment check
+after installation:
+
+```bash
+php artisan prompt-weaver:doctor
+```
+
+`requirements.txt` is provided as a compatibility file for users who prefer a requirements-based workflow; Prompt Weaver's runner uses the project files above.
 
 If `uv` is not installed, preview rendering still works, but calibration for fixtures with a QR placeholder requires `uv` and OpenCV.
 
-### Service server setup
+### Consuming Laravel service setup
 
-QR calibration runs a Python process from PHP. The server therefore needs `uv`, a writable cache directory, and permission for the PHP process to execute `proc_open()`. The first run downloads `opencv-python-headless`; later runs reuse the `uv` cache.
+The Laravel service owns the machine-level `uv` installation and must run the Prompt Weaver setup during deployment. QR calibration runs a Python process from PHP, so the PHP-FPM or queue-worker user needs access to `uv`, the Python environment, and a writable cache directory. The first setup downloads `opencv-python-headless`; later runs reuse the cache.
 
-For a Linux server, run the following during deployment as the same user that runs the application (or PHP worker):
+For a Linux deployment, configure the paths before running the setup command:
 
 ```bash
-export UV_CACHE_DIR=/var/cache/prompt-weaver/uv
-mkdir -p "$UV_CACHE_DIR"
+export UV_PROJECT_ENVIRONMENT=/opt/prompt-weaver/venv
+export PROMPT_WEAVER_UV_CACHE_DIR=/var/cache/prompt-weaver/uv
+mkdir -p "$UV_PROJECT_ENVIRONMENT" "$PROMPT_WEAVER_UV_CACHE_DIR"
 
 cd /path/to/application
 composer install --no-dev --prefer-dist --optimize-autoloader
-uv sync --locked --project vendor/cable8mm/prompt-weaver
+php artisan prompt-weaver:install
+php artisan prompt-weaver:doctor
 ```
 
-Give the PHP-FPM or queue-worker user read/write access to `UV_CACHE_DIR`. If the environment is managed by PHP-FPM or systemd, configure `UV_CACHE_DIR` there; setting it only in an interactive shell does not make it available to PHP.
+The environment variables must also be available to PHP-FPM and queue workers;
+setting them only in an interactive shell is not sufficient. Give the runtime user read/write access to `UV_PROJECT_ENVIRONMENT` and `PROMPT_WEAVER_UV_CACHE_DIR`.
 
-The package does not install a service-specific CLI command. Call the package's calibration service from your application's command or job, and make that command fail when calibration fails. For example, if your service wraps calibration and preview in shell commands, use:
+The service's Dockerfile should install `uv` and run the same Artisan commands at image-build time. A representative build stage is:
+
+```dockerfile
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && install -m 0755 /root/.local/bin/uv /usr/local/bin/uv
+
+ENV UV_PROJECT_ENVIRONMENT=/opt/prompt-weaver/venv
+ENV PROMPT_WEAVER_UV_CACHE_DIR=/var/cache/prompt-weaver/uv
+
+RUN mkdir -p /opt/prompt-weaver/venv /var/cache/prompt-weaver/uv
+
+RUN composer install --no-dev --prefer-dist --optimize-autoloader
+RUN php artisan prompt-weaver:install --no-interaction
+RUN php artisan prompt-weaver:doctor
+
+RUN chown -R www-data:www-data \
+    /opt/prompt-weaver /var/cache/prompt-weaver
+```
+
+The exact PHP base image, package manager, runtime user, and Docker stage are service decisions. The important contract is that `uv` is installed before `prompt-weaver:install`, and that installation and verification happen during the image build rather than on the first web request.
+
+The package does not install a service-specific calibration command. Call the package's calibration service from the application's command or job, and make that command fail when calibration fails. For example, if the service wraps calibration and preview in shell commands, use:
 
 ```bash
 php artisan wifi:calibrate cafe-restaurant && php artisan wifi:preview cafe-restaurant
@@ -165,8 +194,7 @@ They work together like this:
 3. `ImagePrompt` takes the parsed JSON config in the constructor, then `build()` generates the prompt and `prompt()` returns it.
 4. The prompt classes implement `PromptInterface` and only build prompt text. AI execution is handled by `Pipe` through Laravel AI.
 
-The final prompt text is also stored in the fixture example at
-[`tests/Fixtures/cafe-restaurant/image.prompt`](tests/Fixtures/cafe-restaurant/image.prompt).
+The final prompt text is also stored in the fixture example at [`tests/Fixtures/cafe-restaurant/image.prompt`](tests/Fixtures/cafe-restaurant/image.prompt).
 
 ## Usage
 
@@ -309,19 +337,13 @@ $promptText = $imagePrompt->prompt();
 
 ### Iterative prompt-template workflow
 
-The repository also includes editable prompt templates for working directly with a
-chat-based AI. The shared image-preview instructions live in
-[`prompts/preview.prompt`](prompts/preview.prompt), while layout-specific config
-instructions live in [`stubs/`](stubs/).
+The repository also includes editable prompt templates for working directly with a chat-based AI. The shared image-preview instructions live in [`prompts/preview.prompt`](prompts/preview.prompt), while layout-specific config instructions live in [`stubs/`](stubs/).
 
 To create or revise a layout config template:
 
 1. Open [`prompts/config.prompt`](prompts/config.prompt) in a chat-based AI.
-2. Include [`stubs/config.centered.prompt`](stubs/config.centered.prompt) as the
-   canonical reference and ask the AI to create or revise exactly one
-   `stubs/config.<layout>.prompt` file.
-3. Save the result under `stubs/`, keeping the existing schema and changing only
-   the layout-specific composition values.
+2. Include [`stubs/config.centered.prompt`](stubs/config.centered.prompt) as the canonical reference and ask the AI to create or revise exactly one `stubs/config.<layout>.prompt` file.
+3. Save the result under `stubs/`, keeping the existing schema and changing only the layout-specific composition values.
 
 For example, save an editorial layout as:
 
@@ -335,11 +357,7 @@ To test that layout with an image-capable chat AI, run:
 ./weaver config-stub editorial
 ```
 
-This inserts the complete `stubs/config.editorial.prompt` into the
-`CONFIG PROMPT` section of [`prompts/preview.prompt`](prompts/preview.prompt) and
-copies the assembled image prompt to the macOS clipboard. Paste it into the
-interactive AI, inspect the generated image, then revise the stub and run the
-command again.
+This inserts the complete `stubs/config.editorial.prompt` into the `CONFIG PROMPT` section of [`prompts/preview.prompt`](prompts/preview.prompt) and copies the assembled image prompt to the macOS clipboard. Paste it into the interactive AI, inspect the generated image, then revise the stub and run the command again.
 
 To inspect or pipe the assembled prompt without using the clipboard, run:
 
@@ -347,9 +365,7 @@ To inspect or pipe the assembled prompt without using the clipboard, run:
 ./weaver config-stub editorial --print
 ```
 
-The currently registered layout names are `centered`, `editorial`,
-`qr-focus`, and `mini-square`. A new layout name must also be registered in the CLI before it can be
-used with `./weaver config-stub <layout>`.
+The currently registered layout names are `centered`, `editorial`, `qr-focus`, and `mini-square`. A new layout name must also be registered in the CLI before it can be used with `./weaver config-stub <layout>`.
 
 ## CLI Workflow
 
@@ -680,17 +696,11 @@ To validate an exported or generated config file independently, run:
 
 #### Export config contract
 
-The machine-readable contract for exported `config.json` files is available at
-[`schemas/config.schema.json`](schemas/config.schema.json). It defines the required
-top-level fields, metadata fields, layout structures, and value types.
+The machine-readable contract for exported `config.json` files is available at [`schemas/config.schema.json`](schemas/config.schema.json). It defines the required top-level fields, metadata fields, layout structures, and value types.
 
-The current contract uses `schema_version: 1`. Consumers should inspect this value
-before deserializing the file. Incompatible structural changes increment the schema
-version; optional fields may be added without changing the version.
+The current contract uses `schema_version: 1`. Consumers should inspect this value before deserializing the file. Incompatible structural changes increment the schema version; optional fields may be added without changing the version.
 
-Laravel applications can validate the JSON against this schema and then map it to a
-consumer-owned DTO, such as a `spatie/laravel-data` class. The exported JSON remains
-the integration boundary so consumers are not coupled to this package's PHP types.
+Laravel applications can validate the JSON against this schema and then map it to a consumer-owned DTO, such as a `spatie/laravel-data` class. The exported JSON remains the integration boundary so consumers are not coupled to this package's PHP types.
 
 These two files are intended to be imported by the Laravel service. The command does not delete existing files in the output directory, but it overwrites `config.json` and `image.png`.
 

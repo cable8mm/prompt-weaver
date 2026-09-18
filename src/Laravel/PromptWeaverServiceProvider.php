@@ -2,6 +2,8 @@
 
 namespace Cable8mm\PromptWeaver\Laravel;
 
+use Cable8mm\PromptWeaver\Console\Commands\PromptWeaverDoctorCommand;
+use Cable8mm\PromptWeaver\Console\Commands\PromptWeaverInstallCommand;
 use Cable8mm\PromptWeaver\Contracts\AiClient;
 use Cable8mm\PromptWeaver\Support\PromptWeaverLogger;
 use Illuminate\Support\ServiceProvider;
@@ -33,6 +35,11 @@ class PromptWeaverServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'prompt-weaver');
 
         if ($this->app->runningInConsole()) {
+            $this->commands([
+                PromptWeaverInstallCommand::class,
+                PromptWeaverDoctorCommand::class,
+            ]);
+
             $this->publishes([
                 __DIR__.'/../../lang' => $this->app->langPath('vendor/cable8mm/prompt-weaver'),
             ], 'prompt-weaver-translations');
