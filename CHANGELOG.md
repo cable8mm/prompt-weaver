@@ -1,5 +1,13 @@
 # Release Notes
 
+## v1.1.1 - 2026-09-18
+
+### What's Changed
+
+* test: implement Workbench functionality with prompt generation, image upload, and calibration workflow by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/68
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v1.1.0...v1.1.1
+
 ## v1.1.0 - 2026-09-18
 
 ### What's Changed
