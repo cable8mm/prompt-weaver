@@ -6,6 +6,8 @@ use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\Pipe;
 use Cable8mm\PromptWeaver\PipeStageException;
+use Illuminate\Http\Client\ConnectionException;
+use Laravel\Ai\Exceptions\ProviderConnectionException;
 
 /**
  * Fake Laravel AI client that returns canned structured responses for each call.
@@ -207,6 +209,28 @@ it('identifies the pipeline stage when an AI request fails', function () {
 })->throws(
     PipeStageException::class,
     'Pipeline failed during config generation: Provider connection timed out.',
+);
+
+it('includes the underlying cause when a provider connection fails', function () {
+    $briefJson = [
+        'name' => 'test',
+        'description' => 'A test design brief.',
+        'color_direction' => 'test colors',
+        'font_mood' => 'test font',
+    ];
+    $providerException = ProviderConnectionException::forProvider(
+        'openrouter',
+        previous: new ConnectionException('cURL error 28: Operation timed out.'),
+    );
+    $client = new FakeAiClient([$briefJson, $providerException]);
+
+    (new Pipe($client))->run(
+        category: Category::CAFE_RESTAURANT,
+        format: Format::A45_POSTER,
+    );
+})->throws(
+    PipeStageException::class,
+    'Pipeline failed during config generation: Could not connect to AI provider [openrouter]. (caused by Illuminate\\Http\\Client\\ConnectionException: cURL error 28: Operation timed out.)',
 );
 
 it('rejects configuration fields required to build the image prompt when they are missing', function () {
