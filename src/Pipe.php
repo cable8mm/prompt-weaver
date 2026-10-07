@@ -150,6 +150,28 @@ final class Pipe
         }
 
         (new ConfigValidator)->validate($config);
+
+        foreach (['ssid', 'password'] as $placeholderName) {
+            $placeholder = $config['placeholders'][$placeholderName] ?? null;
+            if (! is_array($placeholder)) {
+                throw new \RuntimeException("Config response is missing required object [placeholders.{$placeholderName}].");
+            }
+
+            foreach (['label', 'label_position', 'box_fill', 'box_fill_note'] as $field) {
+                if (! is_string($placeholder[$field] ?? null) || trim($placeholder[$field]) === '') {
+                    throw new \RuntimeException("Config response is missing required field [placeholders.{$placeholderName}.{$field}].");
+                }
+            }
+        }
+
+        $qrPlaceholder = $config['placeholders']['qr'] ?? null;
+        if (! is_array($qrPlaceholder)) {
+            throw new \RuntimeException('Config response is missing required object [placeholders.qr].');
+        }
+
+        if (! is_string($qrPlaceholder['style'] ?? null) || trim($qrPlaceholder['style']) === '') {
+            throw new \RuntimeException('Config response is missing required field [placeholders.qr.style].');
+        }
     }
 
     /**
@@ -211,10 +233,10 @@ final class Pipe
             'box_y_pc' => $schema->number()->required(),
             'box_width_pc' => $schema->number()->required(),
             'box_height_pc' => $schema->number()->required(),
-            'label' => $schema->string(),
-            'label_position' => $schema->string(),
-            'box_fill' => $schema->string(),
-            'box_fill_note' => $schema->string(),
+            'label' => $schema->string()->required(),
+            'label_position' => $schema->string()->required(),
+            'box_fill' => $schema->string()->required(),
+            'box_fill_note' => $schema->string()->required(),
             'align' => $schema->string(),
             'font_family' => $schema->string(),
             'font_weight' => $schema->string(),
@@ -259,7 +281,7 @@ final class Pipe
                     'x_pc' => $schema->number()->required(),
                     'y_pc' => $schema->number()->required(),
                     'width_pc' => $schema->number()->required(),
-                    'style' => $schema->string(),
+                    'style' => $schema->string()->required(),
                     'box_fill' => $schema->string(),
                     'box_fill_note' => $schema->string(),
                 ])->required(),

@@ -183,6 +183,61 @@ it('throws when the design brief response is missing the description field', fun
     );
 })->throws(RuntimeException::class, 'Design brief response missing "description" field.');
 
+it('rejects configuration fields required to build the image prompt when they are missing', function () {
+    $briefJson = [
+        'name' => 'test',
+        'description' => 'A test design brief.',
+        'color_direction' => 'test colors',
+        'font_mood' => 'test font',
+    ];
+    $config = [
+        'canvas' => ['aspect_ratio' => '5:7', 'width_mm' => 210, 'height_mm' => 297, 'dpi' => 300],
+        'style' => [
+            'theme' => 'test',
+            'background' => 'test background',
+            'print_target' => 'black-and-white laser printer safe',
+        ],
+        'content' => [],
+        'placeholders' => [
+            'ssid' => [
+                'box_x_pc' => 50, 'box_y_pc' => 40, 'box_width_pc' => 70, 'box_height_pc' => 8,
+                'label' => 'SSID:', 'label_position' => 'outside_above',
+                'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid white cutout',
+            ],
+            'password' => [
+                'box_x_pc' => 50, 'box_y_pc' => 52, 'box_width_pc' => 70, 'box_height_pc' => 8,
+                'label' => 'PASSWORD:', 'label_position' => 'outside_above',
+                'box_fill' => '#FFFFFF', 'box_fill_note' => 'solid white cutout',
+            ],
+            'qr' => ['x_pc' => 50, 'y_pc' => 80, 'width_pc' => 28, 'style' => 'clean square'],
+        ],
+    ];
+    $requiredFields = [
+        ['ssid', 'label'],
+        ['ssid', 'label_position'],
+        ['ssid', 'box_fill'],
+        ['ssid', 'box_fill_note'],
+        ['password', 'label'],
+        ['password', 'label_position'],
+        ['password', 'box_fill'],
+        ['password', 'box_fill_note'],
+        ['qr', 'style'],
+    ];
+
+    foreach ($requiredFields as [$placeholder, $field]) {
+        $incompleteConfig = $config;
+        unset($incompleteConfig['placeholders'][$placeholder][$field]);
+
+        expect(fn () => (new Pipe(new FakeAiClient([$briefJson, $incompleteConfig])))->run(
+            category: Category::CAFE_RESTAURANT,
+            format: Format::A45_POSTER,
+        ))->toThrow(
+            RuntimeException::class,
+            "Config response is missing required field [placeholders.{$placeholder}.{$field}].",
+        );
+    }
+});
+
 it('validates the config response before building the image prompt', function () {
     $briefJson = [
         'name' => '테스트',
