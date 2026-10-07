@@ -112,6 +112,8 @@ dist/cafe-restaurant/
 └── preview.png  (when a preview exists)
 ```
 
+`publish`하기 전에 `dist/` 아래 **모든 템플릿의 `preview.png`를 직접 확인**하세요. Prompt Weaver는 검토 결과를 기록하거나 승인 여부를 강제하지 않으며, `publish`도 내보낸 템플릿 디렉터리를 수정하거나 제거하지 않습니다.
+
 ## 여러 fixture 만들기
 
 여러 디자인을 만들 때는 각 fixture를 먼저 preview까지 확인합니다.
