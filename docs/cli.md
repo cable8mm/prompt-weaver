@@ -146,6 +146,17 @@ dist/cafe-restaurant/
 
 그러면 `dist` 폴더에 fixture별 4개 export 파일이 생성됩니다. 이 결과물을 Laravel 서비스에 import하여 실제 서비스의 템플릿 데이터로 등록합니다.
 
+## WifiNote에 템플릿 게시
+
+미리보기를 확인하고 승인한 템플릿을 한 번에 WifiNote에 게시합니다. 먼저 서버 주소와 Personal Access Token을 설정합니다. 토큰은 입력 중 화면에 표시되지 않으며 `~/.config/prompt-weaver/config.json`에 저장됩니다.
+
+```bash
+./weaver login
+./weaver publish
+```
+
+`publish`는 `dist` 아래의 템플릿 디렉터리를 ZIP Template Pack으로 묶은 다음 업로드 여부를 확인합니다. `y`로 승인한 경우에만 Bearer Token을 사용해 WifiNote의 `/api/template-packs/upload` 엔드포인트로 업로드하며, Prompt Weaver는 서버 DB를 변경하지 않습니다. 다른 템플릿 루트를 게시하려면 `--dist-root=path/to/templates`를 지정합니다.
+
 ## 단계별 디버깅
 
 `pipe` 전체 흐름에서 어느 단계가 실패했는지 확인해야 할 때는 다음 커맨드로 나누어 실행합니다.

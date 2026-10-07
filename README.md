@@ -108,6 +108,31 @@ composer test
 composer lint
 ```
 
+WifiNote Publish 기능만 확인하려면 다음 테스트를 실행합니다. ZIP 생성과 manifest, 비밀 설정 저장 권한, 승인 전 업로드 방지, HTTP multipart 요청 및 401/403/422/500·timeout·network 오류 처리를 로컬에서 검사하며 실제 WifiNote 서버에는 접속하지 않습니다.
+
+```bash
+./vendor/bin/pest \
+  tests/Unit/Services/WifiNotePublishServiceTest.php \
+  tests/Unit/Services/WifiNoteUploadClientTest.php \
+  tests/Integration/WifiNotePublishCommandTest.php
+```
+
+실제 WifiNote 개발 서버에 수동으로 게시 흐름을 시험하려면 먼저 `dist/`에 시험용 템플릿을 준비한 뒤 다음을 실행합니다.
+
+```bash
+./weaver login
+./weaver publish
+```
+
+예를 들어 개발 서버 주소가 `https://wifinote.test`라면 `./weaver login`에서 다음과 같이 입력합니다.
+
+```text
+WifiNote Server URL: https://wifinote.test
+Personal Access Token: [개발 서버에서 발급한 테스트용 토큰]
+```
+
+`login`에 입력한 URL과 토큰은 이후 `publish`에서 사용됩니다. `publish`는 업로드 전에 확인을 요청하며, `y`를 입력하면 `dist/`의 모든 템플릿을 해당 서버로 전송하므로 운영 서버 대신 격리된 개발 서버와 시험용 템플릿을 사용하세요. 업로드 요청을 보내지 않고 확인 동작만 점검하려면 질문에서 `n`을 선택합니다.
+
 Python detector 테스트는 다음과 같습니다.
 
 ```bash
