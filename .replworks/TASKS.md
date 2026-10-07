@@ -1,144 +1,146 @@
 # Tasks
 
-- [ ] T-001 Project foundation
-    - Satisfies: TECH_STACK.md, Development Checks
-    - External boundary: no
-    - Acceptance criteria:
-        - Every implementation constraint in TECH_STACK.md is satisfied.
-        - Every check defined in TECH_STACK.md passes.
+- [x] T-001 Project foundation
+  - Satisfies: TECH_STACK.md, Development Checks
+  - External boundary: no
+  - Acceptance criteria:
+    - Every implementation constraint in TECH_STACK.md is satisfied.
+    - Every check defined in TECH_STACK.md passes.
 
-- [ ] T-002 Create a working template
-    - Satisfies: PRODUCT_SPEC.md Inputs, SCR-001, FR-001, FR-027
-    - Components: Command Interface, Template Workspace
-    - External boundary: no
-    - Acceptance criteria:
-        - Running `init` with a template code creates a working template with a manifest containing code, category, format, color mode, and layout.
-        - The default category, format, color mode, and layout match PRODUCT_SPEC.md when their options are omitted.
-        - All category, format, color-mode, and layout values defined by PRODUCT_SPEC.md are accepted.
-        - A supplied working-root option is honored.
-        - An existing template, invalid input, or template-creation failure is reported and exits non-zero.
-        - Unit tests for template creation pass.
+- [x] T-002 Create a working template
+  - Satisfies: PRODUCT_SPEC.md Inputs, SCR-001, FR-001, FR-027
+  - Components: Command Interface, Template Workspace
+  - External boundary: no
+  - Acceptance criteria:
+    - Running `init` with a template code creates a working template with a manifest containing code, category, format, color mode, and layout.
+    - The default category, format, color mode, and layout match PRODUCT_SPEC.md when their options are omitted.
+    - All category, format, color-mode, and layout values defined by PRODUCT_SPEC.md are accepted.
+    - A supplied working-root option is honored.
+    - An existing template, invalid input, or template-creation failure is reported and exits non-zero.
+    - Unit tests for template creation pass.
 
-- [ ] T-003 Verify the AI text service boundary
-    - Satisfies: PRODUCT_SPEC.md External Systems, SCR-002, FR-002, FR-028
-    - Components: Prompt Generation, AI Text Boundary
-    - External boundary: yes
-    - Acceptance criteria:
-        - A live observation is recorded for the selected AI text service's structured design-brief and configuration responses.
-        - An executable probe against the live service submits the requests needed to produce a design brief and configuration and records the observed responses.
-        - The observed responses provide the fields consumed to produce the design brief, configuration, and image prompt required by PRODUCT_SPEC.md.
-        - A rejected request, unavailable service, or unusable structured response is recorded as a failure and the probe exits non-zero.
+- [x] T-003 Verify the AI text service boundary
+  - Satisfies: PRODUCT_SPEC.md External Systems, SCR-002, FR-002, FR-028
+  - Components: Prompt Generation, AI Text Boundary
+  - External boundary: yes
+  - Acceptance criteria:
+    - A live observation is recorded for the selected AI text service's structured design-brief and configuration responses.
+    - An executable probe against the live service submits the requests needed to produce a design brief and configuration and records the observed responses.
+    - The observed responses provide the fields consumed to produce the design brief, configuration, and image prompt required by PRODUCT_SPEC.md.
+    - A rejected request, unavailable service, or unusable structured response is recorded as a failure and the probe exits non-zero.
 
-- [ ] T-004 Generate prompts and template configuration
-    - Satisfies: PRODUCT_SPEC.md Inputs, Outputs, SCR-002, FR-002, FR-028
-    - Components: Command Interface, Prompt Generation, AI Text Boundary, Template Workspace
-    - External boundary: yes
-    - Acceptance criteria:
-        - With a working template, `pipe` obtains the structured responses required by Prompt Generation and saves `brief.prompt`, `design-brief.json`, `config.prompt`, `raw.config.json`, and `image.prompt` to that template.
-        - Without a template code, `pipe` accepts the category and format inputs and prints prompts and JSON responses only when `--show-output` is supplied.
-        - `pipe` accepts all options defined for it in PRODUCT_SPEC.md and honors the progress-output option.
-        - A live E2E test exercises `pipe` through the selected AI text service and verifies the generated artifacts or printed output.
-        - The live E2E test verifies that a rejected request, unavailable service, or unusable response is reported and exits non-zero.
-        - Unit tests for prompt generation and command behavior pass.
+- [x] T-004 Generate prompts and template configuration
+  - Satisfies: PRODUCT_SPEC.md Inputs, Outputs, SCR-002, FR-002, FR-028
+  - Components: Command Interface, Prompt Generation, AI Text Boundary, Template Workspace
+  - External boundary: yes
+  - Acceptance criteria:
+    - With a working template, `pipe` obtains the structured responses required by Prompt Generation and saves `brief.prompt`, `design-brief.json`, `config.prompt`, `raw.config.json`, and `image.prompt` to that template.
+    - Without a template code, `pipe` accepts the category and format inputs and prints prompts and JSON responses only when `--show-output` is supplied.
+    - `pipe` accepts all options defined for it in PRODUCT_SPEC.md and honors the progress-output option.
+    - A live E2E test exercises `pipe` through the selected AI text service and verifies the generated artifacts or printed output.
+    - The live E2E test verifies that a rejected request, unavailable service, or unusable response is reported and exits non-zero.
+    - Unit tests for prompt generation and command behavior pass.
 
-- [ ] T-005 Calibrate placeholder coordinates
-    - Satisfies: PRODUCT_SPEC.md Inputs, Outputs, SCR-003, FR-003, FR-004, FR-029
-    - Components: Command Interface, Template Workspace, Calibration
-    - External boundary: no
-    - Acceptance criteria:
-        - Given a working template and user-supplied design image, `calibrate` writes calibrated coordinates for QR code, SSID, and password placeholders to the template configuration.
-        - `calibrate` accepts both template-reference and explicit-template-location inputs defined by PRODUCT_SPEC.md.
-        - Missing or unreadable template inputs and calibration failures are reported and exit non-zero.
-        - Unit tests for calibration command behavior pass.
+- [x] T-005 Calibrate placeholder coordinates
+  - Satisfies: PRODUCT_SPEC.md Inputs, Outputs, SCR-003, FR-003, FR-004, FR-029
+  - Components: Command Interface, Template Workspace, Calibration
+  - External boundary: no
+  - Acceptance criteria:
+    - Given a working template and user-supplied design image, `calibrate` writes calibrated coordinates for QR code, SSID, and password placeholders to the template configuration.
+    - `calibrate` accepts both template-reference and explicit-template-location inputs defined by PRODUCT_SPEC.md.
+    - Missing or unreadable template inputs and calibration failures are reported and exit non-zero.
+    - Unit tests for calibration command behavior pass.
 
-- [ ] T-006 Render a template preview
-    - Satisfies: PRODUCT_SPEC.md Inputs, Outputs, SCR-004, FR-005, FR-030
-    - Components: Command Interface, Preview Renderer, Template Workspace
-    - External boundary: no
-    - Acceptance criteria:
-        - Given a selected template, `preview` renders a PNG preview to the supplied output path or the default preview path.
-        - When the output path has an `.html` extension, `preview` renders an HTML preview.
-        - `preview` accepts the template selection and output options defined by PRODUCT_SPEC.md.
-        - Missing or invalid template inputs and rendering failures are reported and exit non-zero.
-        - Unit tests for preview rendering command behavior pass.
+- [x] T-006 Render a template preview
+  - Satisfies: PRODUCT_SPEC.md Inputs, Outputs, SCR-004, FR-005, FR-030
+  - Components: Command Interface, Preview Renderer, Template Workspace
+  - External boundary: no
+  - Acceptance criteria:
+    - Given a selected template, `preview` renders a PNG preview to the supplied output path or the default preview path.
+    - When the output path has an `.html` extension, `preview` renders an HTML preview.
+    - `preview` accepts the template selection and output options defined by PRODUCT_SPEC.md.
+    - Missing or invalid template inputs and rendering failures are reported and exit non-zero.
+    - Unit tests for preview rendering command behavior pass.
 
-- [ ] T-007 Derive and apply a template code
-    - Satisfies: PRODUCT_SPEC.md SCR-006, FR-008, FR-009, FR-031
-    - Components: Command Interface, Template Code Manager, Template Workspace
-    - External boundary: no
-    - Acceptance criteria:
-        - Given a template with a configured style theme, `code` derives the template code from that theme.
-        - When the derived code differs from the supplied code, the changed code is applied to the working template and any matching exported template.
-        - When the derived code matches the supplied code, the existing code remains unchanged.
-        - Invalid template input or a code-update failure is reported and exits non-zero.
-        - Unit tests for code derivation and application pass.
+- [x] T-007 Derive and apply a template code
+  - Satisfies: PRODUCT_SPEC.md SCR-006, FR-008, FR-009, FR-031
+  - Components: Command Interface, Template Code Manager, Template Workspace
+  - External boundary: no
+  - Acceptance criteria:
+    - Given a template with a configured style theme, `code` derives the template code from that theme.
+    - When the derived code differs from the supplied code, the changed code is applied to the working template and any matching exported template.
+    - When the derived code matches the supplied code, the existing code remains unchanged.
+    - Invalid template input or a code-update failure is reported and exits non-zero.
+    - Unit tests for code derivation and application pass.
 
-- [ ] T-008 Export a prepared template
-    - Satisfies: PRODUCT_SPEC.md Outputs, SCR-007, FR-024, FR-025, FR-026, FR-032, FR-034
-    - Components: Command Interface, Template Workspace, Template Exporter
-    - External boundary: no
-    - Acceptance criteria:
-        - Given a prepared working template, `export` creates an exported template at the specified destination or `dist/<template-code>/` by default.
-        - The exported template contains `manifest.json` with code, category, format, color mode, and layout.
-        - The exported template contains `config.json`, `image.png`, and `image.prompt`.
-        - The exported template contains `preview.png` when a preview image exists.
-        - `export` accepts the image, destination, and working-root options defined by PRODUCT_SPEC.md.
-        - Missing or invalid source artifacts, invalid image data, and export failures are reported and exit non-zero.
-        - Unit tests for export contents and failure behavior pass.
+- [x] T-008 Export a prepared template
+  - Satisfies: PRODUCT_SPEC.md Outputs, SCR-007, FR-024, FR-025, FR-026, FR-032, FR-034
+  - Components: Command Interface, Template Workspace, Template Exporter
+  - External boundary: no
+  - Acceptance criteria:
+    - Given a prepared working template, `export` creates an exported template at the specified destination or `dist/<template-code>/` by default.
+    - The exported template contains `manifest.json` with code, category, format, color mode, and layout.
+    - The exported template contains `config.json`, `image.png`, and `image.prompt`.
+    - The exported template contains `preview.png` when a preview image exists.
+    - `export` accepts the image, destination, and working-root options defined by PRODUCT_SPEC.md.
+    - Missing or invalid source artifacts, invalid image data, and export failures are reported and exit non-zero.
+    - Unit tests for export contents and failure behavior pass.
 
-- [ ] T-009 Persist WifiNote credentials
-    - Satisfies: PRODUCT_SPEC.md SCR-008, FR-010, FR-011, FR-012
-    - Components: Command Interface, Credential Manager
-    - External boundary: no
-    - Acceptance criteria:
-        - Running `login` requests a WifiNote server URL and a Personal Access Token.
-        - The Personal Access Token is not displayed while it is entered.
-        - Valid credentials are available to subsequent command invocations.
-        - An invalid server URL, empty token, or credential persistence failure is reported and exits non-zero.
-        - Unit tests for credential validation, persistence, and retrieval pass.
+- [x] T-009 Persist WifiNote credentials
+  - Satisfies: PRODUCT_SPEC.md SCR-008, FR-010, FR-011, FR-012
+  - Components: Command Interface, Credential Manager
+  - External boundary: no
+  - Acceptance criteria:
+    - Running `login` requests a WifiNote server URL and a Personal Access Token.
+    - The Personal Access Token is not displayed while it is entered.
+    - Valid credentials are available to subsequent command invocations.
+    - An invalid server URL, empty token, or credential persistence failure is reported and exits non-zero.
+    - Unit tests for credential validation, persistence, and retrieval pass.
 
-- [ ] T-010 Preserve user-owned template review
-    - Satisfies: PRODUCT_SPEC.md SCR-005, FR-006, FR-007
-    - Components: Command Interface, Template Exporter, Publication Workflow
-    - External boundary: no
-    - Acceptance criteria:
-        - Every exported template under the publication root remains available for the user to inspect before publication.
-        - Prompt Weaver creates no Human Approval record.
-        - Publication does not require an application-recorded approval state.
-        - Unit tests for the absence of approval recording or enforcement pass.
+- [x] T-010 Preserve user-owned template review
+  - Satisfies: PRODUCT_SPEC.md SCR-005, FR-006, FR-007
+  - Components: Command Interface, Template Exporter, Publication Workflow
+  - External boundary: no
+  - Acceptance criteria:
+    - Every exported template under the publication root remains available for the user to inspect before publication.
+    - Prompt Weaver creates no Human Approval record.
+    - Publication does not require an application-recorded approval state.
+    - Unit tests for the absence of approval recording or enforcement pass.
 
-- [ ] T-011 Package the templates for publication
-    - Satisfies: PRODUCT_SPEC.md Outputs, SCR-009, FR-013, FR-014, FR-015, FR-033
-    - Components: Command Interface, Template Packager
-    - External boundary: no
-    - Acceptance criteria:
-        - Given one or more template directories directly under the selected publication root, `publish` creates one Template Pack containing every such directory.
-        - The Template Pack contains a root-level `manifest.json` with schema, generator, generator version, and creation time.
-        - The Template Pack filename contains a timestamp in the required `template-pack-YYYYMMDD-HHMMSS.zip` form.
-        - `publish` accepts the publication-root option and uses the default root when the option is omitted.
-        - A missing publication root, no template directories, or packaging failure is reported and exits non-zero.
-        - Unit tests for archive contents, manifest fields, filename, and failure behavior pass.
+- [x] T-011 Package templates for WifiNote
+  - Satisfies: PRODUCT_SPEC.md Outputs, SCR-009, FR-013, FR-014, FR-015, FR-033
+  - Components: Command Interface, Template Packager
+  - External boundary: no
+  - Acceptance criteria:
+    - Given one or more template directories directly under the selected publication root, `publish` creates one WifiNote-compatible Template Pack containing each directory's `config.json`, `image.png`, and `preview.png` under `templates/<code>/`.
+    - The Template Pack contains a root-level `manifest.json` whose only key is `templates`, a list of all packaged codes.
+    - Packs with more than 50 templates, missing required files, a config code mismatch, or a ZIP larger than 100 MiB are rejected before upload.
+    - The Template Pack filename contains a timestamp in the required `template-pack-YYYYMMDD-HHMMSS.zip` form.
+    - `publish` accepts the publication-root option and uses the default root when the option is omitted.
+    - A missing publication root, no template directories, or packaging failure is reported and exits non-zero.
+    - Unit tests for archive contents, manifest fields, filename, limits, and failure behavior pass.
 
-- [ ] T-012 Verify the WifiNote upload boundary
-    - Satisfies: PRODUCT_SPEC.md External Systems, SCR-009, FR-019, FR-020, FR-021, FR-035, ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-006
-    - Components: WifiNote Upload Boundary
-    - External boundary: yes
-    - Acceptance criteria:
-        - A live observation is recorded for WifiNote accepting the required Template Pack upload using multipart form data and a Bearer token.
-        - An executable probe against the live WifiNote server records the successful upload result and confirms the automatic import behavior stated in PRODUCT_SPEC.md.
-        - The live observation records the server outcomes for HTTP 401, 403, 422, and 500, a timeout, and a network error.
-        - The probe distinguishes each recorded outcome and exits non-zero when an observed result does not match its recorded expected result.
+- [x] T-012 Verify the WifiNote upload boundary
+  - Satisfies: PRODUCT_SPEC.md External Systems, SCR-009, FR-019, FR-020, FR-021, FR-035, ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-006
+  - Components: WifiNote Upload Boundary
+  - External boundary: yes
+  - Acceptance criteria:
+    - A live observation is recorded for WifiNote accepting the required Template Pack upload using multipart form data and a Bearer token.
+    - An executable probe against the live WifiNote server records the 202 response and its upload identifier, and verifies the accepted file is in the private inbox without running import.
+    - WifiNote Testbench tests verify 202 inbox storage without DB import, plus the implemented 401 and 422 outcomes.
+    - The documented separation between upload acceptance and the explicit `template-packs:import` or Scheduler import is recorded.
+    - Prompt Weaver's local HTTP-client tests verify its classification of HTTP 401, 403, 422, 500, timeout, and network errors; the probe does not claim WifiNote emits outcomes its upload route does not implement.
 
-- [ ] T-013 Publish a confirmed Template Pack to WifiNote
-    - Satisfies: PRODUCT_SPEC.md SCR-009, FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, FR-020, FR-021, FR-022, FR-023, FR-033, FR-035, ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-006, ERR-007
-    - Components: Command Interface, Credential Manager, Template Packager, Publication Workflow, WifiNote Upload Boundary
-    - External boundary: yes
-    - Acceptance criteria:
-        - With configured credentials and a Template Pack, `publish` requests confirmation before sending an upload request and defaults to decline.
-        - Declining publication sends no upload request, reports cancellation, and exits zero.
-        - Approving publication uploads the Template Pack to the observed WifiNote boundary using multipart form data and the configured Bearer token.
-        - After a successful response, `publish` reports successful upload and automatic WifiNote import and exits zero.
-        - The live E2E test exercises the product through WifiNote and verifies the observed success behavior and automatic import.
-        - The live E2E test verifies that HTTP 401 reports token rejection, HTTP 403 reports insufficient permission, HTTP 422 reports pack rejection, HTTP 500 reports a server error, timeout reports a timeout, and network failure reports a network error; each failure exits non-zero.
-        - Missing or invalid credentials and packaging failures are reported and exit non-zero before an upload request is sent.
-        - Unit tests for confirmation handling, request preparation, response classification, and command exit behavior pass.
+- [x] T-013 Publish a confirmed Template Pack to WifiNote
+  - Satisfies: PRODUCT_SPEC.md SCR-009, FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, FR-020, FR-021, FR-022, FR-023, FR-033, FR-035, ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-006, ERR-007
+  - Components: Command Interface, Credential Manager, Template Packager, Publication Workflow, WifiNote Upload Boundary
+  - External boundary: yes
+  - Acceptance criteria:
+    - With configured credentials and a Template Pack, `publish` requests confirmation before sending an upload request and defaults to decline.
+    - Declining publication sends no upload request, reports cancellation, and exits zero.
+    - Approving publication uploads the Template Pack to the observed WifiNote boundary using multipart form data and the configured Bearer token.
+    - After a successful response, `publish` reports successful upload acceptance for import and exits zero.
+    - The live E2E test exercises the product through WifiNote and verifies the observed acceptance behavior without claiming the separate import has run.
+    - Local HTTP-client tests verify mappings for HTTP 401 token rejection, HTTP 403 insufficient permission, HTTP 422 pack rejection, HTTP 500 server error, timeout, and network failure; command integration verifies an upload rejection exits non-zero.
+    - Missing or invalid credentials and packaging failures are reported and exit non-zero before an upload request is sent.
+    - Unit tests for confirmation handling, request preparation, response classification, and command exit behavior pass.
