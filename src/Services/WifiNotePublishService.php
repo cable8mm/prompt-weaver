@@ -122,10 +122,9 @@ final class WifiNotePublishService
 
         $timestamp = (new DateTimeImmutable)->format('Ymd-His');
         $archivePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'template-pack-'.$timestamp.'.zip';
-        $suffix = 1;
-        while (file_exists($archivePath)) {
-            $archivePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'template-pack-'.$timestamp.'-'.$suffix.'.zip';
-            $suffix++;
+
+        if (file_exists($archivePath)) {
+            throw new RuntimeException("Template pack already exists for this second: {$archivePath}");
         }
 
         $archive = new ZipArchive;

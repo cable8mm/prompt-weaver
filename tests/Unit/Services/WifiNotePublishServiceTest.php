@@ -79,18 +79,28 @@ it('creates a ZIP with all templates and a root pack manifest', function () {
 
     try {
         $archivePath = $service->createTemplatePack($dist);
-        expect(basename($archivePath))->toMatch('/^template-pack-\d{8}-\d{6}(?:-\d+)?\.zip$/');
+        expect(basename($archivePath))->toMatch('/^template-pack-\d{8}-\d{6}\.zip$/');
 
         $archive = new ZipArchive;
         expect($archive->open($archivePath))->toBeTrue();
-        expect($archive->locateName('manifest.json'))->not->toBeFalse();
-        expect($archive->locateName('cafe-minimal/nested/image.png'))->not->toBeFalse();
-        expect($archive->locateName('winter-forest/config.json'))->not->toBeFalse();
+        $entries = [];
+        for ($index = 0; $index < $archive->numFiles; $index++) {
+            $entries[] = $archive->getNameIndex($index);
+        }
+        expect($entries)->toContain(
+            'manifest.json',
+            'cafe-minimal/nested/image.png',
+            'winter-forest/config.json',
+        );
+        expect(array_values(array_filter($entries, fn (string $entry): bool => basename($entry) === 'manifest.json')))
+            ->toBe(['manifest.json']);
 
         $manifest = json_decode((string) $archive->getFromName('manifest.json'), true, 512, JSON_THROW_ON_ERROR);
         expect($manifest)->toHaveKeys(['schema', 'generator', 'generator_version', 'created_at']);
+        expect($manifest['schema'])->toBeInt();
         expect($manifest['generator'])->toBe('prompt-weaver');
-        expect($manifest['created_at'])->toBeString();
+        expect($manifest['generator_version'])->toBeString();
+        expect((new DateTimeImmutable($manifest['created_at']))->format(DATE_ATOM))->toBe($manifest['created_at']);
         $archive->close();
     } finally {
         if (is_string($archivePath)) {
