@@ -30,6 +30,11 @@ final class RenderHtml
             throw new RuntimeException("Background image not found: {$backgroundPath}");
         }
 
+        $directory = dirname($outputPath);
+        if (! is_dir($directory) && ! mkdir($directory, 0777, true) && ! is_dir($directory)) {
+            throw new RuntimeException("Unable to create directory: {$directory}");
+        }
+
         $dimensions = getimagesize($backgroundPath);
         if ($dimensions === false) {
             throw new RuntimeException("Unable to read background image dimensions: {$backgroundPath}");
@@ -78,10 +83,6 @@ final class RenderHtml
             .'<img class="qr" src="'.$qrDataUri.'" alt="Wi-Fi QR code" style="left: '.$qrX.'%; top: '.$qrY.'%;"></main>'.PHP_EOL
             .'<script>fetch("'.htmlspecialchars(basename($configPath), ENT_QUOTES, 'UTF-8').'" ).then(r=>r.json()).then(c=>{document.querySelector("#ssid").textContent=c.placeholders?.ssid?.value??'.json_encode($ssid, JSON_THROW_ON_ERROR).';document.querySelector("#password").textContent=c.placeholders?.password?.value??'.json_encode($password, JSON_THROW_ON_ERROR).';}).catch(()=>{document.querySelector("#ssid").textContent='.json_encode($ssid, JSON_THROW_ON_ERROR).';document.querySelector("#password").textContent='.json_encode($password, JSON_THROW_ON_ERROR).';});</script></body></html>'.PHP_EOL;
 
-        $directory = dirname($outputPath);
-        if (! is_dir($directory) && ! mkdir($directory, 0777, true) && ! is_dir($directory)) {
-            throw new RuntimeException("Unable to create directory: {$directory}");
-        }
         if (file_put_contents($outputPath, $html) === false) {
             throw new RuntimeException("Unable to write preview HTML: {$outputPath}");
         }

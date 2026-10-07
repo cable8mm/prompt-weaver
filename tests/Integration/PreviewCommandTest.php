@@ -141,6 +141,58 @@ it('creates a preview image by overlaying qr and credential text on the backgrou
     }
 });
 
+it('renders the default PNG preview when a template code and fixtures root are supplied', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-preview-default-'.bin2hex(random_bytes(4));
+    $workingFixture = $workingRoot.'/preview-target';
+
+    try {
+        copy_directory_preview($sourceFixture, $workingFixture);
+
+        $result = run_prompt_weaver_preview([
+            'preview',
+            'preview-target',
+            '--fixtures-root='.$workingRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0)
+            ->and($result['stderr'])->toBe('')
+            ->and($result['stdout'])->toContain('Created '.$workingFixture.'/preview.png')
+            ->and(is_file($workingFixture.'/preview.png'))->toBeTrue()
+            ->and(getimagesize($workingFixture.'/preview.png'))->not->toBeFalse();
+    } finally {
+        remove_directory_preview($workingRoot);
+    }
+});
+
+it('renders an HTML preview to the supplied output path and accepts the code option', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-preview-html-'.bin2hex(random_bytes(4));
+    $workingFixture = $workingRoot.'/html-target';
+    $outputPath = $workingRoot.'/nested/review.html';
+
+    try {
+        copy_directory_preview($sourceFixture, $workingFixture);
+
+        $result = run_prompt_weaver_preview([
+            'preview',
+            '--code=html-target',
+            '--fixtures-root='.$workingRoot,
+            '--output='.$outputPath,
+        ]);
+
+        expect($result['exitCode'])->toBe(0)
+            ->and($result['stderr'])->toBe('')
+            ->and($result['stdout'])->toContain('Created '.$outputPath)
+            ->and(is_file($outputPath))->toBeTrue()
+            ->and(file_get_contents($outputPath))
+            ->toContain('<!doctype html>')
+            ->toContain('data:image/png;base64,');
+    } finally {
+        remove_directory_preview($workingRoot);
+    }
+});
+
 it('calibrates placeholder coordinates in config from the generated image', function () {
     $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
     $workingFixture = sys_get_temp_dir().'/prompt-weaver-calibrate-'.bin2hex(random_bytes(4));
@@ -166,6 +218,64 @@ it('calibrates placeholder coordinates in config from the generated image', func
         expect($calibratedConfig['placeholders']['password'])->toHaveKey('box_y_pc');
     } finally {
         remove_directory_preview($workingFixture);
+    }
+});
+
+it('reports missing templates, missing preview inputs, and rendering failures with a non-zero exit code', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-preview-errors-'.bin2hex(random_bytes(4));
+    mkdir($workingRoot, 0777, true);
+
+    try {
+        $missingTemplate = run_prompt_weaver_preview([
+            'preview',
+            'missing-template',
+            '--fixtures-root='.$workingRoot,
+        ]);
+
+        expect($missingTemplate['exitCode'])->not->toBe(0)
+            ->and($missingTemplate['stderr'])->toContain('Fixture directory not found');
+
+        $missingConfigFixture = $workingRoot.'/missing-config';
+        copy_directory_preview($sourceFixture, $missingConfigFixture);
+        unlink($missingConfigFixture.'/config.json');
+        unlink($missingConfigFixture.'/raw.config.json');
+
+        $missingConfig = run_prompt_weaver_preview([
+            'preview',
+            '--fixture='.$missingConfigFixture,
+        ]);
+
+        expect($missingConfig['exitCode'])->not->toBe(0)
+            ->and($missingConfig['stderr'])->toContain('Config file not found');
+        remove_directory_preview($missingConfigFixture);
+
+        $missingImageFixture = $workingRoot.'/missing-image';
+        copy_directory_preview($sourceFixture, $missingImageFixture);
+        unlink($missingImageFixture.'/image.png');
+
+        $missingImage = run_prompt_weaver_preview([
+            'preview',
+            '--fixture='.$missingImageFixture,
+        ]);
+
+        expect($missingImage['exitCode'])->not->toBe(0)
+            ->and($missingImage['stderr'])->toContain('Background image not found');
+        remove_directory_preview($missingImageFixture);
+
+        $invalidImageFixture = $workingRoot.'/invalid-image';
+        copy_directory_preview($sourceFixture, $invalidImageFixture);
+        file_put_contents($invalidImageFixture.'/image.png', 'not an image');
+
+        $renderFailure = run_prompt_weaver_preview([
+            'preview',
+            '--fixture='.$invalidImageFixture,
+        ]);
+
+        expect($renderFailure['exitCode'])->not->toBe(0)
+            ->and($renderFailure['stderr'])->toContain('Unable to load background image');
+    } finally {
+        remove_directory_preview($workingRoot);
     }
 });
 
@@ -200,6 +310,100 @@ it('calibrates the qr position and width from the generated image', function () 
         expect($calibratedConfig['placeholders']['qr']['x_pc'])->toBeGreaterThan(45.0);
         expect($calibratedConfig['placeholders']['qr']['y_pc'])->toBeBetween(75.0, 82.0);
         expect($calibratedConfig['placeholders']['qr']['width_pc'])->toBeGreaterThan(25.0);
+    } finally {
+        remove_directory_preview($workingFixture);
+    }
+});
+
+it('calibrates a template selected by code under a custom fixtures root', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-calibrate-root-'.bin2hex(random_bytes(4));
+    $workingFixture = $workingRoot.'/calibration-target';
+
+    try {
+        copy_directory_preview($sourceFixture, $workingFixture);
+
+        $result = run_prompt_weaver_preview([
+            'calibrate',
+            'calibration-target',
+            '--fixtures-root='.$workingRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0)
+            ->and($result['stderr'])->toBe('')
+            ->and($result['stdout'])->toContain('Updated '.$workingFixture.'/config.json');
+
+        $config = json_decode((string) file_get_contents($workingFixture.'/config.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        expect($config['placeholders']['ssid']['box_y_pc'])->toBeNumeric()
+            ->and($config['placeholders']['password']['box_y_pc'])->toBeNumeric()
+            ->and($config['placeholders']['qr']['x_pc'])->toBeNumeric()
+            ->and($config['placeholders']['qr']['y_pc'])->toBeNumeric()
+            ->and($config['placeholders']['qr']['width_pc'])->toBeNumeric();
+    } finally {
+        remove_directory_preview($workingRoot);
+    }
+});
+
+it('reports missing working templates and required calibration inputs with a non-zero exit code', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-calibrate-errors-'.bin2hex(random_bytes(4));
+    mkdir($workingRoot, 0777, true);
+
+    try {
+        $missingTemplate = run_prompt_weaver_preview([
+            'calibrate',
+            'missing-template',
+            '--fixtures-root='.$workingRoot,
+        ]);
+
+        expect($missingTemplate['exitCode'])->not->toBe(0)
+            ->and($missingTemplate['stderr'])->toContain('Fixture directory not found');
+
+        foreach (['raw.config.json', 'image.png'] as $missingInput) {
+            $workingFixture = $workingRoot.'/missing-'.str_replace('.', '-', $missingInput);
+            copy_directory_preview($sourceFixture, $workingFixture);
+            unlink($workingFixture.'/'.$missingInput);
+
+            $result = run_prompt_weaver_preview([
+                'calibrate',
+                '--fixture='.$workingFixture,
+            ]);
+
+            expect($result['exitCode'])->not->toBe(0)
+                ->and($result['stderr'])->toContain(
+                    $missingInput === 'raw.config.json' ? 'Raw config file not found' : 'Background image not found'
+                );
+
+            remove_directory_preview($workingFixture);
+        }
+    } finally {
+        remove_directory_preview($workingRoot);
+    }
+});
+
+it('reports calibration failure when the supplied image has no detectable placeholders', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingFixture = sys_get_temp_dir().'/prompt-weaver-calibrate-failure-'.bin2hex(random_bytes(4));
+
+    try {
+        copy_directory_preview($sourceFixture, $workingFixture);
+        $configBeforeCalibration = file_get_contents($workingFixture.'/config.json');
+        [$width, $height] = getimagesize($workingFixture.'/image.png');
+        $blank = imagecreatetruecolor($width, $height);
+        $black = imagecolorallocate($blank, 0, 0, 0);
+        imagefill($blank, 0, 0, $black);
+        imagepng($blank, $workingFixture.'/image.png');
+        imagedestroy($blank);
+
+        $result = run_prompt_weaver_preview([
+            'calibrate',
+            '--fixture='.$workingFixture,
+        ]);
+
+        expect($result['exitCode'])->not->toBe(0)
+            ->and($result['stderr'])->toContain('Unable to detect the QR frame')
+            ->and(file_get_contents($workingFixture.'/config.json'))->toBe($configBeforeCalibration);
     } finally {
         remove_directory_preview($workingFixture);
     }
