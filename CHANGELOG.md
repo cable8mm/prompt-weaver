@@ -1,5 +1,17 @@
 # Release Notes
 
+## v1.2.0 - 2026-10-07
+
+### What's Changed
+
+* feat: implement WifiNote publishing functionality with login and upload commands by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/69
+* feat: Initialize project structure with foundational documents by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/70
+* feat: replace PRODUCT_SPEC.md to `.replworks` directory by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/71
+* feat: enhance AGENTS.md with detailed REQUEST_LANES classification and handling rules by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/72
+* feat: make tasks md completed by [@cable8mm](https://github.com/cable8mm) in https://github.com/cable8mm/prompt-weaver/pull/73
+
+**Full Changelog**: https://github.com/cable8mm/prompt-weaver/compare/v1.1.1...v1.2.0
+
 ## v1.1.1 - 2026-09-18
 
 ### What's Changed
