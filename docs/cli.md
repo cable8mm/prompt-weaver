@@ -105,10 +105,11 @@ export 결과는 `dist` 아래에 서비스가 import할 파일을 생성합니�
 
 ```text
 dist/cafe-restaurant/
+├── manifest.json
 ├── config.json
 ├── image.png
 ├── image.prompt
-└── preview.png
+└── preview.png  (when a preview exists)
 ```
 
 ## 여러 fixture 만들기
