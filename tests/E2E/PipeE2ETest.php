@@ -90,14 +90,20 @@ it('runs the full pipeline with real OpenRouter API', function () {
     expect($result->config['style'])
         ->toHaveKey('theme')
         ->toHaveKey('background')
-        ->toHaveKey('color_mode');
+        ->toHaveKey('print_target');
 
     // Verify content structure
     expect($result->config['content'])
         ->toHaveKey('wifi_icon')
-        ->not->toHaveKey('title')
+        ->toHaveKey('title')
         ->not->toHaveKey('message')
         ->not->toHaveKey('footer');
+    expect($result->config['content']['title'])
+        ->toHaveKey('style')
+        ->not->toHaveKey('text')
+        ->not->toHaveKey('x_pc')
+        ->not->toHaveKey('y_pc')
+        ->not->toHaveKey('align');
 
     // Verify placeholders structure
     expect($result->config['placeholders'])
