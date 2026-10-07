@@ -13,7 +13,9 @@
   ],
   "require": {
     "php": "^8.3",
+    "ext-curl": "*",
     "ext-gd": "*",
+    "ext-zip": "*",
     "bacon/bacon-qr-code": "^3.1",
     "cable8mm/enum-getter": "^2.2",
     "laravel/prompts": "^0.3.22",

@@ -39,6 +39,8 @@ Usage:
   bin/prompt-weaver imagegen code [--provider=openai] [--model=...] [--output=path/to/image.png] [--fixtures-root=.weaver]
   bin/prompt-weaver export code [--image=path/to/generated.png] [--output-dir=dist/code] [--fixtures-root=.weaver]
   bin/prompt-weaver export-all [--output-dir=dist] [--fixtures-root=.weaver]
+  bin/prompt-weaver login
+  bin/prompt-weaver publish [--dist-root=dist]
   bin/prompt-weaver code-all [--dist-root=dist] [--fixtures-root=.weaver] [--dry-run]
   bin/prompt-weaver config:validate path/to/config.json
   bin/prompt-weaver chain --category="..." --format="..." --description="..." --color-direction="..." --font-mood="..." [--name="..."] --config-file=path/to/config.json
