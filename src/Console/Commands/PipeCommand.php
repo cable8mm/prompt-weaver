@@ -17,7 +17,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function Laravel\Prompts\info;
 use function Laravel\Prompts\progress;
 
 final class PipeCommand extends PromptWeaverCommand
@@ -112,15 +111,15 @@ final class PipeCommand extends PromptWeaverCommand
         }
 
         if ($input->getOption('show-output')) {
-            $this->displaySection('design-brief prompt', $result->briefPrompt);
-            $this->displaySection('design-brief response', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            $this->displaySection('config prompt', $result->configPrompt);
-            $this->displaySection('config response', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            $this->displaySection('image prompt', $result->imagePrompt);
+            $this->writeSection($output, 'design-brief prompt', $result->briefPrompt);
+            $this->writeSection($output, 'design-brief response', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $this->writeSection($output, 'config prompt', $result->configPrompt);
+            $this->writeSection($output, 'config response', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $this->writeSection($output, 'image prompt', $result->imagePrompt);
         } elseif ($fixtureDirectory !== null) {
-            info("Pipeline complete. Files saved to {$fixtureDirectory}");
+            $output->writeln("Pipeline complete. Files saved to {$fixtureDirectory}");
         } else {
-            info('Pipeline complete. Use a fixture argument to save the generated files.');
+            $output->writeln('Pipeline complete. Use a fixture argument to save the generated files.');
         }
 
         return self::SUCCESS;
@@ -133,6 +132,13 @@ final class PipeCommand extends PromptWeaverCommand
         }
 
         return app(AiClient::class);
+    }
+
+    private function writeSection(OutputInterface $output, string $title, string $content): void
+    {
+        $output->writeln("=== {$title} ===");
+        $output->writeln($content);
+        $output->writeln('');
     }
 
     private function writePipelineFiles(string $directory, PipeResult $result): void

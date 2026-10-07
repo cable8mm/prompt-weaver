@@ -68,6 +68,7 @@ class ExportCommand extends PromptWeaverCommand
         $manifest = $this->readJsonFile($manifestPath);
         $designBrief = $this->readJsonFile($designBriefPath);
         $config = $this->readJsonFile($configPath);
+        $exportManifest = $this->exportManifest($manifest, $manifestPath);
         $localizedStyle = $config['metadata']['style'] ?? null;
         unset($config['schema_version'], $config['metadata']);
         $config = [
@@ -81,6 +82,7 @@ class ExportCommand extends PromptWeaverCommand
             throw new RuntimeException("Unable to create output directory: {$outputDirectory}");
         }
 
+        $this->writeJson($outputDirectory.'/manifest.json', $exportManifest);
         $this->writeJson($outputDirectory.'/config.json', $config);
 
         if (! copy($imagePath, $outputDirectory.'/image.png')) {
@@ -96,6 +98,28 @@ class ExportCommand extends PromptWeaverCommand
         }
 
         $this->displayCreated($outputDirectory);
+    }
+
+    /**
+     * @param  array<string, mixed>  $manifest
+     * @return array{code:string, category:string, format:string, color_mode:string, layout:string}
+     */
+    private function exportManifest(array $manifest, string $manifestPath): array
+    {
+        $fields = ['code', 'category', 'format', 'color_mode', 'layout'];
+        $exportManifest = [];
+
+        foreach ($fields as $field) {
+            $value = $manifest[$field] ?? null;
+
+            if (! is_string($value) || trim($value) === '') {
+                throw new RuntimeException("Manifest field '{$field}' is missing or invalid: {$manifestPath}");
+            }
+
+            $exportManifest[$field] = $value;
+        }
+
+        return $exportManifest;
     }
 
     /** @param array<string, mixed> $manifest @param array<string, mixed> $designBrief @param array<string, mixed>|null $localizedStyle @return array<string, mixed> */

@@ -8,8 +8,8 @@
 - Working Template: A template being prepared before export. It contains a template manifest and may contain generated prompts, configuration, a design image, calibrated placeholder coordinates, and a preview.
 - Exported Template: A prepared template made available under the publication root. It contains the template manifest, configuration, design image, image prompt, and a preview when one exists.
 - Template Manifest: Metadata that identifies a template code, category, format, color mode, and layout.
-- Template Pack: One archive containing each template directory directly under the selected publication root and a pack manifest at the archive root.
-- Pack Manifest: Metadata at the root of a Template Pack containing the schema, generator, generator version, and creation time.
+- Template Pack: One WifiNote-compatible archive containing each template's `config.json`, `image.png`, and `preview.png` under `templates/<code>/`, plus a pack manifest at the archive root.
+- Pack Manifest: The root `manifest.json` whose only key is `templates`, a list of packaged template codes.
 - Placeholder Coordinates: Positions recorded for QR code, SSID, and password content. They describe placement; they are not the actual values.
 - Human Review: The user's manual inspection of every Exported Template before publication. Prompt Weaver neither records nor enforces this decision.
 
@@ -218,7 +218,7 @@
   - Request user confirmation before sending an upload request.
   - Skip upload when the user declines.
   - Submit the approved Template Pack to the WifiNote Upload Boundary.
-  - Report successful upload and automatic import after a successful response.
+  - Report successful upload acceptance for import after a successful response.
 - Inputs:
   - Publication root, configured credentials, Template Packager result, and user confirmation.
 - Outputs:
@@ -228,7 +228,7 @@
   - Owns the order and outcome of the publication workflow.
   - Does not create WifiNote import behavior or modify WifiNote data.
 
-## WifiNote Upload Boundary [UNVERIFIED]
+## WifiNote Upload Boundary [DOCUMENTED; LIVE VERIFIED FOR 202]
 
 - Responsibilities:
   - Send an approved Template Pack to `POST /api/template-packs/upload`.
@@ -240,8 +240,9 @@
   - A successful upload result or a categorized upload failure.
 - Ownership boundaries:
   - Prompt Weaver owns the upload request and its local error reporting.
-  - WifiNote owns request acceptance and automatic import.
-  - End-to-end boundary behavior has not been observed and is not further specified here.
+  - WifiNote owns request acceptance and a separate, explicit import process.
+  - A live single-template request verified `202 Accepted`, an upload identifier, and private inbox storage without running import.
+  - Local client tests verify response classification, including response codes not emitted by the current WifiNote upload route.
 
 ## Image-Generation Boundary [UNVERIFIED]
 
@@ -362,7 +363,7 @@
 - Calibrated Placeholder Coordinates refer to the user-supplied design image of the same Working Template.
 - A preview is derived from a selected template image and its configuration; rendering does not replace those source inputs.
 - An Exported Template contains its Template Manifest, configuration, design image, and image prompt; its preview is included only when one exists.
-- Every Template Pack contains all direct template directories selected for that publication, without substituting a subset.
+- Every Template Pack represents all direct template directories selected for that publication under `templates/<code>/`; each packaged template contains only the three files required by WifiNote.
 - Every Template Pack has exactly one root Pack Manifest separate from template-level manifests.
 - Credentials are used only by the WifiNote publication workflow.
 - No upload occurs unless the user explicitly approves the current publication.
@@ -377,8 +378,8 @@
 - The design image is generated outside Prompt Weaver and supplied by the user, because SCR-002 and SCR-003 define a user handoff rather than an application image-generation action.
 - Prompt Generation stops after producing `image.prompt`; it does not run image generation, because FR-002 and the SCR-002 interaction distinguish prompt generation from the user's external image-generation step.
 - Calibration records placeholder positions only; actual QR code, SSID, and password values are produced by the consuming service, because the Users and Inputs sections assign those values externally.
-- Template-level and pack-level manifests are separate artifacts, because FR-001 and FR-034 define the template manifest while FR-014 and FR-015 define the archive-root pack manifest.
+- Template-level and pack-level manifests are separate artifacts, because FR-001 and FR-034 define the template manifest while FR-014 and FR-015 define the WifiNote archive-root manifest.
 - Template Exporter owns carrying `manifest.json` into every Exported Template, because Outputs and FR-034 require that artifact in the exported template.
 - Publication Workflow obtains credentials and creates the Template Pack before asking for confirmation, matching the defined publication flow in SCR-009 and the existing command behavior.
-- A successful upload ends Prompt Weaver's responsibility; WifiNote owns automatic import, because FR-021 assigns import to the server.
+- A successful upload ends Prompt Weaver's responsibility; WifiNote stores the upload in its private inbox and owns the separate import process.
 - External service behavior is limited to the behavior stated in PRODUCT_SPEC.md; unobserved response details remain marked [UNVERIFIED] rather than being inferred.

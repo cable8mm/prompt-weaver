@@ -106,6 +106,123 @@ it('fails when the derived code already exists', function () {
     }
 });
 
+it('leaves the working template and export unchanged when the derived code matches', function () {
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-code-'.bin2hex(random_bytes(4));
+    $fixturesRoot = $workingRoot.'/fixtures';
+    $distRoot = $workingRoot.'/dist';
+    $fixtureDirectory = $fixturesRoot.'/wabi-sabi-minimalist';
+    $distDirectory = $distRoot.'/wabi-sabi-minimalist';
+    mkdir($fixtureDirectory, 0777, true);
+    mkdir($distDirectory, 0777, true);
+    file_put_contents($fixtureDirectory.'/manifest.json', json_encode(['code' => 'wabi-sabi-minimalist']).PHP_EOL);
+    file_put_contents($fixtureDirectory.'/config.json', json_encode([
+        'style' => ['theme' => 'Wabi-Sabi Minimalist'],
+        'metadata' => ['code' => 'wabi-sabi-minimalist'],
+    ]).PHP_EOL);
+    file_put_contents($distDirectory.'/config.json', json_encode([
+        'metadata' => ['code' => 'wabi-sabi-minimalist'],
+    ]).PHP_EOL);
+    $manifestBefore = file_get_contents($fixtureDirectory.'/manifest.json');
+    $configBefore = file_get_contents($fixtureDirectory.'/config.json');
+    $exportConfigBefore = file_get_contents($distDirectory.'/config.json');
+
+    try {
+        $result = run_code_command([
+            'code',
+            'wabi-sabi-minimalist',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$distRoot,
+        ]);
+
+        expect($result['exitCode'])->toBe(0)
+            ->and(is_dir($fixtureDirectory))->toBeTrue()
+            ->and(is_dir($distDirectory))->toBeTrue()
+            ->and(file_get_contents($fixtureDirectory.'/manifest.json'))->toBe($manifestBefore)
+            ->and(file_get_contents($fixtureDirectory.'/config.json'))->toBe($configBefore)
+            ->and(file_get_contents($distDirectory.'/config.json'))->toBe($exportConfigBefore);
+    } finally {
+        remove_code_command_directory($workingRoot);
+    }
+});
+
+it('reports missing templates, invalid themes, and missing configuration with non-zero exit codes', function () {
+    $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-code-errors-'.bin2hex(random_bytes(4));
+    mkdir($fixturesRoot, 0777, true);
+
+    try {
+        $missingFixture = run_code_command([
+            'code',
+            'missing',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$fixturesRoot.'/dist',
+        ]);
+        expect($missingFixture['exitCode'])->not->toBe(0)
+            ->and($missingFixture['stderr'])->toContain('Fixture directory not found');
+
+        foreach ([
+            'missing-config' => null,
+            'invalid-theme' => ['style' => ['theme' => '---']],
+            'missing-theme' => ['style' => []],
+        ] as $code => $config) {
+            $fixtureDirectory = $fixturesRoot.'/'.$code;
+            mkdir($fixtureDirectory);
+            file_put_contents($fixtureDirectory.'/manifest.json', json_encode(['code' => $code]).PHP_EOL);
+
+            if ($config !== null) {
+                file_put_contents($fixtureDirectory.'/config.json', json_encode($config).PHP_EOL);
+            }
+
+            $result = run_code_command([
+                'code',
+                $code,
+                '--fixtures-root='.$fixturesRoot,
+                '--dist-root='.$fixturesRoot.'/dist',
+            ]);
+
+            expect($result['exitCode'])->not->toBe(0);
+            expect($result['stderr'])->toContain(
+                $config === null
+                    ? 'JSON file not found'
+                    : ($code === 'invalid-theme' ? 'Unable to derive a code from style.theme' : "Config field 'style.theme' is missing or invalid"),
+            );
+        }
+    } finally {
+        remove_code_command_directory($fixturesRoot);
+    }
+});
+
+it('fails without changing the working template when the destination export code already exists', function () {
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-code-dist-collision-'.bin2hex(random_bytes(4));
+    $fixturesRoot = $workingRoot.'/fixtures';
+    $distRoot = $workingRoot.'/dist';
+    $source = $fixturesRoot.'/old-code';
+    mkdir($source, 0777, true);
+    mkdir($distRoot.'/new-theme', 0777, true);
+    file_put_contents($source.'/manifest.json', json_encode(['code' => 'old-code']).PHP_EOL);
+    file_put_contents($source.'/config.json', json_encode([
+        'style' => ['theme' => 'New Theme'],
+    ]).PHP_EOL);
+    $manifestBefore = file_get_contents($source.'/manifest.json');
+    $configBefore = file_get_contents($source.'/config.json');
+
+    try {
+        $result = run_code_command([
+            'code',
+            'old-code',
+            '--fixtures-root='.$fixturesRoot,
+            '--dist-root='.$distRoot,
+        ]);
+
+        expect($result['exitCode'])->not->toBe(0)
+            ->and($result['stderr'])->toContain('Export directory already exists')
+            ->and(is_dir($source))->toBeTrue()
+            ->and(file_get_contents($source.'/manifest.json'))->toBe($manifestBefore)
+            ->and(file_get_contents($source.'/config.json'))->toBe($configBefore);
+    } finally {
+        remove_code_command_directory($workingRoot);
+    }
+});
+
 it('limits the derived code to four words', function () {
     $fixturesRoot = sys_get_temp_dir().'/prompt-weaver-code-'.bin2hex(random_bytes(4));
     $sourceDirectory = $fixturesRoot.'/old-code';

@@ -4,7 +4,10 @@ function run_prompt_weaver_cmd(array $args, ?string $cwd = null): array
 {
     $cwd ??= dirname(__DIR__, 2);
 
-    $command = implode(' ', array_map('escapeshellarg', array_merge(['php', 'bin/prompt-weaver'], $args)));
+    $command = implode(' ', array_map(
+        'escapeshellarg',
+        array_merge([PHP_BINARY, dirname(__DIR__, 2).'/bin/prompt-weaver'], $args),
+    ));
 
     $descriptors = [
         0 => ['pipe', 'r'],
@@ -278,10 +281,18 @@ it('exports a generated png and config for Laravel import', function () {
         expect($result['stderr'])->toBe('');
         expect($result['stdout'])->toContain('Created '.$outputDirectory);
         expect(is_file($outputDirectory.'/config.json'))->toBeTrue();
+        expect(is_file($outputDirectory.'/manifest.json'))->toBeTrue();
         expect(is_file($outputDirectory.'/image.png'))->toBeTrue();
         expect(is_file($outputDirectory.'/image.prompt'))->toBeTrue();
         expect(is_file($outputDirectory.'/preview.png'))->toBeTrue();
-        expect(is_file($outputDirectory.'/manifest.json'))->toBeFalse();
+        $exportedManifest = json_decode((string) file_get_contents($outputDirectory.'/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+        expect($exportedManifest)->toMatchArray([
+            'code' => 'cafe-restaurant',
+            'category' => 'Cafe/Restaurant',
+            'format' => 'A4/A5 Poster',
+            'color_mode' => 'Mono',
+            'layout' => 'centered',
+        ]);
         $exportedConfig = json_decode((string) file_get_contents($outputDirectory.'/config.json'), true, 512, JSON_THROW_ON_ERROR);
 
         expect(array_slice(array_keys($exportedConfig), 0, 2))->toBe(['schema_version', 'metadata']);
@@ -302,6 +313,35 @@ it('exports a generated png and config for Laravel import', function () {
         expect(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($fixtureDirectory.'/image.png'));
         expect(md5_file($outputDirectory.'/image.prompt'))->toBe(md5_file($fixtureDirectory.'/image.prompt'));
         expect(md5_file($outputDirectory.'/preview.png'))->toBe(md5_file($fixtureDirectory.'/preview.png'));
+    } finally {
+        remove_directory_cmd($workingRoot);
+    }
+});
+
+it('uses the default export location and a separately supplied image path', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-export-default-'.bin2hex(random_bytes(4));
+    $fixturesRoot = $workingRoot.'/fixtures';
+    $fixtureDirectory = $fixturesRoot.'/cafe-restaurant';
+    $providedImage = $workingRoot.'/provided-image.png';
+
+    try {
+        copy_directory_cmd($sourceFixture, $fixtureDirectory);
+        copy($fixtureDirectory.'/image.png', $providedImage);
+
+        $result = run_prompt_weaver_cmd([
+            'export',
+            'cafe-restaurant',
+            '--fixtures-root='.$fixturesRoot,
+            '--image='.$providedImage,
+        ], $workingRoot);
+
+        $outputDirectory = $workingRoot.'/dist/cafe-restaurant';
+        expect($result['exitCode'])->toBe(0, $result['stderr'])
+            ->and($result['stderr'])->toBe('')
+            ->and($result['stdout'])->toContain('Created dist/cafe-restaurant')
+            ->and(is_file($outputDirectory.'/manifest.json'))->toBeTrue()
+            ->and(md5_file($outputDirectory.'/image.png'))->toBe(md5_file($providedImage));
     } finally {
         remove_directory_cmd($workingRoot);
     }
@@ -400,6 +440,88 @@ it('rejects an exported image with the wrong aspect ratio', function () {
         expect($result['exitCode'])->not->toBe(0);
         expect($result['stderr'])->toContain('aspect ratio');
         expect(is_file($outputDirectory.'/image.png'))->toBeFalse();
+    } finally {
+        remove_directory_cmd($workingRoot);
+    }
+});
+
+it('reports missing source files, unreadable image data, and output failures without success', function () {
+    $sourceFixture = dirname(__DIR__).'/Fixtures/cafe-restaurant';
+    $workingRoot = sys_get_temp_dir().'/prompt-weaver-export-errors-'.bin2hex(random_bytes(4));
+    $fixturesRoot = $workingRoot.'/fixtures';
+    mkdir($fixturesRoot, 0777, true);
+
+    try {
+        foreach (['manifest.json', 'design-brief.json', 'image.prompt', 'config.json', 'image.png'] as $missingFile) {
+            $fixtureDirectory = $fixturesRoot.'/missing-'.str_replace('.', '-', $missingFile);
+            copy_directory_cmd($sourceFixture, $fixtureDirectory);
+            unlink($fixtureDirectory.'/'.$missingFile);
+            $result = run_prompt_weaver_cmd([
+                'export',
+                basename($fixtureDirectory),
+                '--fixtures-root='.$fixturesRoot,
+                '--output-dir='.$workingRoot.'/out-'.str_replace('.', '-', $missingFile),
+            ]);
+
+            expect($result['exitCode'])->not->toBe(0)
+                ->and($result['stderr'])->toContain(
+                    match ($missingFile) {
+                        'manifest.json' => 'Manifest file not found',
+                        'design-brief.json' => 'Design brief file not found',
+                        'image.prompt' => 'Image prompt file not found',
+                        'config.json' => 'Config file not found',
+                        default => 'Image file not found',
+                    },
+                );
+            remove_directory_cmd($fixtureDirectory);
+        }
+
+        $invalidManifestFixture = $fixturesRoot.'/missing-layout';
+        copy_directory_cmd($sourceFixture, $invalidManifestFixture);
+        $manifestPath = $invalidManifestFixture.'/manifest.json';
+        $manifest = json_decode((string) file_get_contents($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+        unset($manifest['layout']);
+        file_put_contents($manifestPath, json_encode($manifest, JSON_THROW_ON_ERROR).PHP_EOL);
+        $invalidManifest = run_prompt_weaver_cmd([
+            'export',
+            'missing-layout',
+            '--fixtures-root='.$fixturesRoot,
+            '--output-dir='.$workingRoot.'/invalid-manifest-output',
+        ]);
+
+        expect($invalidManifest['exitCode'])->not->toBe(0)
+            ->and($invalidManifest['stderr'])->toContain("Manifest field 'layout' is missing or invalid");
+        remove_directory_cmd($invalidManifestFixture);
+
+        $invalidImageFixture = $fixturesRoot.'/invalid-image';
+        copy_directory_cmd($sourceFixture, $invalidImageFixture);
+        $invalidImage = $workingRoot.'/invalid-image.bin';
+        file_put_contents($invalidImage, 'not an image');
+        $invalidImageResult = run_prompt_weaver_cmd([
+            'export',
+            'invalid-image',
+            '--fixtures-root='.$fixturesRoot,
+            '--image='.$invalidImage,
+            '--output-dir='.$workingRoot.'/invalid-image-output',
+        ]);
+
+        expect($invalidImageResult['exitCode'])->not->toBe(0)
+            ->and($invalidImageResult['stderr'])->toContain('Unable to read image dimensions');
+        remove_directory_cmd($invalidImageFixture);
+
+        $outputFailureFixture = $fixturesRoot.'/output-failure';
+        copy_directory_cmd($sourceFixture, $outputFailureFixture);
+        $blockedOutputPath = $workingRoot.'/blocked-output';
+        file_put_contents($blockedOutputPath, 'file blocks output directory creation');
+        $outputFailure = run_prompt_weaver_cmd([
+            'export',
+            'output-failure',
+            '--fixtures-root='.$fixturesRoot,
+            '--output-dir='.$blockedOutputPath.'/nested',
+        ]);
+
+        expect($outputFailure['exitCode'])->not->toBe(0)
+            ->and($outputFailure['stderr'])->toContain('Unable to create output directory');
     } finally {
         remove_directory_cmd($workingRoot);
     }
