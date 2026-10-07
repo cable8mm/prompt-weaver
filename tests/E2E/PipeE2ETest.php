@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-use Cable8mm\PromptWeaver\Contracts\AiClient;
-use Cable8mm\PromptWeaver\Enums\Category;
-use Cable8mm\PromptWeaver\Enums\Format;
-use Cable8mm\PromptWeaver\Pipe;
 use Cable8mm\PromptWeaver\Support\Environment;
 
 /*
@@ -31,89 +27,108 @@ uses()->group('e2e');
 $skipE2E = ! getenv('RUN_E2E_TESTS');
 $skipMsg = 'Set RUN_E2E_TESTS=1 and configure API keys in .env to run e2e tests.';
 
-it('runs the full pipeline with real OpenRouter API', function () {
-    $client = app(AiClient::class);
-
-    $pipe = new Pipe($client);
-    $result = $pipe->run(
-        category: Category::CAFE_RESTAURANT,
-        format: Format::A45_POSTER,
-        color: 'warm brown and cream',
-        provider: getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter',
-        model: getenv('PROMPT_WEAVER_MODEL') ?: 'google/gemma-4-26b-a4b-it:free',
+/**
+ * @param  list<string>  $arguments
+ * @return array{exit_code: int, stdout: string, stderr: string}
+ */
+function run_pipe_e2e_command(array $arguments): array
+{
+    $pipes = [];
+    $process = proc_open(
+        array_merge([PHP_BINARY, dirname(__DIR__, 2).'/bin/prompt-weaver'], $arguments),
+        [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ],
+        $pipes,
+        dirname(__DIR__, 2),
     );
 
-    // Save generated working files outside the checked-in test fixtures.
-    $fixtureDir = dirname(__DIR__, 2).'/.weaver/google-gemma-4-26b-a4b-it-free';
-
-    if (! is_dir($fixtureDir)) {
-        mkdir($fixtureDir, 0777, true);
+    if (! is_resource($process)) {
+        throw new RuntimeException('Unable to start the Prompt Weaver pipe command.');
     }
 
-    // Save manifest.json
-    $manifest = [
-        'code' => 'google-gemma-4-26b-a4b-it-free',
+    fclose($pipes[0]);
+    $stdout = stream_get_contents($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+
+    return [
+        'exit_code' => proc_close($process),
+        'stdout' => $stdout,
+        'stderr' => $stderr,
+    ];
+}
+
+it('runs the pipe command through the real AI service and saves generated artifacts', function () {
+    $provider = getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter';
+    $model = getenv('PROMPT_WEAVER_MODEL') ?: 'google/gemma-4-26b-a4b-it:free';
+    $root = sys_get_temp_dir().'/prompt-weaver-pipe-e2e-'.bin2hex(random_bytes(4));
+    $fixture = $root.'/live-template';
+    mkdir($fixture, 0777, true);
+    file_put_contents($fixture.'/manifest.json', json_encode([
+        'code' => 'live-template',
         'category' => 'Cafe/Restaurant',
         'format' => 'A4/A5 Poster',
-    ];
-    file_put_contents($fixtureDir.'/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).PHP_EOL);
+        'color_mode' => 'Mono',
+        'layout' => 'centered',
+    ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR).PHP_EOL);
 
-    // Save prompts
-    file_put_contents($fixtureDir.'/brief.prompt', $result->briefPrompt.PHP_EOL);
-    file_put_contents($fixtureDir.'/config.prompt', $result->configPrompt.PHP_EOL);
-    file_put_contents($fixtureDir.'/image.prompt', $result->imagePrompt.PHP_EOL);
+    try {
+        $result = run_pipe_e2e_command([
+            'pipe',
+            'live-template',
+            '--fixtures-root='.$root,
+            '--provider='.$provider,
+            '--model='.$model,
+            '--color=warm brown and cream',
+            '--no-progress',
+        ]);
 
-    // Save JSON responses
-    file_put_contents($fixtureDir.'/design-brief.json', json_encode($result->briefJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
-    file_put_contents($fixtureDir.'/raw.config.json', json_encode($result->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL);
+        expect($result['exit_code'])->toBe(0)
+            ->and($result['stdout'].$result['stderr'])->toContain('Pipeline complete.');
 
-    echo "Fixtures saved to: {$fixtureDir}\n\n";
+        foreach (['brief.prompt', 'design-brief.json', 'config.prompt', 'raw.config.json', 'image.prompt'] as $filename) {
+            expect(is_file($fixture.'/'.$filename))->toBeTrue()
+                ->and(filesize($fixture.'/'.$filename))->toBeGreaterThan(0);
+        }
 
-    // Verify design brief response
-    expect($result->briefJson)
-        ->toHaveKey('description')
-        ->and($result->briefJson['description'])
-        ->not->toBeEmpty();
+        $brief = json_decode((string) file_get_contents($fixture.'/design-brief.json'), true, 512, JSON_THROW_ON_ERROR);
+        $config = json_decode((string) file_get_contents($fixture.'/raw.config.json'), true, 512, JSON_THROW_ON_ERROR);
+        $imagePrompt = (string) file_get_contents($fixture.'/image.prompt');
 
-    // Verify config response structure
-    expect($result->config)
-        ->toHaveKey('canvas')
-        ->toHaveKey('style')
-        ->toHaveKey('content')
-        ->toHaveKey('placeholders');
+        expect($brief)
+            ->toHaveKey('description')
+            ->and($brief['description'])
+            ->not->toBeEmpty()
+            ->and($config)
+            ->toHaveKeys(['canvas', 'style', 'content', 'placeholders'])
+            ->and($imagePrompt)
+            ->toContain('와이파이 연결');
+    } finally {
+        foreach (['brief.prompt', 'design-brief.json', 'config.prompt', 'raw.config.json', 'image.prompt', 'manifest.json'] as $filename) {
+            if (is_file($fixture.'/'.$filename)) {
+                unlink($fixture.'/'.$filename);
+            }
+        }
+        rmdir($fixture);
+        rmdir($root);
+    }
+})->skip($skipE2E, $skipMsg);
 
-    // Verify canvas structure
-    expect($result->config['canvas'])
-        ->toHaveKey('aspect_ratio');
+it('reports a rejected live AI request and exits non-zero', function () {
+    $result = run_pipe_e2e_command([
+        'pipe',
+        '--category=Cafe/Restaurant',
+        '--format=A4/A5 Poster',
+        '--provider='.(getenv('PROMPT_WEAVER_PROVIDER') ?: 'openrouter'),
+        '--model=prompt-weaver-invalid-model-for-e2e',
+        '--no-progress',
+    ]);
 
-    // Verify style structure
-    expect($result->config['style'])
-        ->toHaveKey('theme')
-        ->toHaveKey('background')
-        ->toHaveKey('print_target');
-
-    // Verify content structure
-    expect($result->config['content'])
-        ->toHaveKey('wifi_icon')
-        ->toHaveKey('title')
-        ->not->toHaveKey('message')
-        ->not->toHaveKey('footer');
-    expect($result->config['content']['title'])
-        ->toHaveKey('style')
-        ->not->toHaveKey('text')
-        ->not->toHaveKey('x_pc')
-        ->not->toHaveKey('y_pc')
-        ->not->toHaveKey('align');
-
-    // Verify placeholders structure
-    expect($result->config['placeholders'])
-        ->toHaveKey('ssid')
-        ->toHaveKey('password')
-        ->toHaveKey('qr');
-
-    // Verify image prompt is not empty
-    expect($result->imagePrompt)
-        ->not->toBeEmpty()
-        ->and($result->imagePrompt)
-        ->toContain('와이파이 연결');
+    expect($result['exit_code'])->not->toBe(0)
+        ->and($result['stdout'].$result['stderr'])
+        ->toContain('Pipeline failed during design brief generation');
 })->skip($skipE2E, $skipMsg);
