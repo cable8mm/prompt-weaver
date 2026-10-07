@@ -32,7 +32,7 @@ final class WifiNotePublishService
         }
 
         $directory = dirname($this->configPath);
-        if (! is_dir($directory) && ! mkdir($directory, 0700, true) && ! is_dir($directory)) {
+        if (! is_dir($directory) && ! @mkdir($directory, 0700, true) && ! is_dir($directory)) {
             throw new RuntimeException("Unable to create config directory: {$directory}");
         }
 
@@ -51,7 +51,10 @@ final class WifiNotePublishService
                 throw new RuntimeException("Unable to write config file: {$this->configPath}");
             }
 
-            chmod($temporaryPath, 0600);
+            if (! chmod($temporaryPath, 0600)) {
+                throw new RuntimeException("Unable to set private permissions on config file: {$this->configPath}");
+            }
+
             if (! rename($temporaryPath, $this->configPath)) {
                 throw new RuntimeException("Unable to save config file: {$this->configPath}");
             }

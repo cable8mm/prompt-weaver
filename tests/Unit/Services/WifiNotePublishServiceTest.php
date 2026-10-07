@@ -53,6 +53,20 @@ it('rejects invalid credentials and empty template directories', function () {
     }
 });
 
+it('reports failures to persist WifiNote credentials', function () {
+    $root = sys_get_temp_dir().'/prompt-weaver-wifinote-'.bin2hex(random_bytes(4));
+    mkdir($root);
+    file_put_contents($root.'/not-a-directory', 'file');
+    $service = new WifiNotePublishService(configPath: $root.'/not-a-directory/config.json');
+
+    try {
+        expect(fn () => $service->saveCredentials('https://wifinote.net', 'secret-token'))
+            ->toThrow(RuntimeException::class, 'Unable to create config directory');
+    } finally {
+        remove_wifi_note_test_directory($root);
+    }
+});
+
 it('creates a ZIP with all templates and a root pack manifest', function () {
     $root = sys_get_temp_dir().'/prompt-weaver-wifinote-'.bin2hex(random_bytes(4));
     $dist = $root.'/dist';
