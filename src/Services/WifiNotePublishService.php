@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Cable8mm\PromptWeaver\Services;
 
-use Cable8mm\PromptWeaver\Console\Application;
 use DateTimeImmutable;
 use RuntimeException;
 use ZipArchive;
 
 final class WifiNotePublishService
 {
+    private const int MAX_TEMPLATES = 50;
+
+    private const int MAX_TEMPLATE_PACK_BYTES = 104857600;
+
     private readonly string $configPath;
 
     public function __construct(
@@ -120,6 +123,16 @@ final class WifiNotePublishService
             throw new RuntimeException("No template directories found: {$distDirectory}");
         }
 
+        if (count($templateDirectories) > self::MAX_TEMPLATES) {
+            throw new RuntimeException('WifiNote accepts at most 50 templates per Template Pack.');
+        }
+
+        foreach ($templateDirectories as $templateDirectory) {
+            if (preg_match('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $templateDirectory) !== 1) {
+                throw new RuntimeException("Template code is not valid for WifiNote: {$templateDirectory}");
+            }
+        }
+
         $timestamp = (new DateTimeImmutable)->format('Ymd-His');
         $archivePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'template-pack-'.$timestamp.'.zip';
 
@@ -134,43 +147,47 @@ final class WifiNotePublishService
         }
 
         try {
+            if (! $archive->addEmptyDir('templates')) {
+                throw new RuntimeException('Unable to add templates directory to template pack.');
+            }
+
             foreach ($templateDirectories as $templateDirectory) {
                 $rootPath = rtrim($distDirectory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$templateDirectory;
-                if (! $archive->addEmptyDir($templateDirectory)) {
-                    throw new RuntimeException("Unable to add directory to template pack: {$templateDirectory}");
+                $configPath = $rootPath.'/config.json';
+                if (! is_file($configPath) || ! is_readable($configPath)) {
+                    throw new RuntimeException("Required WifiNote template file is missing or unreadable: {$configPath}");
                 }
-                $iterator = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($rootPath, \FilesystemIterator::SKIP_DOTS),
-                    \RecursiveIteratorIterator::SELF_FIRST,
-                );
 
-                foreach ($iterator as $item) {
-                    if ($item->isLink()) {
-                        continue;
+                try {
+                    $config = json_decode((string) file_get_contents($configPath), true, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    throw new RuntimeException("Template config is not valid JSON: {$configPath}", previous: $exception);
+                }
+
+                if (! is_array($config) || ($config['metadata']['code'] ?? null) !== $templateDirectory) {
+                    throw new RuntimeException("Template config metadata.code must match its directory: {$configPath}");
+                }
+
+                $templateArchivePath = 'templates/'.$templateDirectory;
+                if (! $archive->addEmptyDir($templateArchivePath)) {
+                    throw new RuntimeException("Unable to add directory to template pack: {$templateArchivePath}");
+                }
+
+                foreach (['config.json', 'image.png', 'preview.png'] as $filename) {
+                    $sourcePath = $rootPath.'/'.$filename;
+                    $entryPath = $templateArchivePath.'/'.$filename;
+
+                    if (! is_file($sourcePath) || ! is_readable($sourcePath)) {
+                        throw new RuntimeException("Required WifiNote template file is missing or unreadable: {$sourcePath}");
                     }
 
-                    $relativePath = str_replace(
-                        DIRECTORY_SEPARATOR,
-                        '/',
-                        substr($item->getPathname(), strlen(rtrim($distDirectory, DIRECTORY_SEPARATOR)) + 1),
-                    );
-
-                    if ($item->isDir()) {
-                        if (! $archive->addEmptyDir($relativePath)) {
-                            throw new RuntimeException("Unable to add directory to template pack: {$relativePath}");
-                        }
-                    } elseif (! $archive->addFile($item->getPathname(), $relativePath)) {
-                        throw new RuntimeException("Unable to add file to template pack: {$relativePath}");
+                    if (! $archive->addFile($sourcePath, $entryPath)) {
+                        throw new RuntimeException("Unable to add file to template pack: {$entryPath}");
                     }
                 }
             }
 
-            $manifest = [
-                'schema' => 1,
-                'generator' => 'prompt-weaver',
-                'generator_version' => Application::VERSION,
-                'created_at' => (new DateTimeImmutable)->format(DATE_ATOM),
-            ];
+            $manifest = ['templates' => $templateDirectories];
             $manifestJson = json_encode(
                 $manifest,
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR,
@@ -188,13 +205,24 @@ final class WifiNotePublishService
             throw $throwable;
         }
 
+        $archiveSize = filesize($archivePath);
+        if ($archiveSize === false || $archiveSize > self::MAX_TEMPLATE_PACK_BYTES) {
+            if (! unlink($archivePath)) {
+                throw new RuntimeException("Template pack exceeds WifiNote's 100 MiB limit and could not be removed: {$archivePath}");
+            }
+
+            throw new RuntimeException("Template pack exceeds WifiNote's 100 MiB upload limit: {$archivePath}");
+        }
+
         return $archivePath;
     }
 
-    public function upload(string $archivePath): void
+    /** @return array{status_code: 202, upload_id: string} */
+    public function upload(string $archivePath): array
     {
         $credentials = $this->credentials();
-        $this->uploadClient->upload($credentials['server'], $credentials['token'], $archivePath);
+
+        return $this->uploadClient->upload($credentials['server'], $credentials['token'], $archivePath);
     }
 
     public function removeTemplatePack(string $archivePath): void

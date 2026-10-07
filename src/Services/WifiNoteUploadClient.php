@@ -13,7 +13,8 @@ final class WifiNoteUploadClient
         private readonly int $timeoutSeconds = 60,
     ) {}
 
-    public function upload(string $server, string $token, string $archivePath): void
+    /** @return array{status_code: 202, upload_id: string} */
+    public function upload(string $server, string $token, string $archivePath): array
     {
         if (! is_file($archivePath) || ! is_readable($archivePath)) {
             throw new RuntimeException("Template pack is not readable: {$archivePath}");
@@ -57,12 +58,25 @@ final class WifiNoteUploadClient
             401 => throw new RuntimeException('WifiNote rejected the Personal Access Token. Run "prompt-weaver login" to update it.'),
             403 => throw new RuntimeException('This Personal Access Token does not have permission to upload template packs.'),
             422 => throw new RuntimeException('WifiNote could not accept this template pack. Check the generated files and try again.'),
-            500 => throw new RuntimeException('WifiNote encountered a server error while importing the template pack. Try again later.'),
+            500 => throw new RuntimeException('WifiNote encountered a server error while accepting the template pack. Try again later.'),
             default => null,
         };
 
-        if ($statusCode < 200 || $statusCode >= 300) {
-            throw new RuntimeException("WifiNote upload failed with HTTP {$statusCode}.");
+        if ($statusCode !== 202) {
+            throw new RuntimeException("WifiNote returned unexpected HTTP {$statusCode}; expected 202 Accepted.");
         }
+
+        try {
+            $result = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $exception) {
+            throw new RuntimeException('WifiNote returned an invalid upload confirmation.', previous: $exception);
+        }
+
+        if (! is_array($result) || ($result['status'] ?? null) !== 'accepted'
+            || ! is_string($result['upload_id'] ?? null) || trim($result['upload_id']) === '') {
+            throw new RuntimeException('WifiNote returned an incomplete upload confirmation.');
+        }
+
+        return ['status_code' => 202, 'upload_id' => trim($result['upload_id'])];
     }
 }

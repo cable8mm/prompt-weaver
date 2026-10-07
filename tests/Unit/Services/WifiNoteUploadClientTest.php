@@ -38,8 +38,8 @@ file_put_contents(%s, json_encode([
 if ($mode === 'timeout') {
     sleep(3);
 }
-http_response_code($mode === 'timeout' ? 200 : (int) $mode);
-echo '{}';
+http_response_code(in_array($mode, ['timeout', 'invalid'], true) ? ($mode === 'timeout' ? 200 : 202) : (int) $mode);
+echo $mode === '202' ? '{"status":"accepted","upload_id":"local-probe-id"}' : '{}';
 PHP, var_export($modePath, true), var_export($requestPath, true)));
 
     $socket = stream_socket_server('tcp://127.0.0.1:0', $errorCode, $errorMessage);
@@ -94,7 +94,17 @@ PHP, var_export($modePath, true), var_export($requestPath, true)));
         }
 
         file_put_contents($modePath, '200');
-        $client->upload($server, 'secret-token', $archivePath);
+        expect(fn () => $client->upload($server, 'secret-token', $archivePath))
+            ->toThrow(RuntimeException::class, 'expected 202 Accepted');
+
+        file_put_contents($modePath, 'invalid');
+        expect(fn () => $client->upload($server, 'secret-token', $archivePath))
+            ->toThrow(RuntimeException::class, 'incomplete upload confirmation');
+
+        file_put_contents($modePath, '202');
+        $result = $client->upload($server, 'secret-token', $archivePath);
+        expect($result['status_code'])->toBe(202)
+            ->and($result['upload_id'])->toBe('local-probe-id');
         $request = json_decode((string) file_get_contents($requestPath), true, 512, JSON_THROW_ON_ERROR);
         expect($request)->toBe([
             'authorization' => 'Bearer secret-token',

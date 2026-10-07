@@ -62,11 +62,13 @@
 - Each exported template directory MUST contain `image.png` and `manifest.json`.
 - The exported `manifest.json` MUST contain `code`, `category`, `format`, `color_mode`, and `layout`.
 - `login` MUST persist the WifiNote server URL and Personal Access Token across command invocations.
-- `publish` MUST create one ZIP template pack containing every template directory under `dist/`.
-- The ZIP template pack MUST contain a root-level `manifest.json` with `schema`, `generator`, `generator_version`, and `created_at` fields.
+- `publish` MUST create one ZIP template pack containing every template directory under the selected publication root, represented under `templates/<code>/`.
+- The ZIP template pack MUST contain a root-level `manifest.json` whose only key is `templates`, a list of the packaged codes.
+- Each packaged template MUST contain exactly `config.json`, `image.png`, and `preview.png` under `templates/<code>/`.
+- A Template Pack MUST contain no more than 50 templates and MUST be no larger than 100 MiB; otherwise `publish` MUST fail before requesting confirmation or uploading.
 - The ZIP template pack MUST use a filename containing a timestamp in the form `template-pack-YYYYMMDD-HHMMSS.zip`.
 - `preview` MUST write an HTML preview when the selected output path has an `.html` extension.
-- A successful upload MUST report successful completion and automatic import by the WifiNote server.
+- A successful upload MUST report that WifiNote accepted the Template Pack for import.
 
 # Constraints
 
@@ -87,13 +89,17 @@
 
 - The consuming service MUST use the template placeholders to position actual QR code, SSID, and password values.
 
-### [UNVERIFIED] WifiNote server
+### [DOCUMENTED; LIVE VERIFIED FOR 202] WifiNote server
 
 - The WifiNote server MUST accept a template pack through `POST /api/template-packs/upload`.
 - The upload MUST use `multipart/form-data`.
 - The upload MUST include an Authorization header.
 - The Authorization header MUST use the `Bearer` scheme.
-- The WifiNote server MUST import a successfully uploaded template pack automatically.
+- The ZIP root manifest MUST contain only a `templates` list of 1 to 50 valid template codes. Each code directory MUST contain `config.json`, `image.png`, and `preview.png`, with `metadata.code` matching the manifest code.
+- The upload file MUST be a ZIP no larger than 100 MiB.
+- A successful upload responds with `202 Accepted` and stores the ZIP in a private inbox.
+- Upload acceptance and Template import are separate operations. Import is performed by `template-packs:import` or the Laravel Scheduler; upload alone MUST NOT be described as automatic import.
+- One live single-template probe verified `202 Accepted`, an upload identifier, and the ZIP in the private inbox. The server's other response codes are not claimed as live behavior unless separately observed; client-side mappings are verified by local HTTP tests.
 
 # User Interface
 
@@ -268,15 +274,15 @@
 - FR-010: `login` MUST request a WifiNote server URL.
 - FR-011: `login` MUST request a Personal Access Token without displaying its characters.
 - FR-012: `login` MUST persist the server URL and token at `~/.config/prompt-weaver/config.json`.
-- FR-013: `publish` MUST include every template directory directly under `dist/` in one ZIP template pack.
+- FR-013: `publish` MUST include every template directory directly under the selected publication root under `templates/<code>/` in one ZIP template pack. It MUST reject packs with more than 50 templates or a ZIP larger than 100 MiB before requesting confirmation.
 - FR-014: The ZIP template pack MUST contain a root-level `manifest.json`.
-- FR-015: The root-level `manifest.json` MUST contain `schema`, `generator`, `generator_version`, and `created_at`.
+- FR-015: The root-level `manifest.json` MUST contain only a `templates` list of the packaged template codes.
 - FR-016: `publish` MUST request user confirmation before sending an upload request.
 - FR-017: The confirmation request MUST default to declining publication.
 - FR-018: `publish` MUST NOT upload the template pack when the user declines publication.
 - FR-019: `publish` MUST upload the ZIP template pack to `POST /api/template-packs/upload` using `multipart/form-data`.
 - FR-020: `publish` MUST include the configured Personal Access Token in an Authorization header.
-- FR-021: `publish` MUST report successful upload and automatic WifiNote import after a successful response.
+- FR-021: `publish` MUST report that WifiNote accepted the Template Pack for import after a successful response; it MUST NOT claim that import has already completed.
 - FR-022: Successful commands and declined publication MUST exit with status 0.
 - FR-023: Command errors MUST exit with a non-zero status.
 - FR-024: `export` MUST export the supplied template to `dist/<template-code>/`.
@@ -327,9 +333,9 @@
 - AC-006: Given a reviewed template, when the user runs `./weaver code <template-code>`, then SCR-006 applies the code derived from the configured style theme, satisfying FR-008 and FR-009.
 - AC-007: Given a derived template code, when the user runs `./weaver export <derived-template-code>`, then SCR-007 creates the exported template directory with the files required by FR-025, FR-026, and FR-034, satisfying FR-024, FR-025, FR-026, and FR-034.
 - AC-008: When the user runs `./weaver login`, then SCR-008 requests a server URL and a hidden Personal Access Token and saves both at the specified path, satisfying FR-010, FR-011, and FR-012.
-- AC-009: Given multiple template directories under `dist/`, when `publish` creates a template pack at SCR-009, then the ZIP contains every directory and a root-level manifest with all four required fields, satisfying FR-013, FR-014, and FR-015.
+- AC-009: Given one or more importable template directories under the selected root within WifiNote limits, when `publish` creates a template pack at SCR-009, then the ZIP contains each directory's required three files under `templates/<code>/` and a root manifest containing only the complete `templates` list, satisfying FR-013, FR-014, and FR-015.
 - AC-010: Given a template pack and configured credentials, when the user runs `./weaver publish`, then SCR-009 requests confirmation before upload and defaults to decline, satisfying FR-016 and FR-017.
 - AC-011: Given a pending publication confirmation at SCR-009, when the user declines or accepts the default, then no upload request is sent and the command exits 0, satisfying FR-018 and FR-022.
 - AC-012: Given a pending publication confirmation, when the user approves, then SCR-009 sends the ZIP to WifiNote using multipart upload and the Authorization header required by FR-020 and FR-035, satisfying FR-019, FR-020, and FR-035.
-- AC-013: Given a successful WifiNote response at SCR-009, when the upload completes, then the CLI reports upload success and automatic import and exits 0, satisfying FR-021 and FR-022.
+- AC-013: Given a successful WifiNote response at SCR-009, when the upload completes, then the CLI reports upload acceptance for import and exits 0, satisfying FR-021 and FR-022.
 - AC-014: Given ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, or ERR-006, when the user runs `./weaver publish` at SCR-009, then the CLI reports the corresponding error and exits non-zero, satisfying FR-022 and FR-023.

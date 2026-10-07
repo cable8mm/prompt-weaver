@@ -160,6 +160,10 @@ dist/cafe-restaurant/
 
 `publish`는 `dist` 아래의 템플릿 디렉터리를 ZIP Template Pack으로 묶은 다음 업로드 여부를 확인합니다. `y`로 승인한 경우에만 Bearer Token을 사용해 WifiNote의 `/api/template-packs/upload` 엔드포인트로 업로드하며, Prompt Weaver는 서버 DB를 변경하지 않습니다. 다른 템플릿 루트를 게시하려면 `--dist-root=path/to/templates`를 지정합니다.
 
+WifiNote 규격에서는 ZIP 루트의 `manifest.json`에 `templates` 목록이 있고 템플릿 파일은 `templates/<code>/` 아래에 있어야 합니다. 서버가 `202 Accepted`와 업로드 ID를 반환하면 파일은 private inbox에 저장된 것입니다. 이 응답은 Template import 완료를 뜻하지 않습니다. Import는 WifiNote에서 `php artisan template-packs:import`를 별도로 실행하거나 Scheduler가 수행합니다.
+
+각 템플릿은 `config.json`, `image.png`, `preview.png`만 포함하며, `metadata.code`는 디렉터리명과 일치해야 합니다. WifiNote 제한에 따라 한 팩은 최대 50개 템플릿, 압축 후 100 MiB까지 허용됩니다. `publish`는 제한을 넘는 팩을 확인 요청 전에 거부합니다.
+
 ## 단계별 디버깅
 
 `pipe` 전체 흐름에서 어느 단계가 실패했는지 확인해야 할 때는 다음 커맨드로 나누어 실행합니다.

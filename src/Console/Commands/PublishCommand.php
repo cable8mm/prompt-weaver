@@ -40,11 +40,10 @@ final class PublishCommand extends PromptWeaverCommand
                 return self::SUCCESS;
             }
 
-            $this->publisher->upload($archivePath);
-            $output->writeln([
-                'Upload completed successfully.',
-                'WifiNote server will import this template pack automatically.',
-            ]);
+            $uploadResult = $this->publisher->upload($archivePath);
+            $output->writeln("Upload completed successfully (HTTP {$uploadResult['status_code']}).");
+            $output->writeln('WifiNote accepted the Template Pack for import.');
+            $output->writeln('Upload ID: '.$uploadResult['upload_id']);
 
             return self::SUCCESS;
         } finally {
