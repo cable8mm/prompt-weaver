@@ -10,6 +10,7 @@ use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\Validators\ConfigValidator;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
+use Throwable;
 
 /**
  * Orchestrates the three-step text prompt chain (design brief → config → image prompt)
@@ -52,77 +53,100 @@ final class Pipe
         if ($onProgress !== null) {
             $onProgress('brief', 'Generating design brief...');
         }
-        $briefPrompt = new DesignBriefPrompt(
-            category: $category,
-            format: $format,
-            colorMode: $colorMode,
-            color: $color ?? 'black-and-white',
-        );
-        $briefPrompt->build();
-        $briefJson = $this->client->structured(
-            $briefPrompt->prompt() ?? throw new \RuntimeException('Unable to build design brief prompt.'),
-            self::briefSchema(...),
-            $provider,
-            $model,
-        );
+        [$briefPrompt, $briefJson] = $this->runStage('design brief generation', function () use ($category, $format, $colorMode, $color, $provider, $model): array {
+            $prompt = new DesignBriefPrompt(
+                category: $category,
+                format: $format,
+                colorMode: $colorMode,
+                color: $color ?? 'black-and-white',
+            );
+            $prompt->build();
+            $response = $this->client->structured(
+                $prompt->prompt() ?? throw new \RuntimeException('Unable to build design brief prompt.'),
+                self::briefSchema(...),
+                $provider,
+                $model,
+            );
+
+            return [$prompt, $response];
+        });
+
+        if ($onProgress !== null) {
+            $onProgress('brief.validate', 'Validating design brief response...');
+        }
+        [$description, $colorDirection, $fontMood, $name] = $this->runStage('design brief validation', function () use ($briefJson): array {
+            return [
+                $briefJson['description'] ?? throw new \RuntimeException('Design brief response missing "description" field.'),
+                $briefJson['color_direction'] ?? throw new \RuntimeException('Design brief response missing "color_direction" field.'),
+                $briefJson['font_mood'] ?? throw new \RuntimeException('Design brief response missing "font_mood" field.'),
+                $briefJson['name'] ?? null,
+            ];
+        });
         if ($onProgress !== null) {
             $onProgress('brief.complete', 'Design brief received.');
         }
-
-        $description = $briefJson['description']
-            ?? throw new \RuntimeException('Design brief response missing "description" field.');
-        $colorDirection = $briefJson['color_direction']
-            ?? throw new \RuntimeException('Design brief response missing "color_direction" field.');
-        $fontMood = $briefJson['font_mood']
-            ?? throw new \RuntimeException('Design brief response missing "font_mood" field.');
-        $name = $briefJson['name'] ?? null;
 
         // Step 2 — config JSON
         if ($onProgress !== null) {
             $onProgress('config', 'Generating config JSON...');
         }
-        $configPrompt = new ConfigPrompt(
-            description: $description,
-            colorDirection: $colorDirection,
-            fontMood: $fontMood,
-            format: $format,
-            colorMode: $colorMode,
-            name: $name,
-            layout: $layout,
-        );
-        $configPrompt->build();
-        $config = $this->client->structured(
-            $configPrompt->prompt() ?? throw new \RuntimeException('Unable to build config prompt.'),
-            self::configSchema(...),
-            $provider,
-            $model,
-        );
+        [$configPrompt, $config] = $this->runStage('config generation', function () use ($description, $colorDirection, $fontMood, $format, $colorMode, $name, $layout, $provider, $model): array {
+            $prompt = new ConfigPrompt(
+                description: $description,
+                colorDirection: $colorDirection,
+                fontMood: $fontMood,
+                format: $format,
+                colorMode: $colorMode,
+                name: $name,
+                layout: $layout,
+            );
+            $prompt->build();
+            $response = $this->client->structured(
+                $prompt->prompt() ?? throw new \RuntimeException('Unable to build config prompt.'),
+                self::configSchema(...),
+                $provider,
+                $model,
+            );
+
+            return [$prompt, $response];
+        });
+
+        if ($onProgress !== null) {
+            $onProgress('config.validate', 'Validating config response...');
+        }
+        $config = $this->runStage('config validation', function () use ($config, $format, $layout): array {
+            $validatedConfig = $this->applyTypographyDefaults($config, $format);
+            $this->validateConfig($validatedConfig);
+
+            // Title, message, and footer are application-owned content, not AI-generated copy.
+            unset($validatedConfig['content']['message'], $validatedConfig['content']['footer']);
+            if ($layout === Layout::MINI_SQUARE) {
+                unset($validatedConfig['content']['title']);
+            } elseif (isset($validatedConfig['content']['title']) && is_array($validatedConfig['content']['title'])) {
+                unset(
+                    $validatedConfig['content']['title']['text'],
+                    $validatedConfig['content']['title']['x_pc'],
+                    $validatedConfig['content']['title']['y_pc'],
+                    $validatedConfig['content']['title']['align'],
+                );
+            }
+
+            return $validatedConfig;
+        });
         if ($onProgress !== null) {
             $onProgress('config.complete', 'Config JSON received.');
-        }
-
-        $config = $this->applyTypographyDefaults($config, $format);
-        $this->validateConfig($config);
-
-        // Title, message, and footer are application-owned content, not AI-generated copy.
-        unset($config['content']['message'], $config['content']['footer']);
-        if ($layout === Layout::MINI_SQUARE) {
-            unset($config['content']['title']);
-        } elseif (isset($config['content']['title']) && is_array($config['content']['title'])) {
-            unset(
-                $config['content']['title']['text'],
-                $config['content']['title']['x_pc'],
-                $config['content']['title']['y_pc'],
-                $config['content']['title']['align'],
-            );
         }
 
         // Step 3 — final image prompt (build only, execution is left to the caller)
         if ($onProgress !== null) {
             $onProgress('image', 'Building image prompt...');
         }
-        $imagePrompt = new ImagePrompt($config, $layout);
-        $imagePrompt->build();
+        $imagePrompt = $this->runStage('image prompt generation', function () use ($config, $layout): ImagePrompt {
+            $prompt = new ImagePrompt($config, $layout);
+            $prompt->build();
+
+            return $prompt;
+        });
         if ($onProgress !== null) {
             $onProgress('image.complete', 'Pipeline complete.');
         }
@@ -134,6 +158,21 @@ final class Pipe
             config: $config,
             imagePrompt: $imagePrompt->prompt() ?? '',
         );
+    }
+
+    /**
+     * @template T
+     *
+     * @param  callable(): T  $operation
+     * @return T
+     */
+    private function runStage(string $stage, callable $operation): mixed
+    {
+        try {
+            return $operation();
+        } catch (Throwable $exception) {
+            throw new PipeStageException($stage, $exception);
+        }
     }
 
     /**

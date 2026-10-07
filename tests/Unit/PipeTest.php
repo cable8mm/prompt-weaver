@@ -5,19 +5,20 @@ use Cable8mm\PromptWeaver\Enums\Category;
 use Cable8mm\PromptWeaver\Enums\Format;
 use Cable8mm\PromptWeaver\Enums\Layout;
 use Cable8mm\PromptWeaver\Pipe;
+use Cable8mm\PromptWeaver\PipeStageException;
 
 /**
  * Fake Laravel AI client that returns canned structured responses for each call.
  */
 final class FakeAiClient implements AiClient
 {
-    /** @var array<int, array<string, mixed>> */
+    /** @var array<int, array<string, mixed>|Throwable> */
     private array $responses;
 
     private int $callIndex = 0;
 
     /**
-     * @param  array<int, array<string, mixed>>  $responses
+     * @param  array<int, array<string, mixed>|Throwable>  $responses
      */
     public function __construct(array $responses)
     {
@@ -28,6 +29,10 @@ final class FakeAiClient implements AiClient
     {
         $response = $this->responses[$this->callIndex] ?? [];
         $this->callIndex++;
+
+        if ($response instanceof Throwable) {
+            throw $response;
+        }
 
         return $response;
     }
@@ -171,7 +176,7 @@ it('accepts structured responses from the AI client', function () {
     expect($result->config['style']['theme'])->toBe('test');
 });
 
-it('throws when the design brief response is missing the description field', function () {
+it('identifies design brief validation when a required field is missing', function () {
     $briefJson = ['name' => 'test']; // missing description
     $client = new FakeAiClient([$briefJson]);
 
@@ -181,7 +186,28 @@ it('throws when the design brief response is missing the description field', fun
         category: Category::CAFE_RESTAURANT,
         format: Format::A45_POSTER,
     );
-})->throws(RuntimeException::class, 'Design brief response missing "description" field.');
+})->throws(
+    PipeStageException::class,
+    'Pipeline failed during design brief validation: Design brief response missing "description" field.',
+);
+
+it('identifies the pipeline stage when an AI request fails', function () {
+    $briefJson = [
+        'name' => 'test',
+        'description' => 'A test design brief.',
+        'color_direction' => 'test colors',
+        'font_mood' => 'test font',
+    ];
+    $client = new FakeAiClient([$briefJson, new RuntimeException('Provider connection timed out.')]);
+
+    (new Pipe($client))->run(
+        category: Category::CAFE_RESTAURANT,
+        format: Format::A45_POSTER,
+    );
+})->throws(
+    PipeStageException::class,
+    'Pipeline failed during config generation: Provider connection timed out.',
+);
 
 it('rejects configuration fields required to build the image prompt when they are missing', function () {
     $briefJson = [
